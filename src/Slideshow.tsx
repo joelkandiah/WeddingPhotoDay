@@ -1,0 +1,162 @@
+import { useQuery } from "convex/react";
+import { api } from "../convex/_generated/api";
+import { useState, useEffect } from "react";
+
+export function Slideshow() {
+  const photos = useQuery(api.photos.getApprovedPhotos);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [interval, setIntervalDuration] = useState(5000); // 5 seconds
+
+  useEffect(() => {
+    if (!isPlaying || !photos || photos.length === 0) return;
+
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % photos.length);
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [isPlaying, photos, interval]);
+
+  if (photos === undefined) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
+      </div>
+    );
+  }
+
+  if (photos.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-6xl mb-4">🎬</div>
+        <h3 className="text-2xl font-bold text-gray-700 mb-2">No photos for slideshow</h3>
+        <p className="text-gray-500">
+          Upload and approve some photos to start the slideshow!
+        </p>
+      </div>
+    );
+  }
+
+  const currentPhoto = photos[currentIndex];
+
+  const nextPhoto = () => {
+    setCurrentIndex((prev) => (prev + 1) % photos.length);
+  };
+
+  const prevPhoto = () => {
+    setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length);
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="text-center mb-6">
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">
+          Wedding Slideshow 🎬
+        </h2>
+        
+        {/* Controls */}
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              isPlaying
+                ? "bg-red-500 hover:bg-red-600 text-white"
+                : "bg-green-500 hover:bg-green-600 text-white"
+            }`}
+          >
+            {isPlaying ? "⏸️ Pause" : "▶️ Play"}
+          </button>
+          
+          <select
+            value={interval}
+            onChange={(e) => setIntervalDuration(Number(e.target.value))}
+            className="px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none"
+          >
+            <option value={3000}>3 seconds</option>
+            <option value={5000}>5 seconds</option>
+            <option value={8000}>8 seconds</option>
+            <option value={10000}>10 seconds</option>
+          </select>
+          
+          <span className="text-gray-600">
+            {currentIndex + 1} of {photos.length}
+          </span>
+        </div>
+      </div>
+
+      {/* Main slideshow area */}
+      <div className="relative bg-black rounded-2xl overflow-hidden shadow-2xl">
+        <div className="aspect-video relative">
+          {currentPhoto.url ? (
+            <img
+              src={currentPhoto.url}
+              alt={currentPhoto.caption || "Wedding photo"}
+              className="w-full h-full object-contain"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-500">Loading...</span>
+            </div>
+          )}
+          
+          {/* Navigation arrows */}
+          <button
+            onClick={prevPhoto}
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center hover:bg-opacity-75 transition-all"
+          >
+            ←
+          </button>
+          <button
+            onClick={nextPhoto}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center hover:bg-opacity-75 transition-all"
+          >
+            →
+          </button>
+          
+          {/* Photo info overlay */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
+            <h3 className="text-white font-bold text-lg mb-1">
+              Photo by {currentPhoto.uploaderName}
+            </h3>
+            {currentPhoto.caption && (
+              <p className="text-white text-sm opacity-90 mb-2">
+                {currentPhoto.caption}
+              </p>
+            )}
+            <p className="text-white text-xs opacity-75">
+              {new Date(currentPhoto._creationTime).toLocaleDateString()}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Thumbnail navigation */}
+      <div className="mt-6 flex gap-2 overflow-x-auto pb-4">
+        {photos.map((photo, index) => (
+          <button
+            key={photo._id}
+            onClick={() => setCurrentIndex(index)}
+            className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+              index === currentIndex
+                ? "border-rose-500 ring-2 ring-rose-200"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            {photo.url ? (
+              <img
+                src={photo.url}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <span className="text-xs text-gray-500">...</span>
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
