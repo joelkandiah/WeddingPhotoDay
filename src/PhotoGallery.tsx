@@ -37,22 +37,22 @@ export function PhotoGallery() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 max-w-3xl mx-auto">
         {photos.map((photo) => (
           <div
             key={photo._id}
             className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105"
             onClick={() => setSelectedPhoto(photo)}
           >
-            <div className="aspect-square overflow-hidden">
+            <div className="overflow-hidden">
               {photo.url ? (
                 <img
                   src={photo.url}
                   alt={photo.caption || "Wedding photo"}
-                  className="w-full h-full object-cover"
+                  className="w-full h-auto"
                 />
               ) : (
-                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <div className="w-full aspect-square bg-gray-200 flex items-center justify-center">
                   <span className="text-gray-500">Loading...</span>
                 </div>
               )}

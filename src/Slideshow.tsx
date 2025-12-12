@@ -1,13 +1,83 @@
 import { useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export function Slideshow() {
   const photos = useQuery(api.photos.getApprovedPhotos);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [interval, setIntervalDuration] = useState(5000); // 5 seconds
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const slideshowRef = useRef<HTMLDivElement>(null);
+  const hideControlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Handle fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  // Mouse activity tracking for auto-hiding controls
+  useEffect(() => {
+    if (!isFullscreen) {
+      setShowControls(true);
+      return;
+    }
+
+    const handleMouseMove = () => {
+      setShowControls(true);
+      
+      // Clear existing timeout
+      if (hideControlsTimeoutRef.current) {
+        clearTimeout(hideControlsTimeoutRef.current);
+      }
+      
+      // Set new timeout to hide controls after 3 seconds
+      hideControlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    
+    // Initial timeout
+    handleMouseMove();
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (hideControlsTimeoutRef.current) {
+        clearTimeout(hideControlsTimeoutRef.current);
+      }
+    };
+  }, [isFullscreen]);
+
+  // Keyboard controls
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "f" || e.key === "F") {
+        toggleFullscreen();
+      } else if (e.key === "Escape" && isFullscreen) {
+        exitFullscreen();
+      } else if (e.key === "ArrowLeft") {
+        prevPhoto();
+      } else if (e.key === "ArrowRight") {
+        nextPhoto();
+      } else if (e.key === " ") {
+        e.preventDefault();
+        setIsPlaying(!isPlaying);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [isPlaying, isFullscreen]);
+
+  // Auto-advance slideshow
   useEffect(() => {
     if (!isPlaying || !photos || photos.length === 0) return;
 
@@ -17,6 +87,26 @@ export function Slideshow() {
 
     return () => clearInterval(timer);
   }, [isPlaying, photos, interval]);
+
+  const toggleFullscreen = async () => {
+    if (!slideshowRef.current) return;
+
+    try {
+      if (!document.fullscreenElement) {
+        await slideshowRef.current.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (err) {
+      console.error("Error toggling fullscreen:", err);
+    }
+  };
+
+  const exitFullscreen = async () => {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    }
+  };
 
   if (photos === undefined) {
     return (
@@ -50,44 +140,60 @@ export function Slideshow() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">
-          Wedding Slideshow 🎬
-        </h2>
-        
-        {/* Controls */}
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-              isPlaying
-                ? "bg-red-500 hover:bg-red-600 text-white"
-                : "bg-green-500 hover:bg-green-600 text-white"
-            }`}
-          >
-            {isPlaying ? "⏸️ Pause" : "▶️ Play"}
-          </button>
+      {!isFullscreen && (
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            Wedding Slideshow 🎬
+          </h2>
           
-          <select
-            value={interval}
-            onChange={(e) => setIntervalDuration(Number(e.target.value))}
-            className="px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none"
-          >
-            <option value={3000}>3 seconds</option>
-            <option value={5000}>5 seconds</option>
-            <option value={8000}>8 seconds</option>
-            <option value={10000}>10 seconds</option>
-          </select>
-          
-          <span className="text-gray-600">
-            {currentIndex + 1} of {photos.length}
-          </span>
+          {/* Controls */}
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
+            <button
+              onClick={() => setIsPlaying(!isPlaying)}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                isPlaying
+                  ? "bg-red-500 hover:bg-red-600 text-white"
+                  : "bg-green-500 hover:bg-green-600 text-white"
+              }`}
+            >
+              {isPlaying ? "⏸️ Pause" : "▶️ Play"}
+            </button>
+            
+            <button
+              onClick={toggleFullscreen}
+              className="px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition-all"
+            >
+              ⛶ Fullscreen
+            </button>
+            
+            <select
+              value={interval}
+              onChange={(e) => setIntervalDuration(Number(e.target.value))}
+              className="px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none"
+            >
+              <option value={3000}>3 seconds</option>
+              <option value={5000}>5 seconds</option>
+              <option value={8000}>8 seconds</option>
+              <option value={10000}>10 seconds</option>
+            </select>
+            
+            <span className="text-gray-600">
+              {currentIndex + 1} of {photos.length}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main slideshow area */}
-      <div className="relative bg-black rounded-2xl overflow-hidden shadow-2xl">
-        <div className="aspect-video relative">
+      <div 
+        ref={slideshowRef}
+        className={`relative bg-black overflow-hidden shadow-2xl ${
+          isFullscreen 
+            ? "w-screen h-screen" 
+            : "rounded-2xl"
+        } ${isFullscreen && !showControls ? "cursor-none" : ""}`}
+      >
+        <div className={`relative ${isFullscreen ? "w-full h-full" : "aspect-video"}`}>
           {currentPhoto.url ? (
             <img
               src={currentPhoto.url}
@@ -103,19 +209,58 @@ export function Slideshow() {
           {/* Navigation arrows */}
           <button
             onClick={prevPhoto}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center hover:bg-opacity-75 transition-all"
+            className={`absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center hover:bg-opacity-75 transition-all duration-300 ${
+              isFullscreen && !showControls ? "opacity-0" : "opacity-100"
+            }`}
           >
             ←
           </button>
           <button
             onClick={nextPhoto}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center hover:bg-opacity-75 transition-all"
+            className={`absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center hover:bg-opacity-75 transition-all duration-300 ${
+              isFullscreen && !showControls ? "opacity-0" : "opacity-100"
+            }`}
           >
             →
           </button>
+
+          {/* Fullscreen controls overlay */}
+          {isFullscreen && (
+            <div className={`absolute top-4 right-4 flex gap-2 transition-opacity duration-300 ${
+              showControls ? "opacity-100" : "opacity-0"
+            }`}>
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                  isPlaying
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-green-500 hover:bg-green-600 text-white"
+                }`}
+              >
+                {isPlaying ? "⏸️" : "▶️"}
+              </button>
+              <button
+                onClick={exitFullscreen}
+                className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-semibold transition-all"
+              >
+                ✕ Exit
+              </button>
+            </div>
+          )}
+
+          {/* Photo counter in fullscreen */}
+          {isFullscreen && (
+            <div className={`absolute top-4 left-4 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg transition-opacity duration-300 ${
+              showControls ? "opacity-100" : "opacity-0"
+            }`}>
+              {currentIndex + 1} / {photos.length}
+            </div>
+          )}
           
           {/* Photo info overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
+          <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6 transition-opacity duration-300 ${
+            isFullscreen && !showControls ? "opacity-0" : "opacity-100"
+          }`}>
             <h3 className="text-white font-bold text-lg mb-1">
               Photo by {currentPhoto.uploaderName}
             </h3>
@@ -131,32 +276,42 @@ export function Slideshow() {
         </div>
       </div>
 
-      {/* Thumbnail navigation */}
-      <div className="mt-6 flex gap-2 overflow-x-auto pb-4">
-        {photos.map((photo, index) => (
-          <button
-            key={photo._id}
-            onClick={() => setCurrentIndex(index)}
-            className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-              index === currentIndex
-                ? "border-rose-500 ring-2 ring-rose-200"
-                : "border-gray-200 hover:border-gray-300"
-            }`}
-          >
-            {photo.url ? (
-              <img
-                src={photo.url}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <span className="text-xs text-gray-500">...</span>
-              </div>
-            )}
-          </button>
-        ))}
-      </div>
+      {/* Thumbnail navigation - hidden in fullscreen */}
+      {!isFullscreen && (
+        <div className="mt-6 flex gap-2 overflow-x-auto pb-4">
+          {photos.map((photo, index) => (
+            <button
+              key={photo._id}
+              onClick={() => setCurrentIndex(index)}
+              className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                index === currentIndex
+                  ? "border-rose-500 ring-2 ring-rose-200"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              {photo.url ? (
+                <img
+                  src={photo.url}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-xs text-gray-500">...</span>
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Keyboard shortcuts hint */}
+      {!isFullscreen && (
+        <div className="mt-4 text-center text-sm text-gray-500">
+          <p>💡 Keyboard shortcuts: <kbd className="px-2 py-1 bg-gray-100 rounded">F</kbd> Fullscreen • <kbd className="px-2 py-1 bg-gray-100 rounded">Space</kbd> Play/Pause • <kbd className="px-2 py-1 bg-gray-100 rounded">←</kbd> <kbd className="px-2 py-1 bg-gray-100 rounded">→</kbd> Navigate</p>
+        </div>
+      )}
     </div>
   );
 }
+
