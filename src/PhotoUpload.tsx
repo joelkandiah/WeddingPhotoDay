@@ -6,71 +6,95 @@ import { toast } from "sonner";
 export function PhotoUpload() {
   const [uploaderName, setUploaderName] = useState("");
   const [caption, setCaption] = useState("");
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<Record<string, boolean>>({});
   const imageInput = useRef<HTMLInputElement>(null);
 
-  const generateUploadUrl = useMutation(api.photos.generateUploadUrl);
-  const uploadPhoto = useMutation(api.photos.uploadPhoto);
+  const generateUploadUrl = useMutation(api.posts.generateUploadUrl);
+  const uploadPost = useMutation(api.posts.uploadPost);
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        toast.error("Image must be smaller than 10MB");
-        return;
+    const files = Array.from(event.target.files || []);
+    
+    // Validate file sizes
+    const validFiles = files.filter(file => {
+      if (file.size > 15 * 1024 * 1024) {
+        toast.error(`${file.name} is too large (max 15MB)`);
+        return false;
       }
-      setSelectedImage(file);
-    }
+      return true;
+    });
+
+    setSelectedImages(prev => [...prev, ...validFiles]);
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleUpload = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    if (!selectedImage || !uploaderName.trim()) {
+    if (selectedImages.length === 0 || !uploaderName.trim()) {
       toast.error("Please fill in all required fields");
       return;
     }
 
     setIsUploading(true);
+    setUploadProgress({});
 
     try {
-      // Step 1: Get upload URL
-      const postUrl = await generateUploadUrl();
+      // Upload all photos
+      const storageIds: string[] = [];
+      
+      for (let i = 0; i < selectedImages.length; i++) {
+        const file = selectedImages[i];
+        
+        // Get upload URL
+        const postUrl = await generateUploadUrl();
 
-      // Step 2: Upload file
-      const result = await fetch(postUrl, {
-        method: "POST",
-        headers: { "Content-Type": selectedImage.type },
-        body: selectedImage,
-      });
+        // Upload file
+        const result = await fetch(postUrl, {
+          method: "POST",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
 
-      const json = await result.json();
-      if (!result.ok) {
-        throw new Error(`Upload failed: ${JSON.stringify(json)}`);
+        const json = await result.json();
+        if (!result.ok) {
+          throw new Error(`Upload failed for ${file.name}: ${JSON.stringify(json)}`);
+        }
+
+        storageIds.push(json.storageId);
+        
+        // Update progress
+        setUploadProgress(prev => ({
+          ...prev,
+          [file.name]: true
+        }));
       }
 
-      const { storageId } = json;
-
-      // Step 3: Save to database
-      await uploadPhoto({
-        storageId,
+      // Create post with all photos
+      await uploadPost({
+        photoStorageIds: storageIds as any,
         uploaderName: uploaderName.trim(),
         caption: caption.trim() || undefined,
       });
 
-      toast.success("Photo uploaded successfully! It will appear after admin approval.");
+      toast.success(`${selectedImages.length} photo${selectedImages.length > 1 ? 's' : ''} uploaded successfully! They will appear after admin approval.`);
       
       // Reset form
       setUploaderName("");
       setCaption("");
-      setSelectedImage(null);
+      setSelectedImages([]);
+      setUploadProgress({});
       if (imageInput.current) {
         imageInput.current.value = "";
       }
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload photo. Please try again.");
+      toast.error("Failed to upload photos. Please try again.");
     } finally {
       setIsUploading(false);
     }
@@ -80,7 +104,7 @@ export function PhotoUpload() {
     <div className="max-w-2xl mx-auto">
       <div className="bg-white rounded-2xl shadow-lg border border-rose-100 p-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          Share a Wedding Memory 📸
+          Share Wedding Memories 📸
         </h2>
         
         <form onSubmit={handleUpload} className="space-y-6">
@@ -106,65 +130,81 @@ export function PhotoUpload() {
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all resize-none"
-              placeholder="Share the story behind this moment..."
+              placeholder="Share the story behind these moments..."
               rows={3}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Photo *
+              Select Photos * {selectedImages.length > 0 && `(${selectedImages.length} selected)`}
             </label>
             <div className="relative">
               <input
                 type="file"
                 accept="image/*"
+                multiple
                 ref={imageInput}
                 onChange={handleImageSelect}
                 className="hidden"
-                required
               />
               <button
                 type="button"
                 onClick={() => imageInput.current?.click()}
                 className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-rose-400 transition-colors text-center"
               >
-                {selectedImage ? (
-                  <div className="space-y-2">
-                    <div className="text-green-600 font-medium">
-                      ✓ {selectedImage.name}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      Click to change photo
-                    </div>
+                <div className="space-y-2">
+                  <div className="text-4xl">📷</div>
+                  <div className="text-gray-600 font-medium">
+                    Click to select photos
                   </div>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="text-4xl">📷</div>
-                    <div className="text-gray-600 font-medium">
-                      Click to select a photo
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      JPG, PNG up to 10MB
-                    </div>
+                  <div className="text-sm text-gray-500">
+                    JPG, PNG up to 10MB each • Multiple photos allowed
                   </div>
-                )}
+                </div>
               </button>
             </div>
+
+            {/* Photo Previews */}
+            {selectedImages.length > 0 && (
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {selectedImages.map((file, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ✕
+                    </button>
+                    {isUploading && uploadProgress[file.name] && (
+                      <div className="absolute inset-0 bg-green-500 bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <span className="text-green-700 font-bold">✓</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={isUploading || !selectedImage || !uploaderName.trim()}
+            disabled={isUploading || selectedImages.length === 0 || !uploaderName.trim()}
             className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold py-4 rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
           >
             {isUploading ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                Uploading...
+                Uploading {Object.keys(uploadProgress).length}/{selectedImages.length}...
               </div>
             ) : (
-              "Upload Photo 💕"
+              `Upload ${selectedImages.length} Photo${selectedImages.length !== 1 ? 's' : ''} 💕`
             )}
           </button>
         </form>

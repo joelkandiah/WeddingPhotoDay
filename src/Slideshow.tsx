@@ -1,9 +1,9 @@
 import { useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
 export function Slideshow() {
-  const photos = useQuery(api.photos.getApprovedPhotos);
+  const posts = useQuery(api.posts.getApprovedPosts);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [interval, setIntervalDuration] = useState(5000); // 5 seconds
@@ -11,6 +11,20 @@ export function Slideshow() {
   const [showControls, setShowControls] = useState(true);
   const slideshowRef = useRef<HTMLDivElement>(null);
   const hideControlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Flatten posts into individual photos
+  const photos = useMemo(() => {
+    if (!posts) return [];
+    return posts.flatMap(post => 
+      post.photoUrls.map(url => ({
+        _id: post._id + url, // unique key
+        url,
+        caption: post.caption,
+        uploaderName: post.uploaderName,
+        _creationTime: post._creationTime
+      }))
+    );
+  }, [posts]);
 
   // Handle fullscreen changes
   useEffect(() => {
@@ -108,7 +122,7 @@ export function Slideshow() {
     }
   };
 
-  if (photos === undefined) {
+  if (posts === undefined) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
@@ -314,4 +328,3 @@ export function Slideshow() {
     </div>
   );
 }
-

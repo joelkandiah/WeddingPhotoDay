@@ -16,6 +16,7 @@ import type {
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as photos from "../photos.js";
+import type * as posts from "../posts.js";
 import type * as router from "../router.js";
 
 /**
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
   photos: typeof photos;
+  posts: typeof posts;
   router: typeof router;
 }>;
 export declare const api: FilterApi<

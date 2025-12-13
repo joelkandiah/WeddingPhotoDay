@@ -1,12 +1,37 @@
-import { useQuery } from "convex/react";
+import { usePaginatedQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { ImageCarousel } from "./components/ImageCarousel";
 
 export function PhotoGallery() {
-  const photos = useQuery(api.photos.getApprovedPhotos);
-  const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
+  const { results: posts, status, loadMore } = usePaginatedQuery(
+    api.posts.getApprovedPostsPaginated, 
+    {}, 
+    { initialNumItems: 5 } // Start with 5 items
+  );
+  
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [initialSlideIndex, setInitialSlideIndex] = useState(0);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  if (photos === undefined) {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && status === "CanLoadMore") {
+          loadMore(5); // Load 5 more items
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [status, loadMore]);
+
+  if (status === "LoadingFirstPage") {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
@@ -14,7 +39,7 @@ export function PhotoGallery() {
     );
   }
 
-  if (photos.length === 0) {
+  if (posts.length === 0) {
     return (
       <div className="text-center py-12">
         <div className="text-6xl mb-4">📷</div>
@@ -26,6 +51,11 @@ export function PhotoGallery() {
     );
   }
 
+  const handlePostClick = (post: any, index: number) => {
+    setSelectedPost(post);
+    setInitialSlideIndex(index);
+  };
+
   return (
     <div>
       <div className="text-center mb-8">
@@ -33,82 +63,94 @@ export function PhotoGallery() {
           Wedding Photo Gallery
         </h2>
         <p className="text-gray-600">
-          {photos.length} beautiful {photos.length === 1 ? 'memory' : 'memories'} shared by our loved ones
+          {posts.length} beautiful {posts.length === 1 ? 'moment' : 'moments'} shared by our loved ones
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 max-w-3xl mx-auto">
-        {photos.map((photo) => (
+        {posts.map((post) => (
           <div
-            key={photo._id}
-            className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105"
-            onClick={() => setSelectedPhoto(photo)}
+            key={post._id}
+            className="bg-white rounded-xl shadow-lg border border-rose-50 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01]"
           >
             <div className="overflow-hidden">
-              {photo.url ? (
-                <img
-                  src={photo.url}
-                  alt={photo.caption || "Wedding photo"}
-                  className="w-full h-auto"
-                />
-              ) : (
-                <div className="w-full aspect-square bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500">Loading...</span>
-                </div>
-              )}
+              <ImageCarousel 
+                images={post.photoUrls} 
+                alt={post.caption || "Wedding photo"}
+                onImageClick={(index) => handlePostClick(post, index)}
+                className="w-full h-auto"
+                aspectRatio="auto"
+              />
             </div>
             <div className="p-4">
-              <p className="font-semibold text-gray-800 text-sm">
-                {photo.uploaderName}
-              </p>
-              {photo.caption && (
-                <p className="text-gray-600 text-sm mt-1 line-clamp-2">
-                  {photo.caption}
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-semibold text-gray-800 text-sm">
+                    {post.uploaderName}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {new Date(post._creationTime).toLocaleDateString()}
+                  </p>
+                </div>
+                {post.photoUrls.length > 1 && (
+                  <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                    {post.photoUrls.length} photos
+                  </span>
+                )}
+              </div>
+              {post.caption && (
+                <p className="text-gray-600 text-sm mt-3 leading-relaxed">
+                  {post.caption}
                 </p>
               )}
-              <p className="text-xs text-gray-400 mt-2">
-                {new Date(photo._creationTime).toLocaleDateString()}
-              </p>
             </div>
           </div>
         ))}
+
+        {/* Loading Sentinel */}
+        <div ref={loadMoreRef} className="h-20 flex justify-center items-center">
+            {status === "LoadingMore" ? (
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-rose-500"></div>
+            ) : status === "Exhausted" ? (
+                <span className="text-gray-400 text-sm">You've reached the end!</span>
+            ) : null}
+        </div>
       </div>
 
-      {/* Photo Modal */}
-      {selectedPhoto && (
+      {/* Post Modal */}
+      {selectedPost && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
-          onClick={() => setSelectedPhoto(null)}
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+          onClick={() => setSelectedPost(null)}
         >
-          <div className="max-w-4xl max-h-full bg-white rounded-2xl overflow-hidden">
-            <div className="relative">
-              {selectedPhoto.url ? (
-                <img
-                  src={selectedPhoto.url}
-                  alt={selectedPhoto.caption || "Wedding photo"}
-                  className="w-full h-auto max-h-[70vh] object-contain"
+          <div 
+            className="w-full max-w-5xl h-full flex flex-col justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative flex-1 min-h-0 bg-black flex items-center justify-center rounded-lg overflow-hidden">
+               <ImageCarousel 
+                  images={selectedPost.photoUrls} 
+                  alt={selectedPost.caption || "Wedding photo"}
+                  className="w-full h-full"
+                  aspectRatio="contain"
                 />
-              ) : (
-                <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500">Loading...</span>
-                </div>
-              )}
               <button
-                onClick={() => setSelectedPhoto(null)}
-                className="absolute top-4 right-4 bg-black bg-opacity-50 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-75 transition-all"
+                onClick={() => setSelectedPost(null)}
+                className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center transition-all z-20"
               >
                 ✕
               </button>
             </div>
-            <div className="p-6">
-              <h3 className="font-bold text-lg text-gray-800 mb-2">
-                Photo by {selectedPhoto.uploaderName}
+            
+            <div className="mt-4 text-white">
+              <h3 className="font-bold text-lg mb-1">
+                {selectedPost.uploaderName}
               </h3>
-              {selectedPhoto.caption && (
-                <p className="text-gray-600 mb-3">{selectedPhoto.caption}</p>
+              {selectedPost.caption && (
+                <p className="text-gray-300 text-sm">{selectedPost.caption}</p>
               )}
-              <p className="text-sm text-gray-400">
-                Shared on {new Date(selectedPhoto._creationTime).toLocaleDateString()}
+              <p className="text-xs text-gray-500 mt-1">
+                {new Date(selectedPost._creationTime).toLocaleDateString()}
               </p>
             </div>
           </div>
