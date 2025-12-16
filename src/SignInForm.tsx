@@ -36,10 +36,6 @@ export function SignInForm() {
             // This will throw an error if the password is invalid
             const verifyResult = await verifyPassword({ password });
             
-            if (!verifyResult.success) {
-              throw new Error("Password verification failed");
-            }
-            
             // Only sign in anonymously if password is valid
             await signIn("anonymous");
             

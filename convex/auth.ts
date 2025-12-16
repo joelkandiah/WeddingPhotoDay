@@ -46,19 +46,19 @@ export const verifyPassword = mutation({
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 
     // Determine role based on password match
-    let role: 'user' | 'admin' | null = null;
     if (secureCompare(password, adminPassword)) {
-      role = 'admin';
+      return {
+        success: true,
+        role: 'admin' as const,
+      };
     } else if (secureCompare(password, userPassword)) {
-      role = 'user';
+      return {
+        success: true,
+        role: 'user' as const,
+      };
     } else {
       throw new Error("Invalid password");
     }
-
-    return {
-      success: true,
-      role: role,
-    };
   },
 });
 
