@@ -1,11 +1,12 @@
 import { useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { POST_CATEGORIES, PostCategory } from "../convex/constants";
 
 export function Slideshow() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("All Posts");
+  const [selectedCategory, setSelectedCategory] = useState<PostCategory | "All Posts">("All Posts");
   const posts = useQuery(api.posts.getApprovedPosts, {
-    category: selectedCategory === "All Posts" ? undefined : selectedCategory as any
+    category: selectedCategory === "All Posts" ? undefined : selectedCategory
   });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -168,20 +169,17 @@ export function Slideshow() {
             <select
               value={selectedCategory}
               onChange={(e) => {
-                setSelectedCategory(e.target.value);
+                setSelectedCategory(e.target.value as PostCategory | "All Posts");
                 setCurrentIndex(0); // Reset to first photo when changing category
               }}
               className="bg-input-bg px-4 py-2 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
             >
               <option value="All Posts">All Posts</option>
-              <option value="US Ceremony">US Ceremony</option>
-              <option value="Reception">Reception</option>
-              <option value="Getting Ready">Getting Ready</option>
-              <option value="The Journey Here">The Journey Here</option>
-              <option value="The Journey Home">The Journey Home</option>
-              <option value="UK Celebration">UK Celebration</option>
-              <option value="Legal Ceremony">Legal Ceremony</option>
-              <option value="Engagement">Engagement</option>
+              {POST_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
             </select>
           </div>
           

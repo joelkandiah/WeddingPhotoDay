@@ -2,11 +2,12 @@ import { useState, useRef } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { toast } from "sonner";
+import { POST_CATEGORIES, PostCategory } from "../convex/constants";
 
 export function PhotoUpload() {
   const [uploaderName, setUploaderName] = useState("");
   const [caption, setCaption] = useState("");
-  const [category, setCategory] = useState("US Ceremony");
+  const [category, setCategory] = useState<PostCategory>("US Ceremony");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<Record<string, boolean>>({});
@@ -81,7 +82,7 @@ export function PhotoUpload() {
         photoStorageIds: storageIds as any,
         uploaderName: uploaderName.trim(),
         caption: caption.trim() || undefined,
-        category: category as any,
+        category: category,
       });
 
       toast.success(`${selectedImages.length} photo${selectedImages.length > 1 ? 's' : ''} uploaded successfully! They will appear after admin approval.`);
@@ -131,18 +132,15 @@ export function PhotoUpload() {
             </label>
             <select
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => setCategory(e.target.value as PostCategory)}
               className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
               required
             >
-              <option value="US Ceremony">US Ceremony</option>
-              <option value="Reception">Reception</option>
-              <option value="Getting Ready">Getting Ready</option>
-              <option value="The Journey Here">The Journey Here</option>
-              <option value="The Journey Home">The Journey Home</option>
-              <option value="UK Celebration">UK Celebration</option>
-              <option value="Legal Ceremony">Legal Ceremony</option>
-              <option value="Engagement">Engagement</option>
+              {POST_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
             </select>
           </div>
 

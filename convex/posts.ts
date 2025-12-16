@@ -3,20 +3,12 @@ import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server"; // Added pagination validator
 import { getIsAdmin } from "./adminHelper";
+import { categoryValidator } from "./constants";
 
 // Public queries
 export const getApprovedPosts = query({
     args: {
-        category: v.optional(v.union(
-            v.literal("US Ceremony"),
-            v.literal("Reception"),
-            v.literal("Getting Ready"),
-            v.literal("The Journey Here"),
-            v.literal("The Journey Home"),
-            v.literal("UK Celebration"),
-            v.literal("Legal Ceremony"),
-            v.literal("Engagement")
-        )),
+        category: v.optional(categoryValidator),
     },
     handler: async (ctx, args) => {
         let posts;
@@ -56,16 +48,7 @@ export const getApprovedPosts = query({
 export const getApprovedPostsPaginated = query({
     args: { 
         paginationOpts: paginationOptsValidator,
-        category: v.optional(v.union(
-            v.literal("US Ceremony"),
-            v.literal("Reception"),
-            v.literal("Getting Ready"),
-            v.literal("The Journey Here"),
-            v.literal("The Journey Home"),
-            v.literal("UK Celebration"),
-            v.literal("Legal Ceremony"),
-            v.literal("Engagement")
-        )),
+        category: v.optional(categoryValidator),
     },
     handler: async (ctx, args) => {
         // Pagination handler
@@ -118,16 +101,7 @@ export const uploadPost = mutation({
         uploaderName: v.string(),
         uploaderEmail: v.optional(v.string()),
         caption: v.optional(v.string()),
-        category: v.union(
-            v.literal("US Ceremony"),
-            v.literal("Reception"),
-            v.literal("Getting Ready"),
-            v.literal("The Journey Here"),
-            v.literal("The Journey Home"),
-            v.literal("UK Celebration"),
-            v.literal("Legal Ceremony"),
-            v.literal("Engagement")
-        ),
+        category: categoryValidator,
     },
     handler: async (ctx, args) => {
         await ctx.db.insert("posts", {
