@@ -133,7 +133,7 @@ export function ImageCarousel({
     <div className={`relative group overflow-hidden select-none ${className}`}>
       <div 
         ref={carouselRef}
-        className={`w-full relative overflow-hidden bg-gray-100 ${
+        className={`w-full relative overflow-hidden bg-gray-100 dark:bg-gray-800 ${
           aspectRatio === "square" ? "aspect-square" : 
           aspectRatio === "video" ? "aspect-video" : 
           aspectRatio === "auto" ? "aspect-square" : // Auto falls back to square for consistent sizing
@@ -147,6 +147,7 @@ export function ImageCarousel({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
+        {/* Want to modify this so that it isn't draggable if there is only one image */}
         <div 
           className={`flex w-full h-full cursor-grab active:cursor-grabbing ${
             isDragging ? "" : "transition-transform duration-300 ease-out"

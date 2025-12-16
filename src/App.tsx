@@ -63,7 +63,7 @@ export default function App() {
 
       {/* Mobile Bottom Navigation - Hidden on desktop */}
       <Authenticated>
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white/90 backdrop-blur-xs border-t border-rose-200 shadow-lg pb-safe dark:bg-white/90 dark:border-rose-800 dark:shadow-lg">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white/90 backdrop-blur-xs border-t border-rose-200 shadow-lg pb-safe dark:bg-black/70 dark:border-rose-800 dark:shadow-lg">
           <div className={`grid gap-1 px-2 py-2 ${
             allNavItems.length === 4 ? 'grid-cols-4' : 'grid-cols-3'
           }`}>
