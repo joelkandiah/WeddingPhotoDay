@@ -15,7 +15,30 @@ The backend code is in the `convex` directory.
 
 ## App authentication
 
-Chef apps use [Convex Auth](https://auth.convex.dev/) with Anonymous auth for easy sign in. You may wish to change this before deploying your app.
+This app uses **sitewide login** with [Convex Auth](https://auth.convex.dev/). Users enter a single password to access the site, and the backend automatically determines their role (user or admin) based on which password matches.
+
+### Setting up passwords
+
+To configure the site passwords, set the following environment variables in your Convex deployment:
+
+- `USER_PASSWORD` - Password for regular users (default: `user123`)
+- `ADMIN_PASSWORD` - Password for admin users (default: `admin123`)
+
+**Important:** The default passwords are for development only. Change them before deploying to production!
+
+To set environment variables in Convex:
+```bash
+npx convex env set USER_PASSWORD your_user_password
+npx convex env set ADMIN_PASSWORD your_admin_password
+```
+
+### How it works
+
+1. Users see a simple password input on the homepage
+2. When they submit the password, the backend checks if it matches either the user or admin password
+3. If it matches the admin password, they're logged in as admin with access to approve/reject photos
+4. If it matches the user password, they're logged in as a regular user who can upload and view photos
+5. Invalid passwords are rejected
 
 ## Developing and deploying your app
 
