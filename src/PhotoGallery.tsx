@@ -53,21 +53,34 @@ export function PhotoGallery() {
         <p>
           {posts.length} {posts.length === 1 ? 'memory' : 'memories'} shared by our loved ones
         </p>
+      </div>
 
-        {/* Category Filter (always visible) */}
-        <div className="mt-4 flex justify-center">
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value as PostCategory | "All Posts")}
-            className="bg-input-bg px-4 py-2 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
+      {/* Category Tabs */}
+      <div className="mb-6 overflow-x-auto">
+        <div className="flex gap-2 border-b border-card-border min-w-max">
+          <button
+            onClick={() => setSelectedCategory("All Posts")}
+            className={`px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
+              selectedCategory === "All Posts"
+                ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
+                : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+            }`}
           >
-            <option value="All Posts">All Posts</option>
-            {POST_CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+            All Posts
+          </button>
+          {POST_CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
+                selectedCategory === cat
+                  ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
+                  : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
       </div>
 

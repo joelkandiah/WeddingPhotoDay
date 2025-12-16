@@ -125,27 +125,49 @@ export function Slideshow() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* Category Selector */}
-      <div className="text-center mb-6">
-        <h2>Wedding Slideshow 🎬</h2>
-        <div className="mt-4 mb-4 flex justify-center">
-          <select
-            value={selectedCategory}
-            onChange={e => {
-              setSelectedCategory(e.target.value as PostCategory | "All Posts");
-              setCurrentIndex(0);
-            }}
-            className="bg-input-bg px-4 py-2 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
-          >
-            <option value="All Posts">All Posts</option>
-            {POST_CATEGORIES.map(cat => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+      {/* Title */}
+      {!isFullscreen && (
+        <div className="text-center mb-6">
+          <h2>Wedding Slideshow 🎬</h2>
         </div>
-      </div>
+      )}
+
+      {/* Category Tabs */}
+      {!isFullscreen && (
+        <div className="mb-6 overflow-x-auto">
+          <div className="flex gap-2 border-b border-card-border min-w-max">
+            <button
+              onClick={() => {
+                setSelectedCategory("All Posts");
+                setCurrentIndex(0);
+              }}
+              className={`px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
+                selectedCategory === "All Posts"
+                  ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
+                  : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+              }`}
+            >
+              All Posts
+            </button>
+            {POST_CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => {
+                  setSelectedCategory(cat);
+                  setCurrentIndex(0);
+                }}
+                className={`px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
+                  selectedCategory === cat
+                    ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
+                    : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Empty state */}
       {photos.length === 0 ? (
