@@ -1,17 +1,23 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 
-const myAuthTables = {
-  _auth: defineTable({
-    tokenIdentifier: v.string(), // Convex's built-in auth token
+export default defineSchema({
+  ...authTables,
+  // Override users table to add role field while maintaining compatibility with @convex-dev/auth
+  users: defineTable({
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    image: v.optional(v.string()),
+    isAnonymous: v.optional(v.boolean()),
+    name: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
     role: v.optional(v.union(v.literal('user'), v.literal('admin'))),
-    createdAt: v.optional(v.number()),
-    lastLogin: v.optional(v.number()),
-    sessionExpiresAt: v.optional(v.number()),
-  }).index('tokenIdentifier', ['tokenIdentifier']),
-}
-
-const applicationTables = {
+    // tokenIdentifier must be optional for @convex-dev/auth compatibility
+    tokenIdentifier: v.optional(v.string()),
+  }).index("by_token", ["tokenIdentifier"]),
+  
   photos: defineTable({
     storageId: v.id("_storage"),
     uploaderName: v.string(),
@@ -31,15 +37,4 @@ const applicationTables = {
   })
     .index("by_status", ["status"])
     .index("by_uploader", ["uploaderName"]),
-
-  userRoles: defineTable({
-    userId: v.id("users"),
-    role: v.union(v.literal("admin"), v.literal("user")),
-  })
-    .index("by_user", ["userId"]),
-};
-
-export default defineSchema({
-  ...myAuthTables,
-  ...applicationTables,
 });
