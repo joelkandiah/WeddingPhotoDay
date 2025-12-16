@@ -72,7 +72,6 @@ export const uploadPost = mutation({
         await ctx.db.insert("posts", {
             photoStorageIds: args.photoStorageIds,
             uploaderName: args.uploaderName,
-            uploaderEmail: args.uploaderEmail,
             caption: args.caption,
             status: "pending",
         });
@@ -185,7 +184,6 @@ export const approvePost = mutation({
 
         await ctx.db.patch(args.postId, {
             status: "approved",
-            approvedBy: userId,
             approvedAt: Date.now(),
         });
     },
@@ -248,7 +246,6 @@ export const approveAllPendingPosts = mutation({
             pendingPosts.map((post) =>
                 ctx.db.patch(post._id, {
                     status: "approved",
-                    approvedBy: userId,
                     approvedAt: Date.now(),
                 })
             )

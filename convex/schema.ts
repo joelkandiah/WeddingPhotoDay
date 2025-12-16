@@ -1,41 +1,45 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { authTables } from "@convex-dev/auth/server";
+
+const myAuthTables = {
+  _auth: defineTable({
+    tokenIdentifier: v.string(), // Convex's built-in auth token
+    role: v.optional(v.union(v.literal('user'), v.literal('admin'))),
+    createdAt: v.optional(v.number()),
+    lastLogin: v.optional(v.number()),
+    sessionExpiresAt: v.optional(v.number()),
+  }).index('tokenIdentifier', ['tokenIdentifier']),
+}
 
 const applicationTables = {
   photos: defineTable({
     storageId: v.id("_storage"),
     uploaderName: v.string(),
-    uploaderEmail: v.optional(v.string()),
     caption: v.optional(v.string()),
     status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
-    approvedBy: v.optional(v.id("users")),
     approvedAt: v.optional(v.number()),
   })
     .index("by_status", ["status"])
-    .index("by_uploader", ["uploaderEmail"]),
+    .index("by_uploader", ["uploaderName"]),
 
   posts: defineTable({
     uploaderName: v.string(),
-    uploaderEmail: v.optional(v.string()),
     caption: v.optional(v.string()),
     photoStorageIds: v.array(v.id("_storage")),
     status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
-    approvedBy: v.optional(v.id("users")),
     approvedAt: v.optional(v.number()),
   })
     .index("by_status", ["status"])
-    .index("by_uploader", ["uploaderEmail"]),
+    .index("by_uploader", ["uploaderName"]),
 
-  admins: defineTable({
+  userRoles: defineTable({
     userId: v.id("users"),
-    email: v.string(),
+    role: v.union(v.literal("admin"), v.literal("user")),
   })
-    .index("by_user", ["userId"])
-    .index("by_email", ["email"]),
+    .index("by_user", ["userId"]),
 };
 
 export default defineSchema({
-  ...authTables,
+  ...myAuthTables,
   ...applicationTables,
 });

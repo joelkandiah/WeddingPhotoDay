@@ -33,17 +33,24 @@ export const uploadPhoto = mutation({
   args: {
     storageId: v.id("_storage"),
     uploaderName: v.string(),
-    uploaderEmail: v.optional(v.string()),
     caption: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("photos", {
       storageId: args.storageId,
       uploaderName: args.uploaderName,
-      uploaderEmail: args.uploaderEmail,
       caption: args.caption,
       status: "pending",
     });
+  },
+});
+
+export const isUserAdmin = query({
+  args: {},
+  handler: async (ctx) => {
+    const isAdmin = await getIsAdmin(ctx);
+
+    return isAdmin;
   },
 });
 
@@ -90,7 +97,6 @@ export const approvePhoto = mutation({
 
     await ctx.db.patch(args.photoId, {
       status: "approved",
-      approvedBy: userId,
       approvedAt: Date.now(),
     });
   },
@@ -115,13 +121,13 @@ export const rejectPhoto = mutation({
 
 export const makeUserAdmin = mutation({
   args: {
-    email: v.string(),
+    tokenIdentifier: v.string(),
   },
   handler: async (ctx, args) => {
     // Find user by email
     const user = await ctx.db
       .query("users")
-      .withIndex("email", (q) => q.eq("email", args.email))
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", args.tokenIdentifier))
       .first();
 
     if (!user) {
@@ -129,18 +135,13 @@ export const makeUserAdmin = mutation({
     }
 
     // Check if already admin
-    const existingAdmin = await ctx.db
-      .query("admins")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .first();
-
-    if (existingAdmin) {
+    const isAdmin = await getIsAdmin(ctx);
+    if (isAdmin) {
       throw new Error("User is already an admin");
     }
 
-    await ctx.db.insert("admins", {
-      userId: user._id,
-      email: args.email,
+    await ctx.db.patch(user, {
+      role: "admin",
     });
   },
 });
@@ -155,8 +156,8 @@ export const makeMeAdmin = mutation({
     }
 
     const user = await ctx.db.get(userId);
-    if (!user || !user.email) {
-      throw new Error("User email not found");
+    if (!user || !user.tokenIdentifier) {
+      throw new Error("User tokenIdentifier not found");
     }
 
     // Check if already admin
@@ -166,9 +167,8 @@ export const makeMeAdmin = mutation({
       return "Already an admin";
     }
 
-    await ctx.db.insert("admins", {
-      userId: userId,
-      email: user.email,
+    await ctx.db.patch(user, {
+      role: "admin",
     });
 
     return "Admin access granted";
@@ -185,8 +185,8 @@ export const getApprovedPhotosForAdmin = query({
     }
 
     const isAdmin = await ctx.db
-      .query("admins")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", userId))
       .first();
 
     if (!isAdmin) {
@@ -275,7 +275,6 @@ export const approveAllPending = mutation({
       pendingPhotos.map((photo) =>
         ctx.db.patch(photo._id, {
           status: "approved",
-          approvedBy: userId,
           approvedAt: Date.now(),
         })
       )
