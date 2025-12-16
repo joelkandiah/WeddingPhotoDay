@@ -32,6 +32,12 @@ npx convex env set USER_PASSWORD your_user_password
 npx convex env set ADMIN_PASSWORD your_admin_password
 ```
 
+**Security Notes:**
+- Passwords are compared using constant-time comparison to prevent timing attacks
+- For production, use strong, unique passwords for both roles
+- The current implementation uses plain text passwords stored in environment variables
+- For enhanced security, consider implementing bcrypt hashing for password storage
+
 ### How it works
 
 1. Users see a simple password input on the homepage

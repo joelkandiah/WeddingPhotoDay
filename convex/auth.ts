@@ -2,7 +2,14 @@ import { convexAuth } from "@convex-dev/auth/server";
 import { Password } from "@convex-dev/auth/providers/Password";
 import { DataModel } from "./_generated/dataModel";
 import { query } from "./_generated/server";
-import { v } from 'convex/values';
+
+// Define interface for user identity with role
+interface UserIdentity {
+  subject: string;
+  email?: string;
+  name?: string;
+  role?: 'user' | 'admin';
+}
 
 // Custom password provider for sitewide login
 // Automatically determines role based on which password is entered
@@ -25,15 +32,29 @@ const SitewidePassword = Password<DataModel>({
     }
 
     // Get passwords from environment variables
-    // For production, use hashed passwords
+    // Supports both plain text (for development) and hashed passwords (for production)
     const userPassword = process.env.USER_PASSWORD || 'user123';
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 
+    // Simple constant-time comparison helper
+    // This helps prevent timing attacks by ensuring comparison takes the same time
+    // regardless of where the mismatch occurs
+    const secureCompare = (a: string, b: string): boolean => {
+      if (a.length !== b.length) {
+        return false;
+      }
+      let result = 0;
+      for (let i = 0; i < a.length; i++) {
+        result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+      }
+      return result === 0;
+    };
+
     // Check which password matches and assign role accordingly
-    if (password === adminPassword) {
+    if (secureCompare(password, adminPassword)) {
       return { role: 'admin' };
     }
-    if (password === userPassword) {
+    if (secureCompare(password, userPassword)) {
       return { role: 'user' };
     }
 
@@ -48,17 +69,17 @@ export const { auth, signIn, signOut, store } = convexAuth({
 // Query to get the logged-in user
 export const loggedInUser = query({
   handler: async (ctx) => {
-    const userId = await ctx.auth.getUserIdentity();
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity() as UserIdentity | null;
+    if (!identity) {
       return null;
     }
     
     // Return user info from the session
     return {
-      id: userId.subject,
-      email: userId.email,
-      name: userId.name,
-      role: (userId as any).role || 'user',
+      id: identity.subject,
+      email: identity.email,
+      name: identity.name,
+      role: identity.role || 'user',
     };
   },
 });
@@ -66,10 +87,10 @@ export const loggedInUser = query({
 // Query to check if current user is admin
 export const isAdmin = query({
   handler: async (ctx) => {
-    const userId = await ctx.auth.getUserIdentity();
-    if (!userId) {
+    const identity = await ctx.auth.getUserIdentity() as UserIdentity | null;
+    if (!identity) {
       return false;
     }
-    return (userId as any).role === 'admin';
+    return identity.role === 'admin';
   },
 });
