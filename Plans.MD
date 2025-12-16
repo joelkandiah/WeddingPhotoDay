@@ -2,6 +2,16 @@
 
 This document outlines the plan to migrate storage to Cloudflare R2, implement image optimization workers, harden security, and enhance the slideshow and UI.
 
+## Existing issue with sign in automatically redirecting to last page, but if user is not authed for admin panel the page doesn't fall back to the  gallery or if completely unauthed fall backto login page. Need to fix this flow.
+ 
+
+**Goal**: Ensure proper redirection based on authentication state.
+
+### Implementation Steps
+1.  Update the authentication flow to check if the user is authenticated before redirecting to the last visited page.
+2.  If the user is not authenticated, redirect them to the login page.
+3.  If the user is authenticated but lacks permissions for the admin panel, redirect them to the gallery page.
+
 ## 1. Cloudflare R2 & Image Processing Migration
 
 **Goal**: Move from Convex Storage to Cloudflare R2 for cost-effective storage and leverage Cloudflare Workers for on-the-fly image compression and format conversion (HEIC to JPEG).
@@ -11,6 +21,7 @@ This document outlines the plan to migrate storage to Cloudflare R2, implement i
 2.  **Integration**: Use **Convex R2 Component** (or S3-compatible standard integration if a specific plugin is unavailable, but optimize for R2 specifics).
 3.  **Compute**: Cloudflare Worker (`image-worker`) acting as the delivery gateway.
 4.  **Database**: Convex stores the `r2_object_key` and a separate `processing_status` field used to notify the user.
+-----
 
 ### Implementation Steps
 

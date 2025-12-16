@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server"; // Added pagination validator
+import { getIsAdmin } from "./adminHelper";
 
 // Public queries
 export const getApprovedPosts = query({
@@ -71,7 +72,6 @@ export const uploadPost = mutation({
         await ctx.db.insert("posts", {
             photoStorageIds: args.photoStorageIds,
             uploaderName: args.uploaderName,
-            uploaderEmail: args.uploaderEmail,
             caption: args.caption,
             status: "pending",
         });
@@ -82,15 +82,7 @@ export const uploadPost = mutation({
 export const getPendingPosts = query({
     args: {},
     handler: async (ctx) => {
-        const userId = await getAuthUserId(ctx);
-        if (!userId) {
-            throw new Error("Not authenticated");
-        }
-
-        const isAdmin = await ctx.db
-            .query("admins")
-            .withIndex("by_user", (q) => q.eq("userId", userId))
-            .first();
+        const isAdmin = await getIsAdmin(ctx);
 
         if (!isAdmin) {
             throw new Error("Not authorized");
@@ -119,15 +111,7 @@ export const getPendingPosts = query({
 export const getApprovedPostsForAdmin = query({
     args: {},
     handler: async (ctx) => {
-        const userId = await getAuthUserId(ctx);
-        if (!userId) {
-            throw new Error("Not authenticated");
-        }
-
-        const isAdmin = await ctx.db
-            .query("admins")
-            .withIndex("by_user", (q) => q.eq("userId", userId))
-            .first();
+        const isAdmin = await getIsAdmin(ctx);
 
         if (!isAdmin) {
             throw new Error("Not authorized");
@@ -156,15 +140,7 @@ export const getApprovedPostsForAdmin = query({
 export const getRejectedPostsForAdmin = query({
     args: {},
     handler: async (ctx) => {
-        const userId = await getAuthUserId(ctx);
-        if (!userId) {
-            throw new Error("Not authenticated");
-        }
-
-        const isAdmin = await ctx.db
-            .query("admins")
-            .withIndex("by_user", (q) => q.eq("userId", userId))
-            .first();
+        const isAdmin = await getIsAdmin(ctx);
 
         if (!isAdmin) {
             throw new Error("Not authorized");
@@ -195,23 +171,19 @@ export const approvePost = mutation({
         postId: v.id("posts"),
     },
     handler: async (ctx, args) => {
-        const userId = await getAuthUserId(ctx);
-        if (!userId) {
-            throw new Error("Not authenticated");
-        }
-
-        const isAdmin = await ctx.db
-            .query("admins")
-            .withIndex("by_user", (q) => q.eq("userId", userId))
-            .first();
+        const isAdmin = await getIsAdmin(ctx);
 
         if (!isAdmin) {
             throw new Error("Not authorized");
         }
 
+        const userId = await getAuthUserId(ctx);
+        if (!userId) {
+            throw new Error("Not authenticated");
+        }
+
         await ctx.db.patch(args.postId, {
             status: "approved",
-            approvedBy: userId,
             approvedAt: Date.now(),
         });
     },
@@ -222,15 +194,7 @@ export const rejectPost = mutation({
         postId: v.id("posts"),
     },
     handler: async (ctx, args) => {
-        const userId = await getAuthUserId(ctx);
-        if (!userId) {
-            throw new Error("Not authenticated");
-        }
-
-        const isAdmin = await ctx.db
-            .query("admins")
-            .withIndex("by_user", (q) => q.eq("userId", userId))
-            .first();
+        const isAdmin = await getIsAdmin(ctx);
 
         if (!isAdmin) {
             throw new Error("Not authorized");
@@ -247,15 +211,7 @@ export const revokePostApproval = mutation({
         postId: v.id("posts"),
     },
     handler: async (ctx, args) => {
-        const userId = await getAuthUserId(ctx);
-        if (!userId) {
-            throw new Error("Not authenticated");
-        }
-
-        const isAdmin = await ctx.db
-            .query("admins")
-            .withIndex("by_user", (q) => q.eq("userId", userId))
-            .first();
+        const isAdmin = await getIsAdmin(ctx);
 
         if (!isAdmin) {
             throw new Error("Not authorized");
@@ -270,18 +226,15 @@ export const revokePostApproval = mutation({
 export const approveAllPendingPosts = mutation({
     args: {},
     handler: async (ctx) => {
-        const userId = await getAuthUserId(ctx);
-        if (!userId) {
-            throw new Error("Not authenticated");
-        }
-
-        const isAdmin = await ctx.db
-            .query("admins")
-            .withIndex("by_user", (q) => q.eq("userId", userId))
-            .first();
+        const isAdmin = await getIsAdmin(ctx);
 
         if (!isAdmin) {
             throw new Error("Not authorized");
+        }
+
+        const userId = await getAuthUserId(ctx);
+        if (!userId) {
+            throw new Error("Not authenticated");
         }
 
         const pendingPosts = await ctx.db
@@ -293,7 +246,6 @@ export const approveAllPendingPosts = mutation({
             pendingPosts.map((post) =>
                 ctx.db.patch(post._id, {
                     status: "approved",
-                    approvedBy: userId,
                     approvedAt: Date.now(),
                 })
             )
@@ -308,15 +260,7 @@ export const deletePost = mutation({
         postId: v.id("posts"),
     },
     handler: async (ctx, args) => {
-        const userId = await getAuthUserId(ctx);
-        if (!userId) {
-            throw new Error("Not authenticated");
-        }
-
-        const isAdmin = await ctx.db
-            .query("admins")
-            .withIndex("by_user", (q) => q.eq("userId", userId))
-            .first();
+        const isAdmin = await getIsAdmin(ctx);
 
         if (!isAdmin) {
             throw new Error("Not authorized");

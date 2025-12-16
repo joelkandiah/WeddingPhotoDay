@@ -2,40 +2,39 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
 
-const applicationTables = {
+export default defineSchema({
+  ...authTables,
+  // Override users table to add role field while maintaining compatibility with @convex-dev/auth
+  users: defineTable({
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    image: v.optional(v.string()),
+    isAnonymous: v.optional(v.boolean()),
+    name: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    role: v.optional(v.union(v.literal('user'), v.literal('admin'))),
+    // tokenIdentifier must be optional for @convex-dev/auth compatibility
+    tokenIdentifier: v.optional(v.string()),
+  }).index("by_token", ["tokenIdentifier"]),
+  
   photos: defineTable({
     storageId: v.id("_storage"),
     uploaderName: v.string(),
-    uploaderEmail: v.optional(v.string()),
     caption: v.optional(v.string()),
     status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
-    approvedBy: v.optional(v.id("users")),
     approvedAt: v.optional(v.number()),
   })
     .index("by_status", ["status"])
-    .index("by_uploader", ["uploaderEmail"]),
+    .index("by_uploader", ["uploaderName"]),
 
   posts: defineTable({
     uploaderName: v.string(),
-    uploaderEmail: v.optional(v.string()),
     caption: v.optional(v.string()),
     photoStorageIds: v.array(v.id("_storage")),
     status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
-    approvedBy: v.optional(v.id("users")),
     approvedAt: v.optional(v.number()),
   })
     .index("by_status", ["status"])
-    .index("by_uploader", ["uploaderEmail"]),
-
-  admins: defineTable({
-    userId: v.id("users"),
-    email: v.string(),
-  })
-    .index("by_user", ["userId"])
-    .index("by_email", ["email"]),
-};
-
-export default defineSchema({
-  ...authTables,
-  ...applicationTables,
+    .index("by_uploader", ["uploaderName"]),
 });
