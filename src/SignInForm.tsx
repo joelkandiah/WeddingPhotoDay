@@ -7,7 +7,8 @@ import { toast } from "sonner";
 
 export function SignInForm() {
   const { signIn } = useAuthActions();
-  const signInWithPassword = useMutation(api.auth.signInWithPassword);
+  const verifyPassword = useMutation(api.auth.verifyPassword);
+  const setUserRole = useMutation(api.auth.signInWithPassword);
   const [submitting, setSubmitting] = useState(false);
 
   return (
@@ -31,15 +32,19 @@ export function SignInForm() {
             const formData = new FormData(e.target as HTMLFormElement);
             const password = formData.get("password") as string;
             
-            // First, sign in anonymously to get a session
+            // First, verify the password WITHOUT signing in
+            // This will throw an error if the password is invalid
+            const verifyResult = await verifyPassword({ password });
+            
+            // Only sign in anonymously if password is valid
             await signIn("anonymous");
             
             // Wait a moment for the user record to be created in the database
             // This ensures the mutation can find the user
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            // Then verify the password and set the role
-            const result = await signInWithPassword({ password });
+            // Set the role on the user
+            const result = await setUserRole({ role: verifyResult.role });
             
             if (result.success) {
               toast.success(`Welcome! Signed in as ${result.role}`);

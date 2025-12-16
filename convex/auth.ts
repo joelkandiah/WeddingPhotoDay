@@ -32,8 +32,9 @@ const secureCompare = (a: string, b: string): boolean => {
   return result === 0;
 };
 
-// Custom mutation for sitewide password authentication
-export const signInWithPassword = mutation({
+// Custom mutation to verify password before sign-in
+// This is called BEFORE anonymous sign-in to validate the password
+export const verifyPassword = mutation({
   args: {
     password: v.string(),
   },
@@ -45,14 +46,30 @@ export const signInWithPassword = mutation({
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 
     // Determine role based on password match
-    let role: 'user' | 'admin' | null = null;
     if (secureCompare(password, adminPassword)) {
-      role = 'admin';
+      return {
+        success: true,
+        role: 'admin' as const,
+      };
     } else if (secureCompare(password, userPassword)) {
-      role = 'user';
+      return {
+        success: true,
+        role: 'user' as const,
+      };
     } else {
       throw new Error("Invalid password");
     }
+  },
+});
+
+// Custom mutation for setting user role after anonymous sign-in
+// This is called AFTER anonymous sign-in to set the role on the user
+export const signInWithPassword = mutation({
+  args: {
+    role: v.union(v.literal('user'), v.literal('admin')),
+  },
+  handler: async (ctx, args) => {
+    const { role } = args;
 
     // Get the current user ID using the auth library helper
     const userId = await getAuthUserId(ctx);
@@ -97,12 +114,18 @@ export const loggedInUser = query({
       return null;
     }
     
+    // If user doesn't have a role yet, they haven't completed the password verification
+    // Treat them as unauthenticated
+    if (!user.role) {
+      return null;
+    }
+    
     // Return user info
     return {
       id: user._id,
       email: user.email,
       name: user.name,
-      role: user.role || 'user',
+      role: user.role,
     };
   },
 });
