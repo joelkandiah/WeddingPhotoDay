@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
+import { Id } from "../convex/_generated/dataModel";
 import { toast } from "sonner";
 import { POST_CATEGORIES, PostCategory } from "../convex/constants";
 
@@ -48,7 +49,7 @@ export function PhotoUpload() {
 
     try {
       // Upload all photos
-      const storageIds: string[] = [];
+      const storageIds: Id<"_storage">[] = [];
       
       for (let i = 0; i < selectedImages.length; i++) {
         const file = selectedImages[i];
@@ -68,7 +69,7 @@ export function PhotoUpload() {
           throw new Error(`Upload failed for ${file.name}: ${JSON.stringify(json)}`);
         }
 
-        storageIds.push(json.storageId);
+        storageIds.push(json.storageId as Id<"_storage">);
         
         // Update progress
         setUploadProgress(prev => ({
@@ -79,7 +80,7 @@ export function PhotoUpload() {
 
       // Create post with all photos
       await uploadPost({
-        photoStorageIds: storageIds as any,
+        photoStorageIds: storageIds,
         uploaderName: uploaderName.trim(),
         caption: caption.trim() || undefined,
         category: category,
