@@ -43,8 +43,8 @@ export function PhotoGallery() {
     return (
       <div className="text-center py-12">
         <div className="text-6xl mb-4">📷</div>
-        <h3 className="text-2xl font-bold text-gray-700 mb-2">No photos yet</h3>
-        <p className="text-gray-500">
+        <h3 className="text-2xl font-bold text-fg mb-2">No photos yet</h3>
+        <p className="text-accent-text">
           Be the first to share a beautiful wedding memory!
         </p>
       </div>
@@ -71,7 +71,7 @@ export function PhotoGallery() {
         {posts.map((post) => (
           <div
             key={post._id}
-            className="bg-white rounded-xl shadow-lg border border-rose-50 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01] dark:bg-gray-800 dark:border-rose-900"
+            className="bg-card-bg rounded-xl shadow-lg border border-card-border overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01]"
           >
             <div className="overflow-hidden">
               <ImageCarousel 
@@ -85,15 +85,15 @@ export function PhotoGallery() {
             <div className="p-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="font-semibold text-sm">
+                  <p className="font-semibold text-sm text-fg">
                     {post.uploaderName}
                   </p>
-                  <p className="text-xs">
+                  <p className="text-xs text-accent-text">
                     {new Date(post._creationTime).toLocaleDateString()}
                   </p>
                 </div>
                 {post.photoUrls.length > 1 && (
-                  <span className="bg-gray-100 text-xs px-2 py-1 rounded-full dark:bg-gray-700 dark:text-gray-300">
+                  <span className="bg-input-bg text-xs px-2 py-1 rounded-full text-accent-text">
                     {post.photoUrls.length} photos
                   </span>
                 )}
@@ -110,9 +110,9 @@ export function PhotoGallery() {
         {/* Loading Sentinel */}
         <div ref={loadMoreRef} className="h-20 flex justify-center items-center">
             {status === "LoadingMore" ? (
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-rose-500 dark:border-rose-400"></div>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-card-border"></div>
             ) : status === "Exhausted" ? (
-                <span className="text-gray-400 text-sm dark:text-gray-500">You've reached the end!</span>
+                <span className="text-accent-text text-sm">You've reached the end!</span>
             ) : null}
         </div>
       </div>
@@ -142,14 +142,14 @@ export function PhotoGallery() {
               </button>
             </div>
             
-            <div className="mt-4 text-white">
+            <div className="mt-4 text-fg">
               <h3 className="font-bold text-lg mb-1">
                 {selectedPost.uploaderName}
               </h3>
               {selectedPost.caption && (
-                <p className="text-gray-300 text-sm">{selectedPost.caption}</p>
+                <p className="text-accent-text text-sm">{selectedPost.caption}</p>
               )}
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-accent-text mt-1">
                 {new Date(selectedPost._creationTime).toLocaleDateString()}
               </p>
             </div>

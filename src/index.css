@@ -23,15 +23,15 @@
   --color-bg: #0f0f0f;
   --color-fg: #f5f5f5;
 
-  --color-input-bg: #1f1f1f;
-  --color-input-border: #374151;
+  --color-input-bg: #1a1a1a;
+  --color-input-border: #881337;
 
   --color-accent-text: #94a3b8;
 
   --color-bg-start: #0f0f0f;
   --color-bg-end: #1a1a1a;
 
-  --color-card-bg: #1f2937;
+  --color-card-bg: #101010;
   --color-card-border: #881337;
 }
 
@@ -71,8 +71,20 @@
 @theme {
   --color-primary: #e11d48;
   --color-primary-hover: #be185d;
+  --color-dark-gray: #1f2937;
 
   --color-secondary: #6b7280;
+
+  --color-bg: var(--color-bg);
+  --color-bg-start: var(--color-bg-start);
+  --color-bg-end: var(--color-bg-end);
+
+  --color-fg: var(--color-fg);
+  --color-input-bg: var(--color-input-bg);
+  --color-input-border: var(--color-input-border);
+  --color-accent-text: var(--color-accent-text);
+  --color-card-bg: var(--color-card-bg);
+  --color-card-border: var(--color-card-border);
 
   --spacing-section: 2rem;
   --spacing-container: 1rem;
@@ -151,4 +163,8 @@ body {
 /* Mobile bottom navigation spacing */
 .mobile-nav-spacing {
   @apply pb-20 md:pb-0;
+}
+
+.sign-out-button {
+  width: clamp(100px, 20vw, 200px);
 }

@@ -133,7 +133,7 @@ export function ImageCarousel({
     <div className={`relative group overflow-hidden select-none ${className}`}>
       <div 
         ref={carouselRef}
-        className={`w-full relative overflow-hidden bg-gray-100 dark:bg-gray-900 ${
+        className={`w-full relative overflow-hidden bg-input-bg ${
           aspectRatio === "square" ? "aspect-square" : 
           aspectRatio === "video" ? "aspect-video" : 
           aspectRatio === "auto" ? "aspect-square" : // Auto falls back to square for consistent sizing
@@ -157,7 +157,7 @@ export function ImageCarousel({
           {images.map((src, idx) => (
             <div 
               key={`${src}-${idx}`}
-              className="w-full shrink-0 h-full flex items-center justify-center p-1 dark:bg-gray-900"
+              className="w-full shrink-0 h-full flex items-center justify-center p-1 bg-input-bg"
               onClick={() => {
                 if (!isDragging) onImageClick?.(idx);
               }}
@@ -200,8 +200,8 @@ export function ImageCarousel({
                 onClick={(e) => goToSlide(idx, e)}
                 className={`w-2 h-2 rounded-full transition-all pointer-events-auto ${
                   currentIndex === idx
-                    ? "bg-white w-4"
-                    : "bg-white/50 hover:bg-white/80"
+                    ? "dark:bg-white bg-black w-4"
+                    : "dark:bg-white/50 hover:dark:bg-white/80 dark:bg-black/50 hover:bg-black/80 bg-black/50 hover:bg-black/80"
                 }`}
                 aria-label={`Go to image ${idx + 1}`}
               />
@@ -209,7 +209,7 @@ export function ImageCarousel({
           </div>
           
           {/* Counter Badge */}
-          <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full z-5 pointer-events-none">
+          <div className="absolute top-2 right-2 bg-card-bg/50 text-card-text text-xs px-2 py-1 rounded-full z-5 pointer-events-none">
             {currentIndex + 1} / {images.length}
           </div>
         </>
@@ -225,7 +225,7 @@ function CarouselSlide({ src, alt, priority }: { src: string, alt: string, prior
   return (
     <div className="w-full h-full relative flex items-center justify-center">
       {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg">
+        <div className="absolute inset-0 flex items-center justify-center bg-input-bg animate-pulse rounded-lg">
           <svg className="w-10 h-10 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>

@@ -80,7 +80,7 @@ export function AdminPanel() {
   if (pendingPosts === undefined || approvedPosts === undefined || rejectedPosts === undefined) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500 dark:border-rose-400"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-card-border"></div>
       </div>
     );
   }
@@ -102,7 +102,7 @@ export function AdminPanel() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex gap-2 mb-6 border-b border-card-border">
         <button
           onClick={() => setActiveTab("pending")}
           className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
@@ -172,9 +172,9 @@ export function AdminPanel() {
           {currentPosts.map((post) => (
             <div
               key={post._id}
-              className="bg-white rounded-2xl shadow-lg border border-rose-100 overflow-hidden dark:bg-gray-800 dark:border-rose-900"
+              className="bg-card-bg rounded-2xl shadow-lg border border-card-border overflow-hidden"
             >
-              <div className="aspect-video overflow-hidden bg-gray-100">
+              <div className="aspect-video overflow-hidden bg-input-bg">
                 <ImageCarousel 
                   images={post.photoUrls} 
                   alt={post.caption || "Wedding photo"}
