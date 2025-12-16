@@ -12,13 +12,14 @@ export const getApprovedPosts = query({
     },
     handler: async (ctx, args) => {
         let posts;
-        
+
         if (args.category) {
+            const category = args.category;
             // Filter by specific category
             posts = await ctx.db
                 .query("posts")
-                .withIndex("by_status_and_category", (q) => 
-                    q.eq("status", "approved").eq("category", args.category)
+                .withIndex("by_status_and_category", (q) =>
+                    q.eq("status", "approved").eq("category", category)
                 )
                 .order("desc")
                 .collect();
@@ -46,20 +47,21 @@ export const getApprovedPosts = query({
 });
 
 export const getApprovedPostsPaginated = query({
-    args: { 
+    args: {
         paginationOpts: paginationOptsValidator,
         category: v.optional(categoryValidator),
     },
     handler: async (ctx, args) => {
         // Pagination handler
         let result;
-        
+
         if (args.category) {
             // Filter by specific category
+            const category = args.category;
             result = await ctx.db
                 .query("posts")
-                .withIndex("by_status_and_category", (q) => 
-                    q.eq("status", "approved").eq("category", args.category)
+                .withIndex("by_status_and_category", (q) =>
+                    q.eq("status", "approved").eq("category", category)
                 )
                 .order("desc")
                 .paginate(args.paginationOpts);

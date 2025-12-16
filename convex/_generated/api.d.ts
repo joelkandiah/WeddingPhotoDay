@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as adminHelper from "../adminHelper.js";
 import type * as auth from "../auth.js";
+import type * as constants from "../constants.js";
 import type * as http from "../http.js";
 import type * as photos from "../photos.js";
 import type * as posts from "../posts.js";
@@ -31,6 +32,7 @@ import type * as router from "../router.js";
 declare const fullApi: ApiFromModules<{
   adminHelper: typeof adminHelper;
   auth: typeof auth;
+  constants: typeof constants;
   http: typeof http;
   photos: typeof photos;
   posts: typeof posts;
