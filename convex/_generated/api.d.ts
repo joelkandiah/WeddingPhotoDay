@@ -13,7 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
-import type * as auth_credentials from "../auth-credentials.js";
+import type * as adminHelper from "../adminHelper.js";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as photos from "../photos.js";
@@ -29,7 +29,7 @@ import type * as router from "../router.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  "auth-credentials": typeof auth_credentials;
+  adminHelper: typeof adminHelper;
   auth: typeof auth;
   http: typeof http;
   photos: typeof photos;
