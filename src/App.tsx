@@ -94,6 +94,7 @@ function Content({ currentView }: { currentView: string }) {
   const loggedInUser = useQuery(api.auth.loggedInUser);
   const isAdmin = useQuery(api.photos.isUserAdmin);
 
+  // Show loading while checking authentication state
   if (loggedInUser === undefined) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
