@@ -102,41 +102,41 @@ export function PhotoUpload() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-lg border border-rose-100 p-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+      <div className="bg-white dark:bg-black/40 rounded-2xl shadow-lg border border-rose-100 p-8 dark:border-rose-800">
+        <h2 className="text-center">
           Share Wedding Memories 📸
         </h2>
         
         <form onSubmit={handleUpload} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Your Name *
             </label>
             <input
               type="text"
               value={uploaderName}
               onChange={(e) => setUploaderName(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all"
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-hidden transition-all dark:border-rose-800 dark:focus:border-rose-600 dark:focus:ring-rose-600"
               placeholder="Enter your name"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Photo Caption
             </label>
             <textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition-all resize-none"
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-hidden transition-all resize-none dark:border-rose-800 dark:focus:border-rose-600 dark:focus:ring-rose-600"
               placeholder="Share the story behind these moments..."
               rows={3}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Select Photos * {selectedImages.length > 0 && `(${selectedImages.length} selected)`}
             </label>
             <div className="relative">
@@ -151,14 +151,14 @@ export function PhotoUpload() {
               <button
                 type="button"
                 onClick={() => imageInput.current?.click()}
-                className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-rose-400 transition-colors text-center"
+                className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-rose-400 transition-colors text-center dark:border-rose-800 dark:hover:border-rose-600"
               >
                 <div className="space-y-2">
                   <div className="text-4xl">📷</div>
-                  <div className="text-gray-600 font-medium">
+                  <div className="text-gray-600 font-medium dark:text-gray-200">
                     Click to select photos
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
                     JPG, PNG up to 10MB each • Multiple photos allowed
                   </div>
                 </div>
@@ -196,7 +196,7 @@ export function PhotoUpload() {
           <button
             type="submit"
             disabled={isUploading || selectedImages.length === 0 || !uploaderName.trim()}
-            className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold py-4 rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+            className="w-full bg-linear-to-r from-rose-500 to-pink-500 text-white font-semibold py-4 rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
           >
             {isUploading ? (
               <div className="flex items-center justify-center gap-2">
@@ -209,8 +209,8 @@ export function PhotoUpload() {
           </button>
         </form>
 
-        <div className="mt-6 p-4 bg-rose-50 rounded-lg">
-          <p className="text-sm text-rose-700">
+        <div className="mt-6 p-4 bg-rose-50 rounded-lg dark:bg-rose-800">
+          <p className="text-sm text-rose-700 dark:text-gray-200">
             <strong>Note:</strong> All photos will be reviewed before appearing in the gallery. 
             Thank you for helping us create beautiful memories! 🌹
           </p>

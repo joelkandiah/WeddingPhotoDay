@@ -156,7 +156,7 @@ export function ImageCarousel({
           {images.map((src, idx) => (
             <div 
               key={`${src}-${idx}`}
-              className="w-full flex-shrink-0 h-full flex items-center justify-center p-1"
+              className="w-full shrink-0 h-full flex items-center justify-center p-1 dark:bg-black/80"
               onClick={() => {
                 if (!isDragging) onImageClick?.(idx);
               }}
@@ -208,7 +208,7 @@ export function ImageCarousel({
           </div>
           
           {/* Counter Badge */}
-          <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full z-10 pointer-events-none">
+          <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full z-5 pointer-events-none">
             {currentIndex + 1} / {images.length}
           </div>
         </>
@@ -224,8 +224,8 @@ function CarouselSlide({ src, alt, priority }: { src: string, alt: string, prior
   return (
     <div className="w-full h-full relative flex items-center justify-center">
       {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 animate-pulse rounded-lg">
-          <svg className="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-black/90 animate-pulse rounded-lg">
+          <svg className="w-10 h-10 text-gray-300 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </div>

@@ -93,10 +93,10 @@ export function AdminPanel() {
   return (
     <div>
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">
+        <h2>
           Admin Panel
         </h2>
-        <p className="text-gray-600">
+        <p>
           Manage post approvals and moderation
         </p>
       </div>
@@ -152,14 +152,14 @@ export function AdminPanel() {
           <div className="text-6xl mb-4">
             {activeTab === "pending" ? "✅" : activeTab === "approved" ? "📷" : "🚫"}
           </div>
-          <h3 className="text-2xl font-bold text-gray-700 mb-2">
+          <h3>
             {activeTab === "pending" 
               ? "All caught up!" 
               : activeTab === "approved" 
               ? "No approved posts" 
               : "No rejected posts"}
           </h3>
-          <p className="text-gray-500">
+          <p>
             {activeTab === "pending"
               ? "No posts pending approval at the moment."
               : activeTab === "approved"
@@ -172,7 +172,7 @@ export function AdminPanel() {
           {currentPosts.map((post) => (
             <div
               key={post._id}
-              className="bg-white rounded-2xl shadow-lg border border-rose-100 overflow-hidden"
+              className="bg-white dark:bg-black/80 rounded-2xl shadow-lg border border-rose-100 dark:border-rose-700 overflow-hidden"
             >
               <div className="aspect-video overflow-hidden bg-gray-100">
                 <ImageCarousel 
@@ -184,18 +184,18 @@ export function AdminPanel() {
               </div>
               <div className="p-6">
                 <div className="mb-4">
-                  <h3 className="font-bold text-lg text-gray-800 mb-1">
+                  <h3>
                     Uploaded by {post.uploaderName}
                   </h3>
-                  {post.uploaderEmail && (
-                    <p className="text-sm text-gray-500 mb-2">
-                      {post.uploaderEmail}
+                  {post.uploaderName && (
+                    <p className="text-sm mb-2">
+                      {post.uploaderName}
                     </p>
                   )}
                   {post.caption && (
-                    <p className="text-gray-600 mb-3">{post.caption}</p>
+                    <p className="mb-3">{post.caption}</p>
                   )}
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm">
                     {post.photoUrls.length} photo{post.photoUrls.length !== 1 ? 's' : ''} • Uploaded {new Date(post._creationTime).toLocaleString()}
                   </p>
                 </div>

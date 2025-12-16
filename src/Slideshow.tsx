@@ -156,7 +156,7 @@ export function Slideshow() {
     <div className="max-w-6xl mx-auto">
       {!isFullscreen && (
         <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+          <h2>
             Wedding Slideshow 🎬
           </h2>
           
@@ -183,7 +183,7 @@ export function Slideshow() {
             <select
               value={interval}
               onChange={(e) => setIntervalDuration(Number(e.target.value))}
-              className="px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none"
+              className="px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-hidden"
             >
               <option value={3000}>3 seconds</option>
               <option value={5000}>5 seconds</option>
@@ -272,7 +272,7 @@ export function Slideshow() {
           )}
           
           {/* Photo info overlay */}
-          <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6 transition-opacity duration-300 ${
+          <div className={`absolute bottom-0 left-0 right-0 bg-linear-to-t from-black to-transparent p-6 transition-opacity duration-300 ${
             isFullscreen && !showControls ? "opacity-0" : "opacity-100"
           }`}>
             <h3 className="text-white font-bold text-lg mb-1">
@@ -297,7 +297,7 @@ export function Slideshow() {
             <button
               key={photo._id}
               onClick={() => setCurrentIndex(index)}
-              className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+              className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
                 index === currentIndex
                   ? "border-rose-500 ring-2 ring-rose-200"
                   : "border-gray-200 hover:border-gray-300"
@@ -322,7 +322,7 @@ export function Slideshow() {
       {/* Keyboard shortcuts hint */}
       {!isFullscreen && (
         <div className="mt-4 text-center text-sm text-gray-500">
-          <p>💡 Keyboard shortcuts: <kbd className="px-2 py-1 bg-gray-100 rounded">F</kbd> Fullscreen • <kbd className="px-2 py-1 bg-gray-100 rounded">Space</kbd> Play/Pause • <kbd className="px-2 py-1 bg-gray-100 rounded">←</kbd> <kbd className="px-2 py-1 bg-gray-100 rounded">→</kbd> Navigate</p>
+          <p>💡 Keyboard shortcuts: <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-sm">F</kbd> Fullscreen • <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-sm">Space</kbd> Play/Pause • <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-sm">←</kbd> <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-sm">→</kbd> Navigate</p>
         </div>
       )}
     </div>

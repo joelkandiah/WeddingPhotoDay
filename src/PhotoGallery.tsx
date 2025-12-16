@@ -59,11 +59,11 @@ export function PhotoGallery() {
   return (
     <div>
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">
+        <h2>
           Wedding Photo Gallery
         </h2>
-        <p className="text-gray-600">
-          {posts.length} beautiful {posts.length === 1 ? 'moment' : 'moments'} shared by our loved ones
+        <p>
+          {posts.length} beautiful {posts.length === 1 ? 'memory' : 'memories'} shared by our loved ones
         </p>
       </div>
 
@@ -71,7 +71,7 @@ export function PhotoGallery() {
         {posts.map((post) => (
           <div
             key={post._id}
-            className="bg-white rounded-xl shadow-lg border border-rose-50 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01]"
+            className="bg-white rounded-xl shadow-lg border border-rose-50 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01] dark:bg-black/90 dark:border-rose-800 dark:shadow-xs dark:bg-linear-to-br dark:from-bg-color-start dark:to-bg-color-end dark:hover:bg-black/90 dark:hover:border-rose-800 dark:hover:shadow-xs dark:hover:bg-linear-to-br dark:hover:from-bg-color-start dark:hover:to-bg-color-end dark:hover:text-white dark:hover:border-white"
           >
             <div className="overflow-hidden">
               <ImageCarousel 
@@ -85,21 +85,21 @@ export function PhotoGallery() {
             <div className="p-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="font-semibold text-gray-800 text-sm">
+                  <p className="font-semibold text-sm">
                     {post.uploaderName}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs">
                     {new Date(post._creationTime).toLocaleDateString()}
                   </p>
                 </div>
                 {post.photoUrls.length > 1 && (
-                  <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                  <span className="bg-gray-100 dark:bg-black/90 text-xs px-2 py-1 rounded-full">
                     {post.photoUrls.length} photos
                   </span>
                 )}
               </div>
               {post.caption && (
-                <p className="text-gray-600 text-sm mt-3 leading-relaxed">
+                <p className="text-sm mt-3 leading-relaxed">
                   {post.caption}
                 </p>
               )}
@@ -120,7 +120,7 @@ export function PhotoGallery() {
       {/* Post Modal */}
       {selectedPost && (
         <div
-          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 backdrop-blur-xs"
           onClick={() => setSelectedPost(null)}
         >
           <div 

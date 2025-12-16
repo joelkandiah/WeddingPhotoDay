@@ -14,10 +14,10 @@ export function SignInForm() {
   return (
     <div className="w-full">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+        <h2>
           Enter Site Password
         </h2>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm">
           Enter the password to access the wedding photo gallery
         </p>
       </div>
@@ -57,7 +57,7 @@ export function SignInForm() {
         }}
       >
         <input
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent text-lg"
+          className="auth-input-field text-lg"
           type="password"
           name="password"
           placeholder="Enter password"
@@ -65,7 +65,7 @@ export function SignInForm() {
           autoFocus
         />
         <button 
-          className="w-full px-4 py-3 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-lg font-medium hover:from-rose-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="auth-button bg-linear-to-r from-rose-600 to-pink-600 text-white rounded-lg font-medium hover:from-rose-700 hover:to-pink-700 transition-all"
           type="submit" 
           disabled={submitting}
         >
