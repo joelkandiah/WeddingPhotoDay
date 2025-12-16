@@ -26,11 +26,11 @@ export default function App() {
     : navItems;
 
   return (
-    <div className="min-h-screen flex flex-col bg-linear-to-br from-[var(--color-bg-start)] to-[var(--color-bg-end)]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[var(--color-bg-start)] to-[var(--color-bg-end)]">
       <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-xs border-b border-rose-200 shadow-xs dark:bg-gray-900/90 dark:border-rose-900">
         <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl md:text-2xl font-bold bg-linear-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent dark:from-rose-400 dark:to-pink-400">
+            <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent dark:from-rose-400 dark:to-pink-400">
               💕 Our Wedding Memories
             </h2>
           </div>
