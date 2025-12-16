@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
+import { categoryValidator } from "./constants";
 
 export default defineSchema({
   ...authTables,
@@ -34,7 +35,10 @@ export default defineSchema({
     photoStorageIds: v.array(v.id("_storage")),
     status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
     approvedAt: v.optional(v.number()),
+    category: categoryValidator,
   })
     .index("by_status", ["status"])
-    .index("by_uploader", ["uploaderName"]),
+    .index("by_uploader", ["uploaderName"])
+    .index("by_category", ["category"])
+    .index("by_status_and_category", ["status", "category"]),
 });
