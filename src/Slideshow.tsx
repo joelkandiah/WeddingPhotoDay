@@ -18,8 +18,8 @@ export function Slideshow() {
   const slideshowRef = useRef<HTMLDivElement>(null);
   const hideControlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(false);
+  const [hiddenLeftArrow, setHiddenLeftArrow] = useState(true);
+  const [hiddenRightArrow, setHiddenRightArrow] = useState(false);
 
   // Flatten posts into individual photos
   const photos = useMemo(() => {
@@ -61,8 +61,8 @@ export function Slideshow() {
   const checkScroll = () => {
     if (tabsContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = tabsContainerRef.current;
-      setShowLeftArrow(scrollLeft > 0);
-      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
+      setHiddenLeftArrow(scrollLeft == 0);
+      setHiddenRightArrow(scrollLeft == scrollWidth - clientWidth);
     }
   };
 
@@ -164,7 +164,7 @@ export function Slideshow() {
       {!isFullscreen && (
         <div className="mb-6 relative">
           {/* Left Arrow - visible on desktop only */}
-          {showLeftArrow && (
+          {!hiddenLeftArrow && (
             <button
               onClick={() => scrollTabs('left')}
               className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-card-bg/90 backdrop-blur-sm border border-card-border rounded-full w-8 h-8 items-center justify-center hover:bg-input-bg transition-colors shadow-md"
@@ -215,7 +215,7 @@ export function Slideshow() {
           </div>
 
           {/* Right Arrow - visible on desktop only */}
-          {showRightArrow && (
+          {!hiddenRightArrow && (
             <button
               onClick={() => scrollTabs('right')}
               className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-card-bg/90 backdrop-blur-sm border border-card-border rounded-full w-8 h-8 items-center justify-center hover:bg-input-bg transition-colors shadow-md"
