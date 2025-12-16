@@ -14,19 +14,25 @@
 
   --color-bg-start: #FEF2F5;
   --color-bg-end: #ffffff;
+
+  --color-card-bg: #ffffff;
+  --color-card-border: #fecdd3;
 }
 
 .dark {
-  --color-bg: #141414;
-  --color-fg: #f7f7f7;
+  --color-bg: #0f0f0f;
+  --color-fg: #f5f5f5;
 
-  --color-input-bg: #2f2f2f;
-  --color-input-border: #334155;
+  --color-input-bg: #1f1f1f;
+  --color-input-border: #374151;
 
   --color-accent-text: #94a3b8;
 
-  --color-bg-start: #141414;
-  --color-bg-end: #2f2f2f;
+  --color-bg-start: #0f0f0f;
+  --color-bg-end: #1a1a1a;
+
+  --color-card-bg: #1f2937;
+  --color-card-border: #881337;
 }
 
 /* only use this to update the style of the auth input fields. use a different class for all other input fields */
@@ -46,11 +52,11 @@
 
 @layer base {
   h1 {
-    @apply text-5xl font-bold bg-linear-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent mb-6 dark:bg-linear-to-r dark:from-rose-400 dark:to-pink-400
+    @apply text-5xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent mb-6 dark:from-rose-400 dark:to-pink-400;
   }
 
   h2 {
-    @apply text-2xl font-semibold text-gray-800 mb-2 dark:text-white;
+    @apply text-2xl font-semibold text-gray-800 mb-2 dark:text-gray-100;
   }
 
   h3 {
@@ -58,7 +64,7 @@
   }
 
   p {
-    @apply text-gray-600 dark:text-gray-200;
+    @apply text-gray-600 dark:text-gray-300;
   }
 }
 

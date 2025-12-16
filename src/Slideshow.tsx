@@ -125,7 +125,7 @@ export function Slideshow() {
   if (posts === undefined) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500 dark:border-rose-400"></div>
       </div>
     );
   }
@@ -183,7 +183,7 @@ export function Slideshow() {
             <select
               value={interval}
               onChange={(e) => setIntervalDuration(Number(e.target.value))}
-              className="px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-hidden"
+              className="px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-hidden bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             >
               <option value={3000}>3 seconds</option>
               <option value={5000}>5 seconds</option>
@@ -321,8 +321,8 @@ export function Slideshow() {
 
       {/* Keyboard shortcuts hint */}
       {!isFullscreen && (
-        <div className="mt-4 text-center text-sm text-gray-500">
-          <p>💡 Keyboard shortcuts: <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-sm">F</kbd> Fullscreen • <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-sm">Space</kbd> Play/Pause • <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-sm">←</kbd> <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-sm">→</kbd> Navigate</p>
+        <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          <p>💡 Keyboard shortcuts: <kbd className="px-2 py-1 bg-gray-100 rounded-sm dark:bg-gray-700 dark:text-gray-300">F</kbd> Fullscreen • <kbd className="px-2 py-1 bg-gray-100 rounded-sm dark:bg-gray-700 dark:text-gray-300">Space</kbd> Play/Pause • <kbd className="px-2 py-1 bg-gray-100 rounded-sm dark:bg-gray-700 dark:text-gray-300">←</kbd> <kbd className="px-2 py-1 bg-gray-100 rounded-sm dark:bg-gray-700 dark:text-gray-300">→</kbd> Navigate</p>
         </div>
       )}
     </div>

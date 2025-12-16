@@ -80,7 +80,7 @@ export function AdminPanel() {
   if (pendingPosts === undefined || approvedPosts === undefined || rejectedPosts === undefined) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500 dark:border-rose-400"></div>
       </div>
     );
   }
@@ -102,13 +102,13 @@ export function AdminPanel() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200">
+      <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={() => setActiveTab("pending")}
           className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
             activeTab === "pending"
-              ? "border-rose-500 text-rose-600"
-              : "border-transparent text-gray-600 hover:text-gray-800"
+              ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
+              : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >
           Pending ({pendingPosts.length})
@@ -117,8 +117,8 @@ export function AdminPanel() {
           onClick={() => setActiveTab("approved")}
           className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
             activeTab === "approved"
-              ? "border-rose-500 text-rose-600"
-              : "border-transparent text-gray-600 hover:text-gray-800"
+              ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
+              : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >
           Approved ({approvedPosts.length})
@@ -127,8 +127,8 @@ export function AdminPanel() {
           onClick={() => setActiveTab("rejected")}
           className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
             activeTab === "rejected"
-              ? "border-rose-500 text-rose-600"
-              : "border-transparent text-gray-600 hover:text-gray-800"
+              ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
+              : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >
           Rejected ({rejectedPosts.length})
@@ -172,7 +172,7 @@ export function AdminPanel() {
           {currentPosts.map((post) => (
             <div
               key={post._id}
-              className="bg-white dark:bg-black/80 rounded-2xl shadow-lg border border-rose-100 dark:border-rose-700 overflow-hidden"
+              className="bg-white rounded-2xl shadow-lg border border-rose-100 overflow-hidden dark:bg-gray-800 dark:border-rose-900"
             >
               <div className="aspect-video overflow-hidden bg-gray-100">
                 <ImageCarousel 

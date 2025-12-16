@@ -34,7 +34,7 @@ export function PhotoGallery() {
   if (status === "LoadingFirstPage") {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500 dark:border-rose-400"></div>
       </div>
     );
   }
@@ -71,7 +71,7 @@ export function PhotoGallery() {
         {posts.map((post) => (
           <div
             key={post._id}
-            className="bg-white rounded-xl shadow-lg border border-rose-50 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01] dark:bg-black/90 dark:border-rose-800 dark:shadow-xs dark:bg-linear-to-br dark:from-bg-color-start dark:to-bg-color-end dark:hover:bg-black/90 dark:hover:border-rose-800 dark:hover:shadow-xs dark:hover:bg-linear-to-br dark:hover:from-bg-color-start dark:hover:to-bg-color-end dark:hover:text-white dark:hover:border-white"
+            className="bg-white rounded-xl shadow-lg border border-rose-50 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01] dark:bg-gray-800 dark:border-rose-900"
           >
             <div className="overflow-hidden">
               <ImageCarousel 
@@ -93,7 +93,7 @@ export function PhotoGallery() {
                   </p>
                 </div>
                 {post.photoUrls.length > 1 && (
-                  <span className="bg-gray-100 dark:bg-black/90 text-xs px-2 py-1 rounded-full">
+                  <span className="bg-gray-100 text-xs px-2 py-1 rounded-full dark:bg-gray-700 dark:text-gray-300">
                     {post.photoUrls.length} photos
                   </span>
                 )}
@@ -110,9 +110,9 @@ export function PhotoGallery() {
         {/* Loading Sentinel */}
         <div ref={loadMoreRef} className="h-20 flex justify-center items-center">
             {status === "LoadingMore" ? (
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-rose-500"></div>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-rose-500 dark:border-rose-400"></div>
             ) : status === "Exhausted" ? (
-                <span className="text-gray-400 text-sm">You've reached the end!</span>
+                <span className="text-gray-400 text-sm dark:text-gray-500">You've reached the end!</span>
             ) : null}
         </div>
       </div>

@@ -133,7 +133,7 @@ export function ImageCarousel({
     <div className={`relative group overflow-hidden select-none ${className}`}>
       <div 
         ref={carouselRef}
-        className={`w-full relative overflow-hidden bg-gray-100 dark:bg-gray-800 ${
+        className={`w-full relative overflow-hidden bg-gray-100 dark:bg-gray-900 ${
           aspectRatio === "square" ? "aspect-square" : 
           aspectRatio === "video" ? "aspect-video" : 
           aspectRatio === "auto" ? "aspect-square" : // Auto falls back to square for consistent sizing
@@ -157,7 +157,7 @@ export function ImageCarousel({
           {images.map((src, idx) => (
             <div 
               key={`${src}-${idx}`}
-              className="w-full shrink-0 h-full flex items-center justify-center p-1 dark:bg-black/80"
+              className="w-full shrink-0 h-full flex items-center justify-center p-1 dark:bg-gray-900"
               onClick={() => {
                 if (!isDragging) onImageClick?.(idx);
               }}
@@ -225,8 +225,8 @@ function CarouselSlide({ src, alt, priority }: { src: string, alt: string, prior
   return (
     <div className="w-full h-full relative flex items-center justify-center">
       {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-black/90 animate-pulse rounded-lg">
-          <svg className="w-10 h-10 text-gray-300 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg">
+          <svg className="w-10 h-10 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </div>
