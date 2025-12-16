@@ -4,6 +4,19 @@ import { authTables } from "@convex-dev/auth/server";
 
 export default defineSchema({
   ...authTables,
+  // Extend users table with role field
+  users: defineTable({
+    tokenIdentifier: v.string(),
+    email: v.optional(v.string()),
+    name: v.optional(v.string()),
+    role: v.optional(v.union(v.literal('user'), v.literal('admin'))),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    image: v.optional(v.string()),
+    isAnonymous: v.optional(v.boolean()),
+  }).index("by_token", ["tokenIdentifier"]),
+  
   photos: defineTable({
     storageId: v.id("_storage"),
     uploaderName: v.string(),

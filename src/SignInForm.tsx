@@ -1,10 +1,13 @@
 "use client";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useMutation } from "convex/react";
+import { api } from "../convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export function SignInForm() {
   const { signIn } = useAuthActions();
+  const signInWithPassword = useMutation(api.auth.signInWithPassword);
   const [submitting, setSubmitting] = useState(false);
 
   return (
@@ -20,15 +23,28 @@ export function SignInForm() {
       
       <form
         className="flex flex-col gap-4"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           setSubmitting(true);
-          const formData = new FormData(e.target as HTMLFormElement);
-          void signIn("password", formData).catch((error) => {
+          
+          try {
+            const formData = new FormData(e.target as HTMLFormElement);
+            const password = formData.get("password") as string;
+            
+            // First, sign in anonymously to get a session
+            await signIn("anonymous");
+            
+            // Then verify the password and set the role
+            const result = await signInWithPassword({ password });
+            
+            if (result.success) {
+              toast.success(`Welcome! Signed in as ${result.role}`);
+            }
+          } catch (error: any) {
             console.error("Sign in error:", error);
             toast.error(error.message || "Invalid password. Please try again.");
             setSubmitting(false);
-          });
+          }
         }}
       >
         <input

@@ -1,7 +1,8 @@
 import { convexAuth } from "@convex-dev/auth/server";
-import { Password } from "@convex-dev/auth/providers/Password";
+import { Anonymous } from "@convex-dev/auth/providers/Anonymous";
 import { DataModel } from "./_generated/dataModel";
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
 
 // Define interface for user identity with role
 interface UserIdentity {
@@ -11,75 +12,106 @@ interface UserIdentity {
   role?: 'user' | 'admin';
 }
 
-// Custom password provider for sitewide login
-// Automatically determines role based on which password is entered
-const SitewidePassword = Password<DataModel>({
-  profile(params) {
-    // Role is determined during verification
-    const role = (params as any).role || 'user';
-    return {
-      email: `${role}@wedding.local`,
-      name: role === 'admin' ? 'Admin' : 'Guest',
-      role: role,
-    };
+// Use Anonymous provider as the base for sitewide login
+export const { auth, signIn, signOut, store } = convexAuth({
+  providers: [Anonymous],
+});
+
+// Simple constant-time comparison helper
+// This helps prevent timing attacks by ensuring comparison takes the same time
+// regardless of where the mismatch occurs
+const secureCompare = (a: string, b: string): boolean => {
+  if (a.length !== b.length) {
+    return false;
+  }
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+};
+
+// Custom mutation for sitewide password authentication
+export const signInWithPassword = mutation({
+  args: {
+    password: v.string(),
   },
-  // Custom verification logic - determines role based on password match
-  async verify(params, credentials: { password?: string }) {
-    const { password } = credentials;
-    
-    if (!password) {
-      throw new Error("Password is required");
-    }
+  handler: async (ctx, args) => {
+    const { password } = args;
 
     // Get passwords from environment variables
-    // Supports both plain text (for development) and hashed passwords (for production)
     const userPassword = process.env.USER_PASSWORD || 'user123';
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 
-    // Simple constant-time comparison helper
-    // This helps prevent timing attacks by ensuring comparison takes the same time
-    // regardless of where the mismatch occurs
-    const secureCompare = (a: string, b: string): boolean => {
-      if (a.length !== b.length) {
-        return false;
-      }
-      let result = 0;
-      for (let i = 0; i < a.length; i++) {
-        result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-      }
-      return result === 0;
-    };
-
-    // Check which password matches and assign role accordingly
+    // Determine role based on password match
+    let role: 'user' | 'admin' | null = null;
     if (secureCompare(password, adminPassword)) {
-      return { role: 'admin' };
-    }
-    if (secureCompare(password, userPassword)) {
-      return { role: 'user' };
+      role = 'admin';
+    } else if (secureCompare(password, userPassword)) {
+      role = 'user';
+    } else {
+      throw new Error("Invalid password");
     }
 
-    throw new Error("Invalid password");
+    // Get or create anonymous identity
+    const identity = await ctx.auth.getUserIdentity();
+    
+    if (!identity) {
+      throw new Error("Failed to create session. Please try again.");
+    }
+
+    // Store the role in the users table
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .first();
+
+    if (existingUser) {
+      // Update existing user's role
+      await ctx.db.patch(existingUser._id, {
+        role: role,
+      });
+    } else {
+      // Create new user with role
+      await ctx.db.insert("users", {
+        tokenIdentifier: identity.tokenIdentifier,
+        role: role,
+        email: `${role}@wedding.local`,
+        name: role === 'admin' ? 'Admin' : 'Guest',
+      });
+    }
+
+    return {
+      success: true,
+      role: role,
+    };
   },
-});
-
-export const { auth, signIn, signOut, store } = convexAuth({
-  providers: [SitewidePassword],
 });
 
 // Query to get the logged-in user
 export const loggedInUser = query({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity() as UserIdentity | null;
+    const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       return null;
     }
+
+    // Get user from database to retrieve role
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .first();
+
+    if (!user) {
+      return null;
+    }
     
-    // Return user info from the session
+    // Return user info
     return {
-      id: identity.subject,
-      email: identity.email,
-      name: identity.name,
-      role: identity.role || 'user',
+      id: user._id,
+      email: user.email,
+      name: user.name,
+      role: user.role || 'user',
     };
   },
 });
@@ -87,10 +119,17 @@ export const loggedInUser = query({
 // Query to check if current user is admin
 export const isAdmin = query({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity() as UserIdentity | null;
+    const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       return false;
     }
-    return identity.role === 'admin';
+
+    // Get user from database to check role
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .first();
+
+    return user?.role === 'admin';
   },
 });
