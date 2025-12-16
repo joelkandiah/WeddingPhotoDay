@@ -53,33 +53,29 @@ export const signInWithPassword = mutation({
       throw new Error("Invalid password");
     }
 
-    // Get or create anonymous identity
+    // Get the current user's identity
     const identity = await ctx.auth.getUserIdentity();
     
     if (!identity) {
-      throw new Error("Failed to create session. Please try again.");
+      throw new Error("No active session. Please try signing in again.");
     }
 
-    // Store the role in the users table
-    const existingUser = await ctx.db
+    // Find the user record by tokenIdentifier
+    const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
       .first();
 
-    if (existingUser) {
-      // Update existing user's role
-      await ctx.db.patch(existingUser._id, {
-        role: role,
-      });
-    } else {
-      // Create new user with role
-      await ctx.db.insert("users", {
-        tokenIdentifier: identity.tokenIdentifier,
-        role: role,
-        email: `${role}@wedding.local`,
-        name: role === 'admin' ? 'Admin' : 'Guest',
-      });
+    if (!user) {
+      throw new Error("User session not found. Please try signing in again.");
     }
+
+    // Update the user's role and other info
+    await ctx.db.patch(user._id, {
+      role: role,
+      email: `${role}@wedding.local`,
+      name: role === 'admin' ? 'Admin' : 'Guest',
+    });
 
     return {
       success: true,

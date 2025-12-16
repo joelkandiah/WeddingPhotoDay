@@ -4,17 +4,18 @@ import { authTables } from "@convex-dev/auth/server";
 
 export default defineSchema({
   ...authTables,
-  // Extend users table with role field
+  // Override users table to add role field while maintaining compatibility with @convex-dev/auth
   users: defineTable({
-    tokenIdentifier: v.string(),
     email: v.optional(v.string()),
-    name: v.optional(v.string()),
-    role: v.optional(v.union(v.literal('user'), v.literal('admin'))),
     emailVerificationTime: v.optional(v.number()),
-    phone: v.optional(v.string()),
-    phoneVerificationTime: v.optional(v.number()),
     image: v.optional(v.string()),
     isAnonymous: v.optional(v.boolean()),
+    name: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    role: v.optional(v.union(v.literal('user'), v.literal('admin'))),
+    // tokenIdentifier must be optional for @convex-dev/auth compatibility
+    tokenIdentifier: v.optional(v.string()),
   }).index("by_token", ["tokenIdentifier"]),
   
   photos: defineTable({
