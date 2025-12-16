@@ -1,8 +1,8 @@
-import { Authenticated, Unauthenticated, useQuery, useMutation } from "convex/react";
+import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { SignInForm } from "./SignInForm";
 import { SignOutButton } from "./SignOutButton";
-import { Toaster, toast } from "sonner";
+import { Toaster } from "sonner";
 import { PhotoUpload } from "./PhotoUpload";
 import { PhotoGallery } from "./PhotoGallery";
 import { AdminPanel } from "./AdminPanel";
@@ -93,16 +93,6 @@ export default function App() {
 function Content({ currentView }: { currentView: string }) {
   const loggedInUser = useQuery(api.auth.loggedInUser);
   const isAdmin = useQuery(api.photos.isUserAdmin);
-  const makeMeAdmin = useMutation(api.photos.makeMeAdmin);
-
-  const handleMakeMeAdmin = async () => {
-    try {
-      const result = await makeMeAdmin({});
-      toast.success(result);
-    } catch (error) {
-      toast.error("Failed to grant admin access");
-    }
-  };
 
   if (loggedInUser === undefined) {
     return (
@@ -131,26 +121,11 @@ function Content({ currentView }: { currentView: string }) {
       <Authenticated>
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent mb-2">
-            Welcome, {loggedInUser?.email?.split('@')[0] || "friend"}!
+            Welcome{loggedInUser?.name ? `, ${loggedInUser.name}` : ""}!
           </h1>
           <p className="text-gray-600">
             Thank you for being part of our special day 💕
           </p>
-          
-          {/* Admin setup helper */}
-          {loggedInUser && !isAdmin && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-700 mb-2">
-                Need to approve photos? Click below to become an admin:
-              </p>
-              <button
-                onClick={handleMakeMeAdmin}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
-              >
-                Make Me Admin
-              </button>
-            </div>
-          )}
         </div>
 
         {currentView === "gallery" && <PhotoGallery />}

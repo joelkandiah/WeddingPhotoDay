@@ -119,76 +119,12 @@ export const rejectPhoto = mutation({
   },
 });
 
-export const makeUserAdmin = mutation({
-  args: {
-    tokenIdentifier: v.string(),
-  },
-  handler: async (ctx, args) => {
-    // Find user by email
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", args.tokenIdentifier))
-      .first();
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    // Check if already admin
-    const isAdmin = await getIsAdmin(ctx);
-    if (isAdmin) {
-      throw new Error("User is already an admin");
-    }
-
-    await ctx.db.patch(user, {
-      role: "admin",
-    });
-  },
-});
-
-// Helper function to make current user admin (for setup)
-export const makeMeAdmin = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-
-    const user = await ctx.db.get(userId);
-    if (!user || !user.tokenIdentifier) {
-      throw new Error("User tokenIdentifier not found");
-    }
-
-    // Check if already admin
-    const existingAdmin = await getIsAdmin(ctx);
-
-    if (existingAdmin) {
-      return "Already an admin";
-    }
-
-    await ctx.db.patch(user, {
-      role: "admin",
-    });
-
-    return "Admin access granted";
-  },
-});
-
 // Get approved photos for admin review
 export const getApprovedPhotosForAdmin = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-
-    const isAdmin = await ctx.db
-      .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", userId))
-      .first();
-
+    const isAdmin = await getIsAdmin(ctx);
+    
     if (!isAdmin) {
       throw new Error("Not authorized");
     }

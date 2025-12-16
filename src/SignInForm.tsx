@@ -5,73 +5,48 @@ import { toast } from "sonner";
 
 export function SignInForm() {
   const { signIn } = useAuthActions();
-  const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
   const [submitting, setSubmitting] = useState(false);
 
   return (
     <div className="w-full">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+          Enter Site Password
+        </h2>
+        <p className="text-sm text-gray-600">
+          Enter the password to access the wedding photo gallery
+        </p>
+      </div>
+      
       <form
-        className="flex flex-col gap-form-field"
+        className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
           setSubmitting(true);
           const formData = new FormData(e.target as HTMLFormElement);
-          formData.set("flow", flow);
           void signIn("password", formData).catch((error) => {
-            let toastTitle = "";
-            if (error.message.includes("Invalid password")) {
-              toastTitle = "Invalid password. Please try again.";
-            } else {
-              toastTitle =
-                flow === "signIn"
-                  ? "Could not sign in, did you mean to sign up?"
-                  : "Could not sign up, did you mean to sign in?";
-            }
-            toast.error(toastTitle);
+            console.error("Sign in error:", error);
+            toast.error(error.message || "Invalid password. Please try again.");
             setSubmitting(false);
           });
         }}
       >
         <input
-          className="auth-input-field"
-          type="email"
-          name="email"
-          placeholder="Email"
-          required
-        />
-        <input
-          className="auth-input-field"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent text-lg"
           type="password"
           name="password"
-          placeholder="Password"
+          placeholder="Enter password"
           required
+          autoFocus
         />
-        <button className="auth-button" type="submit" disabled={submitting}>
-          {flow === "signIn" ? "Sign in" : "Sign up"}
+        <button 
+          className="w-full px-4 py-3 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-lg font-medium hover:from-rose-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          type="submit" 
+          disabled={submitting}
+        >
+          {submitting ? "Signing in..." : "Enter Site"}
         </button>
-        <div className="text-center text-sm text-secondary">
-          <span>
-            {flow === "signIn"
-              ? "Don't have an account? "
-              : "Already have an account? "}
-          </span>
-          <button
-            type="button"
-            className="text-primary hover:text-primary-hover hover:underline font-medium cursor-pointer"
-            onClick={() => setFlow(flow === "signIn" ? "signUp" : "signIn")}
-          >
-            {flow === "signIn" ? "Sign up instead" : "Sign in instead"}
-          </button>
-        </div>
       </form>
-      <div className="flex items-center justify-center my-3">
-        <hr className="my-4 grow border-gray-200" />
-        <span className="mx-4 text-secondary">or</span>
-        <hr className="my-4 grow border-gray-200" />
-      </div>
-      <button className="auth-button" onClick={() => void signIn("anonymous")}>
-        Sign in anonymously
-      </button>
     </div>
   );
 }
