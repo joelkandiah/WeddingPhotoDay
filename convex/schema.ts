@@ -34,7 +34,19 @@ export default defineSchema({
     photoStorageIds: v.array(v.id("_storage")),
     status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
     approvedAt: v.optional(v.number()),
+    category: v.union(
+      v.literal("US Ceremony"),
+      v.literal("Reception"),
+      v.literal("Getting Ready"),
+      v.literal("The Journey Here"),
+      v.literal("The Journey Home"),
+      v.literal("UK Celebration"),
+      v.literal("Legal Ceremony"),
+      v.literal("Engagement")
+    ),
   })
     .index("by_status", ["status"])
-    .index("by_uploader", ["uploaderName"]),
+    .index("by_uploader", ["uploaderName"])
+    .index("by_category", ["category"])
+    .index("by_status_and_category", ["status", "category"]),
 });

@@ -6,13 +6,38 @@ import { getIsAdmin } from "./adminHelper";
 
 // Public queries
 export const getApprovedPosts = query({
-    args: {},
-    handler: async (ctx) => {
-        const posts = await ctx.db
-            .query("posts")
-            .withIndex("by_status", (q) => q.eq("status", "approved"))
-            .order("desc")
-            .collect();
+    args: {
+        category: v.optional(v.union(
+            v.literal("US Ceremony"),
+            v.literal("Reception"),
+            v.literal("Getting Ready"),
+            v.literal("The Journey Here"),
+            v.literal("The Journey Home"),
+            v.literal("UK Celebration"),
+            v.literal("Legal Ceremony"),
+            v.literal("Engagement")
+        )),
+    },
+    handler: async (ctx, args) => {
+        let posts;
+        
+        if (args.category) {
+            // Filter by specific category
+            posts = await ctx.db
+                .query("posts")
+                .withIndex("by_status_and_category", (q) => 
+                    q.eq("status", "approved").eq("category", args.category)
+                )
+                .order("desc")
+                .collect();
+        } else {
+            // Get all approved posts
+            posts = await ctx.db
+                .query("posts")
+                .withIndex("by_status", (q) => q.eq("status", "approved"))
+                .order("desc")
+                .collect();
+        }
 
         return Promise.all(
             posts.map(async (post) => {
@@ -29,14 +54,40 @@ export const getApprovedPosts = query({
 });
 
 export const getApprovedPostsPaginated = query({
-    args: { paginationOpts: paginationOptsValidator },
+    args: { 
+        paginationOpts: paginationOptsValidator,
+        category: v.optional(v.union(
+            v.literal("US Ceremony"),
+            v.literal("Reception"),
+            v.literal("Getting Ready"),
+            v.literal("The Journey Here"),
+            v.literal("The Journey Home"),
+            v.literal("UK Celebration"),
+            v.literal("Legal Ceremony"),
+            v.literal("Engagement")
+        )),
+    },
     handler: async (ctx, args) => {
         // Pagination handler
-        const result = await ctx.db
-            .query("posts")
-            .withIndex("by_status", (q) => q.eq("status", "approved"))
-            .order("desc")
-            .paginate(args.paginationOpts);
+        let result;
+        
+        if (args.category) {
+            // Filter by specific category
+            result = await ctx.db
+                .query("posts")
+                .withIndex("by_status_and_category", (q) => 
+                    q.eq("status", "approved").eq("category", args.category)
+                )
+                .order("desc")
+                .paginate(args.paginationOpts);
+        } else {
+            // Get all approved posts
+            result = await ctx.db
+                .query("posts")
+                .withIndex("by_status", (q) => q.eq("status", "approved"))
+                .order("desc")
+                .paginate(args.paginationOpts);
+        }
 
         const page = await Promise.all(
             result.page.map(async (post) => {
@@ -67,6 +118,16 @@ export const uploadPost = mutation({
         uploaderName: v.string(),
         uploaderEmail: v.optional(v.string()),
         caption: v.optional(v.string()),
+        category: v.union(
+            v.literal("US Ceremony"),
+            v.literal("Reception"),
+            v.literal("Getting Ready"),
+            v.literal("The Journey Here"),
+            v.literal("The Journey Home"),
+            v.literal("UK Celebration"),
+            v.literal("Legal Ceremony"),
+            v.literal("Engagement")
+        ),
     },
     handler: async (ctx, args) => {
         await ctx.db.insert("posts", {
@@ -74,6 +135,7 @@ export const uploadPost = mutation({
             uploaderName: args.uploaderName,
             caption: args.caption,
             status: "pending",
+            category: args.category,
         });
     },
 });

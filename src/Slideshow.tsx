@@ -3,7 +3,10 @@ import { api } from "../convex/_generated/api";
 import { useState, useEffect, useRef, useMemo } from "react";
 
 export function Slideshow() {
-  const posts = useQuery(api.posts.getApprovedPosts);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All Posts");
+  const posts = useQuery(api.posts.getApprovedPosts, {
+    category: selectedCategory === "All Posts" ? undefined : selectedCategory as any
+  });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [interval, setIntervalDuration] = useState(5000); // 5 seconds
@@ -159,6 +162,28 @@ export function Slideshow() {
           <h2>
             Wedding Slideshow 🎬
           </h2>
+          
+          {/* Category Filter */}
+          <div className="mt-4 mb-4 flex justify-center">
+            <select
+              value={selectedCategory}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setCurrentIndex(0); // Reset to first photo when changing category
+              }}
+              className="bg-input-bg px-4 py-2 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
+            >
+              <option value="All Posts">All Posts</option>
+              <option value="US Ceremony">US Ceremony</option>
+              <option value="Reception">Reception</option>
+              <option value="Getting Ready">Getting Ready</option>
+              <option value="The Journey Here">The Journey Here</option>
+              <option value="The Journey Home">The Journey Home</option>
+              <option value="UK Celebration">UK Celebration</option>
+              <option value="Legal Ceremony">Legal Ceremony</option>
+              <option value="Engagement">Engagement</option>
+            </select>
+          </div>
           
           {/* Controls */}
           <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
