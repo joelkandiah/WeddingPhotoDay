@@ -108,11 +108,11 @@ function Content({ currentView }: { currentView: string }) {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <Unauthenticated>
-        <div className="text-center py-12">
+        <div className="text-center mb-8 py-12 gap-4 margin-auto">
           <h1>
             Share Our Wedding Joy
           </h1>
-          <p className="text-xl mb-8">
+          <p className="text-xl mb-8 py-2">
             Help us capture every beautiful moment by sharing your photos
           </p>
           <div className="max-w-md mx-auto">
