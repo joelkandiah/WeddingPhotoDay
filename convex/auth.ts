@@ -3,6 +3,7 @@ import { Anonymous } from "@convex-dev/auth/providers/Anonymous";
 import { DataModel } from "./_generated/dataModel";
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 // Define interface for user identity with role
 interface UserIdentity {
@@ -53,18 +54,15 @@ export const signInWithPassword = mutation({
       throw new Error("Invalid password");
     }
 
-    // Get the current user's identity
-    const identity = await ctx.auth.getUserIdentity();
+    // Get the current user ID using the auth library helper
+    const userId = await getAuthUserId(ctx);
     
-    if (!identity) {
+    if (!userId) {
       throw new Error("No active session. Please try signing in again.");
     }
 
-    // Find the user record by tokenIdentifier
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-      .first();
+    // Get the user record
+    const user = await ctx.db.get(userId);
 
     if (!user) {
       throw new Error("User session not found. Please try signing in again.");
@@ -87,16 +85,13 @@ export const signInWithPassword = mutation({
 // Query to get the logged-in user
 export const loggedInUser = query({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       return null;
     }
 
     // Get user from database to retrieve role
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-      .first();
+    const user = await ctx.db.get(userId);
 
     if (!user) {
       return null;
@@ -115,16 +110,13 @@ export const loggedInUser = query({
 // Query to check if current user is admin
 export const isAdmin = query({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
       return false;
     }
 
     // Get user from database to check role
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-      .first();
+    const user = await ctx.db.get(userId);
 
     return user?.role === 'admin';
   },

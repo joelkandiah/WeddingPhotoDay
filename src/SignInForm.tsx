@@ -34,6 +34,10 @@ export function SignInForm() {
             // First, sign in anonymously to get a session
             await signIn("anonymous");
             
+            // Wait a moment for the user record to be created in the database
+            // This ensures the mutation can find the user
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             // Then verify the password and set the role
             const result = await signInWithPassword({ password });
             
