@@ -7,6 +7,7 @@ import { PhotoUpload } from "./PhotoUpload";
 import { PhotoGallery } from "./PhotoGallery";
 import { AdminPanel } from "./AdminPanel";
 import { Slideshow } from "./Slideshow";
+import { ThemeToggle } from "./components/ThemeToggle";
 import { useState } from "react";
 
 export default function App() {
@@ -25,11 +26,11 @@ export default function App() {
     : navItems;
 
   return (
-    <div className="min-h-screen flex flex-col bg-linear-to-br from-bg-color-start to-bg-color-end">
-      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-xs border-b border-rose-200 shadow-xs dark:bg-black/90 dark:border-rose-800 dark:shadow-xs">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center dark:bg-black/90 dark:border-rose-800 dark:shadow-xs dark:bg-linear-to-br dark:from-bg-color-start dark:to-bg-color-end">
+    <div className="min-h-screen flex flex-col bg-linear-to-br from-[var(--color-bg-start)] to-[var(--color-bg-end)]">
+      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-xs border-b border-rose-200 shadow-xs dark:bg-gray-900/90 dark:border-rose-900">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl md:text-2xl font-bold bg-linear-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent dark:bg-linear-to-r dark:from-rose-400 dark:to-pink-400">
+            <h2 className="text-xl md:text-2xl font-bold bg-linear-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent dark:from-rose-400 dark:to-pink-400">
               💕 Our Wedding Memories
             </h2>
           </div>
@@ -41,10 +42,10 @@ export default function App() {
                   <button
                     key={item.id}
                     onClick={() => setCurrentView(item.id)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors dark:text-gray-600 dark:hover:text-rose-600 ${
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                       currentView === item.id
-                        ? "bg-rose-100 text-rose-700 dark:bg-rose-700 dark:text-rose-100"
-                        : "text-gray-600 hover:text-rose-600 dark:text-gray-400 dark:hover:text-rose-400"
+                        ? "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-100"
+                        : "text-gray-600 hover:text-rose-600 dark:text-gray-300 dark:hover:text-rose-400"
                     }`}
                   >
                     {item.label}
@@ -52,6 +53,7 @@ export default function App() {
                 ))}
               </nav>
             </Authenticated>
+            <ThemeToggle />
             <SignOutButton />
           </div>
         </div>
@@ -63,7 +65,7 @@ export default function App() {
 
       {/* Mobile Bottom Navigation - Hidden on desktop */}
       <Authenticated>
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white/90 backdrop-blur-xs border-t border-rose-200 shadow-lg pb-safe dark:bg-black/70 dark:border-rose-800 dark:shadow-lg">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white/90 backdrop-blur-xs border-t border-rose-200 shadow-lg pb-safe dark:bg-gray-900/90 dark:border-rose-900">
           <div className={`grid gap-1 px-2 py-2 ${
             allNavItems.length === 4 ? 'grid-cols-4' : 'grid-cols-3'
           }`}>
@@ -71,10 +73,10 @@ export default function App() {
               <button
                 key={item.id}
                 onClick={() => setCurrentView(item.id)}
-                className={`touch-target flex flex-col items-center justify-center gap-1 rounded-lg transition-colors dark:text-gray-600 dark:hover:text-rose-600 ${
+                className={`touch-target flex flex-col items-center justify-center gap-1 rounded-lg transition-colors ${
                   currentView === item.id
-                    ? "bg-rose-100 text-rose-700 dark:bg-rose-700 dark:text-rose-100"
-                    : "text-gray-600 hover:text-rose-600 dark:text-gray-400 dark:hover:text-rose-400"
+                    ? "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-100"
+                    : "text-gray-600 hover:text-rose-600 dark:text-gray-300 dark:hover:text-rose-400"
                 }`}
               >
                 <span className="text-xl">{item.icon}</span>
@@ -97,7 +99,7 @@ function Content({ currentView }: { currentView: string }) {
   // Show loading while checking authentication state
   if (loggedInUser === undefined) {
     return (
-      <div className="flex justify-center items-center min-h-[400px] dark:bg-white/90 dark:border-rose-800 dark:shadow-lg">
+      <div className="flex justify-center items-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500 dark:border-rose-400"></div>
       </div>
     );

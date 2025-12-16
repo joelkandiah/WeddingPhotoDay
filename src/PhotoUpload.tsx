@@ -102,7 +102,7 @@ export function PhotoUpload() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-white dark:bg-black/40 rounded-2xl shadow-lg border border-rose-100 p-8 dark:border-rose-800">
+      <div className="bg-white rounded-2xl shadow-lg border border-rose-100 p-8 dark:bg-gray-800 dark:border-rose-900">
         <h2 className="text-center">
           Share Wedding Memories 📸
         </h2>
@@ -116,7 +116,7 @@ export function PhotoUpload() {
               type="text"
               value={uploaderName}
               onChange={(e) => setUploaderName(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-hidden transition-all dark:border-rose-800 dark:focus:border-rose-600 dark:focus:ring-rose-600"
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-hidden transition-all bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:border-rose-400 dark:focus:ring-rose-400"
               placeholder="Enter your name"
               required
             />
@@ -129,7 +129,7 @@ export function PhotoUpload() {
             <textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-hidden transition-all resize-none dark:border-rose-800 dark:focus:border-rose-600 dark:focus:ring-rose-600"
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-hidden transition-all resize-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:border-rose-400 dark:focus:ring-rose-400"
               placeholder="Share the story behind these moments..."
               rows={3}
             />
@@ -151,7 +151,7 @@ export function PhotoUpload() {
               <button
                 type="button"
                 onClick={() => imageInput.current?.click()}
-                className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-rose-400 transition-colors text-center dark:border-rose-800 dark:hover:border-rose-600"
+                className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-rose-400 transition-colors text-center dark:border-gray-600 dark:hover:border-rose-400"
               >
                 <div className="space-y-2">
                   <div className="text-4xl">📷</div>
@@ -209,8 +209,8 @@ export function PhotoUpload() {
           </button>
         </form>
 
-        <div className="mt-6 p-4 bg-rose-50 rounded-lg dark:bg-rose-800">
-          <p className="text-sm text-rose-700 dark:text-gray-200">
+        <div className="mt-6 p-4 bg-rose-50 rounded-lg dark:bg-rose-950/30 dark:border dark:border-rose-900">
+          <p className="text-sm text-rose-700 dark:text-rose-300">
             <strong>Note:</strong> All photos will be reviewed before appearing in the gallery. 
             Thank you for helping us create beautiful memories! 🌹
           </p>
