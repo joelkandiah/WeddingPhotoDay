@@ -17,6 +17,9 @@ export function PhotoGallery() {
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const [initialSlideIndex, setInitialSlideIndex] = useState(0);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -32,6 +35,31 @@ export function PhotoGallery() {
 
     return () => observer.disconnect();
   }, [status, loadMore]);
+
+  // Check scroll position to show/hide arrows
+  const checkScroll = () => {
+    if (tabsContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tabsContainerRef.current;
+      setShowLeftArrow(scrollLeft > 0);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, []);
+
+  const scrollTabs = (direction: 'left' | 'right') => {
+    if (tabsContainerRef.current) {
+      const scrollAmount = 200;
+      tabsContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   if (status === "LoadingFirstPage") {
     return (
@@ -56,32 +84,62 @@ export function PhotoGallery() {
       </div>
 
       {/* Category Tabs */}
-      <div className="mb-6 overflow-x-auto">
-        <div className="flex gap-2 border-b border-card-border min-w-max">
+      <div className="mb-6 relative">
+        {/* Left Arrow - visible on desktop only */}
+        {showLeftArrow && (
           <button
-            onClick={() => setSelectedCategory("All Posts")}
-            className={`px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
-              selectedCategory === "All Posts"
-                ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
-                : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
-            }`}
+            onClick={() => scrollTabs('left')}
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-card-bg/90 backdrop-blur-sm border border-card-border rounded-full w-8 h-8 items-center justify-center hover:bg-input-bg transition-colors shadow-md"
+            aria-label="Scroll left"
           >
-            All Posts
+            ←
           </button>
-          {POST_CATEGORIES.map((cat) => (
+        )}
+
+        {/* Tabs Container */}
+        <div 
+          ref={tabsContainerRef}
+          onScroll={checkScroll}
+          className="overflow-x-auto scrollbar-hide"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          <div className="flex gap-2 border-b border-card-border min-w-max px-10 md:px-0">
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => setSelectedCategory("All Posts")}
               className={`px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
-                selectedCategory === cat
+                selectedCategory === "All Posts"
                   ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
                   : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
               }`}
             >
-              {cat}
+              All Posts
             </button>
-          ))}
+            {POST_CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
+                  selectedCategory === cat
+                    ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
+                    : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Right Arrow - visible on desktop only */}
+        {showRightArrow && (
+          <button
+            onClick={() => scrollTabs('right')}
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-card-bg/90 backdrop-blur-sm border border-card-border rounded-full w-8 h-8 items-center justify-center hover:bg-input-bg transition-colors shadow-md"
+            aria-label="Scroll right"
+          >
+            →
+          </button>
+        )}
       </div>
 
       {posts.length === 0 ? (
