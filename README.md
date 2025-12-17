@@ -92,7 +92,11 @@ This app uses **Cloudflare R2** for image storage and **Cloudflare Image Resizin
 
 ### Cloudflare Worker Setup
 
-The Cloudflare Worker serves images from R2 with on-demand resizing capabilities.
+The Cloudflare Worker serves images from R2 with on-demand resizing capabilities using Cloudflare Image Resizing.
+
+**Prerequisites:**
+- Cloudflare Images must be enabled on your account (available on paid plans)
+- For Image Resizing pricing, see [Cloudflare Images Pricing](https://developers.cloudflare.com/images/pricing/)
 
 1. **Install Wrangler (Cloudflare Workers CLI):**
    ```bash
@@ -104,32 +108,26 @@ The Cloudflare Worker serves images from R2 with on-demand resizing capabilities
    wrangler login
    ```
 
-3. **Configure environment variables for the Worker:**
+3. **Edit `wrangler.toml` configuration:**
    
-   Edit `wrangler.toml` to set your bucket name, or set via secrets:
-   ```bash
-   wrangler secret put BUCKET_NAME
-   # Enter: your-bucket-name
-   
-   wrangler secret put PUBLIC_ORIGIN
-   # Enter: https://your-worker.workers.dev (or your custom domain)
-   ```
+   Open `wrangler.toml` and update the following values:
+   - `bucket_name`: Your R2 bucket name (same as created in R2 Setup)
+   - `BUCKET_NAME` in vars: Your R2 bucket name
+   - `PUBLIC_ORIGIN`: Will be updated after first deployment (see step 5)
 
-4. **Create R2 bucket binding:**
-   
-   The `wrangler.toml` already includes the R2 bucket binding configuration. Make sure the bucket name matches your actual R2 bucket.
-
-5. **Deploy the Worker:**
+4. **Deploy the Worker:**
    ```bash
    wrangler deploy
    ```
-
-6. **Test the Worker:**
    
-   After deployment, you can access images at:
-   - Original: `https://your-worker.workers.dev/images/original/{storage-key}`
-   - Resized: `https://your-worker.workers.dev/images/800x600/{storage-key}`
-   - Custom format: `https://your-worker.workers.dev/images/1200x/{storage-key}?format=webp&quality=80`
+   After deployment, you'll see the Worker URL (e.g., `https://wedding-photo-worker.your-account.workers.dev`)
+
+5. **Update PUBLIC_ORIGIN:**
+   
+   Edit `wrangler.toml` and update the `PUBLIC_ORIGIN` variable with your Worker URL from step 4, then redeploy:
+   ```bash
+   wrangler deploy
+   ```
 
 ### Image URL Patterns
 
@@ -150,6 +148,38 @@ The Worker supports the following URL patterns:
 3. Client uploads the file directly to R2 via the upload URL
 4. R2 component syncs metadata back to Convex
 5. The Worker serves images from R2 with automatic resizing and caching
+
+### Testing the Integration
+
+After deployment, test the setup:
+
+1. **Test file upload:**
+   - Run `npm run dev` to start the app
+   - Navigate to the upload page
+   - Upload a test image
+   - Verify it appears in your R2 bucket via the Cloudflare Dashboard
+
+2. **Test image serving (via Worker):**
+   
+   Once you have uploaded images, test the Worker URLs:
+   ```bash
+   # Original image
+   curl -I https://your-worker.workers.dev/images/original/{your-image-key}
+   
+   # Resized image (800px wide)
+   curl -I https://your-worker.workers.dev/images/800x/{your-image-key}
+   
+   # Custom format and quality
+   curl -I https://your-worker.workers.dev/images/1200x800/{your-image-key}?format=webp&quality=85
+   ```
+   
+   All requests should return `200 OK` with appropriate `Content-Type` and `Cache-Control` headers.
+
+3. **Verify caching:**
+   - Make the same request twice
+   - The first request transforms the image
+   - The second request serves the cached version from R2
+   - Check your R2 bucket - you should see derived images in a `derived/` prefix
 
 ## App authentication
 

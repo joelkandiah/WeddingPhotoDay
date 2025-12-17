@@ -150,7 +150,20 @@ function getDerivedImageKey(request: ImageRequest): string {
 }
 
 /**
+ * Interface for Cloudflare Image Resizing options
+ * See: https://developers.cloudflare.com/images/transform-images/transform-via-workers/
+ */
+interface ImageTransformOptions {
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: 'webp' | 'jpeg' | 'png' | 'avif' | 'auto';
+}
+
+/**
  * Transform an image using Cloudflare Image Resizing
+ * Note: This uses Cloudflare's Image Resizing service which requires
+ * the service to be enabled in your Cloudflare account
  */
 async function transformImage(
   original: R2ObjectBody,
@@ -158,8 +171,8 @@ async function transformImage(
 ): Promise<{ body: ReadableStream; httpMetadata: R2HTTPMetadata }> {
   const originalBody = await original.arrayBuffer();
   
-  // Build cf.image options
-  const options: any = {};
+  // Build cf.image options for Cloudflare Image Resizing
+  const options: ImageTransformOptions = {};
   
   if (request.width) {
     options.width = request.width;
@@ -174,17 +187,18 @@ async function transformImage(
   }
   
   if (request.format) {
-    options.format = request.format;
+    options.format = request.format as ImageTransformOptions['format'];
   }
   
   // Use Cloudflare Image Resizing via fetch with cf.image
-  const response = await fetch('https://example.com/image', {
+  // The URL here is a placeholder - Cloudflare Image Resizing processes the body
+  // See: https://developers.cloudflare.com/images/transform-images/transform-via-workers/
+  const response = await fetch('https://placeholder.invalid/transform', {
     method: 'POST',
     body: originalBody,
-    // @ts-ignore - cf.image is a Cloudflare-specific feature
     cf: {
       image: options,
-    },
+    } as RequestInit['cf'] & { image: ImageTransformOptions },
   });
   
   if (!response.ok || !response.body) {
