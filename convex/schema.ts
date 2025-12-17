@@ -22,16 +22,19 @@ export default defineSchema({
   photos: defineTable({
     storageId: v.string(),
     uploaderName: v.string(),
+    uploaderId: v.optional(v.id("users")),
     caption: v.optional(v.string()),
     status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
     approvedAt: v.optional(v.number()),
   })
     .index("by_storage_id", ["storageId"])
     .index("by_status", ["status"])
-    .index("by_uploader", ["uploaderName"]),
+    .index("by_uploader", ["uploaderName"])
+    .index("by_uploader_id", ["uploaderId"]),
 
   posts: defineTable({
     uploaderName: v.string(),
+    uploaderId: v.optional(v.id("users")),
     caption: v.optional(v.string()),
     photoStorageIds: v.array(v.string()),
     status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
@@ -41,6 +44,7 @@ export default defineSchema({
     .index("by_storage_ids", ["photoStorageIds"])
     .index("by_status", ["status"])
     .index("by_uploader", ["uploaderName"])
+    .index("by_uploader_id", ["uploaderId"])
     .index("by_category", ["category"])
     .index("by_status_and_category", ["status", "category"]),
 });

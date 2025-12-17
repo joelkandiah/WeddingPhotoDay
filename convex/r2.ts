@@ -3,6 +3,8 @@
 // If you see a TypeScript error here, run 'npx convex dev' to generate the types.
 import { components } from "./_generated/api";
 import { R2 } from "@convex-dev/r2";
+import { getAuthUserId } from "@convex-dev/auth/server";
+import { rateLimiter } from "./rateLimit";
 
 // R2 component client
 export const r2 = new R2(components.r2);
@@ -12,17 +14,30 @@ export const r2 = new R2(components.r2);
 // - url: presigned URL for direct upload to R2
 // - key: the R2 object key (storage identifier) for the uploaded file
 export const { generateUploadUrl, syncMetadata, deleteObject } = r2.clientApi({
-  // Optional: Check if user is allowed to upload
+  // Check if user is allowed to upload
   checkUpload: async (ctx, bucket) => {
-    // Allow all uploads for now
-    // You can add authentication/authorization here if needed
-    console.log(`Upload check for bucket: ${bucket}`);
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const user = await ctx.db.get(userId);
+    if (!user || !user.role) {
+      throw new Error("Not authorized: Role required to upload");
+    }
+
+    // Rate limit: 150 uploads per hour
+    // Only apply rate limiting if we're in an action/mutation context (e.g. generateUploadUrl)
+    // Queries like syncMetadata don't support mutations and shouldn't be rate limited here.
+    if ("runMutation" in ctx) {
+      await rateLimiter.limit(ctx as any, "upload", { key: userId });
+    }
+
+    console.log(`Upload check passed for user ${userId} in bucket ${bucket}`);
   },
-  // Optional: Handle successful upload
+  // Handle successful upload
   onUpload: async (ctx, bucket, key) => {
-    // Log when a file is uploaded
     console.log(`File uploaded to bucket ${bucket} with key: ${key}`);
-    // You can add custom logic here, like updating a database record
   },
 });
 

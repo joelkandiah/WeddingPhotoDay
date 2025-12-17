@@ -4,6 +4,7 @@ import { api } from "./_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { getIsAdmin } from "./adminHelper";
 import { generateUploadUrl as r2GenerateUploadUrl, getPhotoUrl } from "./r2";
+import { rateLimiter } from "./rateLimit";
 
 // Public queries
 export const getApprovedPhotos = query({
@@ -33,12 +34,28 @@ export const uploadPhoto = mutation({
     caption: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await ctx.db.insert("photos", {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const user = await ctx.db.get(userId);
+    if (!user || !user.role) {
+      throw new Error("Not authorized: Role required to upload");
+    }
+
+    // Rate limit check: 150 photos per hour
+    await rateLimiter.limit(ctx, "upload", { key: userId });
+
+    const photoId = await ctx.db.insert("photos", {
       storageId: args.storageId,
       uploaderName: args.uploaderName,
+      uploaderId: userId,
       caption: args.caption,
       status: "pending",
     });
+
+    return photoId;
   },
 });
 

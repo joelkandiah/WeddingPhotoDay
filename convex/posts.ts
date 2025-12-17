@@ -6,6 +6,7 @@ import { paginationOptsValidator } from "convex/server"; // Added pagination val
 import { getIsAdmin } from "./adminHelper";
 import { categoryValidator } from "./constants";
 import { generateUploadUrl as r2GenerateUploadUrl, getPhotoUrl } from "./r2";
+import { rateLimiter } from "./rateLimit";
 
 // Public queries
 export const getApprovedPosts = query({
@@ -114,13 +115,32 @@ export const uploadPost = mutation({
         category: categoryValidator,
     },
     handler: async (ctx, args) => {
-        await ctx.db.insert("posts", {
+        const userId = await getAuthUserId(ctx);
+        if (!userId) {
+            throw new Error("Not authenticated");
+        }
+
+        const user = await ctx.db.get(userId);
+        if (!user || !user.role) {
+            throw new Error("Not authorized: Role required to upload");
+        }
+
+        // Rate limit check: 150 photos per hour
+        // We limit each photo in the post
+        for (let i = 0; i < args.photoStorageIds.length; i++) {
+            await rateLimiter.limit(ctx, "upload", { key: userId });
+        }
+
+        const postId = await ctx.db.insert("posts", {
             photoStorageIds: args.photoStorageIds,
             uploaderName: args.uploaderName,
+            uploaderId: userId,
             caption: args.caption,
             status: "pending",
             category: args.category,
         });
+
+        return postId;
     },
 });
 
