@@ -54,9 +54,6 @@ export function PhotoUpload() {
         // Generate signed URL from Convex
         const { url, key } = await generateUploadUrl();
 
-        console.log("Upload URL:", url);
-        console.log("Upload Key:", key);
-
         // Upload file to R2
         const res = await fetch(url, {
           method: "PUT",
