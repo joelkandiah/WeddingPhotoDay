@@ -4,6 +4,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server"; // Added pagination validator
 import { getIsAdmin } from "./adminHelper";
 import { categoryValidator } from "./constants";
+import { generateUploadUrl as r2GenerateUploadUrl, getPhotoUrl } from "./r2";
 
 // Public queries
 export const getApprovedPosts = query({
@@ -35,14 +36,25 @@ export const getApprovedPosts = query({
         return Promise.all(
             posts.map(async (post) => {
                 const urls = await Promise.all(
-                    post.photoStorageIds.map((id) => ctx.storage.getUrl(id))
+                    post.photoStorageIds.map((id) => getPhotoUrl(id))
                 );
                 return {
                     ...post,
-                    photoUrls: urls.filter((url): url is string => url !== null),
+                    photoUrls: urls,
                 };
             })
         );
+    },
+});
+
+export const getApprovedPostsCount = query({
+    args: {},
+    handler: async (ctx) => {
+        const posts = await ctx.db
+            .query("posts")
+            .withIndex("by_status", (q) => q.eq("status", "approved"))
+            .collect();
+        return posts.length;
     },
 });
 
@@ -77,11 +89,11 @@ export const getApprovedPostsPaginated = query({
         const page = await Promise.all(
             result.page.map(async (post) => {
                 const urls = await Promise.all(
-                    post.photoStorageIds.map((id) => ctx.storage.getUrl(id))
+                    post.photoStorageIds.map((id) => getPhotoUrl(id))
                 );
                 return {
                     ...post,
-                    photoUrls: urls.filter((url): url is string => url !== null),
+                    photoUrls: urls,
                 };
             })
         );
@@ -90,16 +102,11 @@ export const getApprovedPostsPaginated = query({
     },
 });
 
-export const generateUploadUrl = mutation({
-    args: {},
-    handler: async (ctx) => {
-        return await ctx.storage.generateUploadUrl();
-    },
-});
+export const generateUploadUrl = r2GenerateUploadUrl;
 
 export const uploadPost = mutation({
     args: {
-        photoStorageIds: v.array(v.id("_storage")),
+        photoStorageIds: v.array(v.string()),
         uploaderName: v.string(),
         uploaderEmail: v.optional(v.string()),
         caption: v.optional(v.string()),
@@ -135,11 +142,11 @@ export const getPendingPosts = query({
         return Promise.all(
             posts.map(async (post) => {
                 const urls = await Promise.all(
-                    post.photoStorageIds.map((id) => ctx.storage.getUrl(id))
+                    post.photoStorageIds.map((id) => getPhotoUrl(id))
                 );
                 return {
                     ...post,
-                    photoUrls: urls.filter((url): url is string => url !== null),
+                    photoUrls: urls,
                 };
             })
         );
@@ -164,11 +171,11 @@ export const getApprovedPostsForAdmin = query({
         return Promise.all(
             posts.map(async (post) => {
                 const urls = await Promise.all(
-                    post.photoStorageIds.map((id) => ctx.storage.getUrl(id))
+                    post.photoStorageIds.map((id) => getPhotoUrl(id))
                 );
                 return {
                     ...post,
-                    photoUrls: urls.filter((url): url is string => url !== null),
+                    photoUrls: urls,
                 };
             })
         );
@@ -193,11 +200,11 @@ export const getRejectedPostsForAdmin = query({
         return Promise.all(
             posts.map(async (post) => {
                 const urls = await Promise.all(
-                    post.photoStorageIds.map((id) => ctx.storage.getUrl(id))
+                    post.photoStorageIds.map((id) => getPhotoUrl(id))
                 );
                 return {
                     ...post,
-                    photoUrls: urls.filter((url): url is string => url !== null),
+                    photoUrls: urls,
                 };
             })
         );

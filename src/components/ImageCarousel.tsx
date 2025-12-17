@@ -6,6 +6,7 @@ interface ImageCarouselProps {
   onImageClick?: (index: number) => void;
   className?: string;
   aspectRatio?: "video" | "square" | "cover" | "contain" | "auto";
+  initialSlide?: number;
 }
 
 export function ImageCarousel({ 
@@ -13,9 +14,10 @@ export function ImageCarousel({
   alt, 
   onImageClick, 
   className = "",
-  aspectRatio = "square" // Default to square as requested
+  aspectRatio = "square", // Default to square as requested
+  initialSlide = 0
 }: ImageCarouselProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(initialSlide);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentTranslate, setCurrentTranslate] = useState(0);
@@ -23,12 +25,22 @@ export function ImageCarousel({
   const carouselRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>(null);
 
-  // Reset state when images change
+  // Reset state when images change (but only if it's not the first render where initialSlide is used)
+  const isFirstRender = useRef(true);
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     setCurrentIndex(0);
     setCurrentTranslate(0);
     setPrevTranslate(0);
   }, [images]);
+
+  // Handle initialSlide changes
+  useEffect(() => {
+    snapToSlide(initialSlide);
+  }, [initialSlide]);
 
   const snapToSlide = (index: number) => {
     if (!carouselRef.current) return;

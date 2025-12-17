@@ -18,25 +18,27 @@ export default defineSchema({
     // tokenIdentifier must be optional for @convex-dev/auth compatibility
     tokenIdentifier: v.optional(v.string()),
   }).index("by_token", ["tokenIdentifier"]),
-  
+
   photos: defineTable({
-    storageId: v.id("_storage"),
+    storageId: v.string(),
     uploaderName: v.string(),
     caption: v.optional(v.string()),
     status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
     approvedAt: v.optional(v.number()),
   })
+    .index("by_storage_id", ["storageId"])
     .index("by_status", ["status"])
     .index("by_uploader", ["uploaderName"]),
 
   posts: defineTable({
     uploaderName: v.string(),
     caption: v.optional(v.string()),
-    photoStorageIds: v.array(v.id("_storage")),
+    photoStorageIds: v.array(v.string()),
     status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
     approvedAt: v.optional(v.number()),
     category: categoryValidator,
   })
+    .index("by_storage_ids", ["photoStorageIds"])
     .index("by_status", ["status"])
     .index("by_uploader", ["uploaderName"])
     .index("by_category", ["category"])
