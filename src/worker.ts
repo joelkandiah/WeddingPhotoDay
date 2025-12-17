@@ -110,11 +110,21 @@ async function transformViaResizer(request: ImageRequest, origin: string): Promi
 /**
  * Helpers
  */
+function isValidKey(key: string): boolean {
+  // Disallow empty keys, path traversal, and absolute-style paths
+  if (!key) return false;
+  if (key.startsWith('/')) return false;
+  if (key.includes('..')) return false;
+  if (key.includes('\\')) return false;
+  return true;
+}
+
 function parseImageRequest(url: URL): ImageRequest | null {
   const parts = url.pathname.split('/').filter(Boolean);
   if (parts.length < 3) return null;
 
   const key = parts.slice(2).join('/');
+  if (!isValidKey(key)) return null;
 
   if (parts[1] === 'original') return { key };
 
