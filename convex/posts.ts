@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { api } from "./_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server"; // Added pagination validator
 import { getIsAdmin } from "./adminHelper";
@@ -318,7 +319,9 @@ export const deletePost = mutation({
 
         // Delete all photos from storage
         await Promise.all(
-            post.photoStorageIds.map((storageId) => ctx.storage.delete(storageId))
+            post.photoStorageIds.map((storageId) =>
+                ctx.runMutation(api.r2.deleteObject, { key: storageId })
+            )
         );
 
         // Delete the post record

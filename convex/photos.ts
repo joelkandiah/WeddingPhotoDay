@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { api } from "./_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { getIsAdmin } from "./adminHelper";
 import { generateUploadUrl as r2GenerateUploadUrl, getPhotoUrl } from "./r2";
@@ -235,7 +236,7 @@ export const deletePhoto = mutation({
     }
 
     // Delete the file from storage
-    await ctx.storage.delete(photo.storageId);
+    await ctx.runMutation(api.r2.deleteObject, { key: photo.storageId });
 
     // Delete the database record
     await ctx.db.delete(args.photoId);

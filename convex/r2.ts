@@ -11,7 +11,7 @@ export const r2 = new R2(components.r2);
 // The client calls generateUploadUrl() which returns { url, key }
 // - url: presigned URL for direct upload to R2
 // - key: the R2 object key (storage identifier) for the uploaded file
-export const { generateUploadUrl, syncMetadata } = r2.clientApi({
+export const { generateUploadUrl, syncMetadata, deleteObject } = r2.clientApi({
   // Optional: Check if user is allowed to upload
   checkUpload: async (ctx, bucket) => {
     // Allow all uploads for now
@@ -33,7 +33,7 @@ export function getPhotoUrl(storageId: string) {
   if (!baseEndpoint) {
     throw new Error(
       "R2_PUBLIC_ENDPOINT environment variable is not set. " +
-        "Configure it in the Convex deployment environment to generate photo URLs."
+      "Configure it in the Convex deployment environment to generate photo URLs."
     );
   }
   const normalizedBase = baseEndpoint.replace(/\/+$/, "");
