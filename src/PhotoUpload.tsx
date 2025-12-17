@@ -211,7 +211,7 @@ export function PhotoUpload() {
           <button
             type="submit"
             disabled={isUploading || selectedImages.length === 0 || !uploaderName.trim()}
-            className="w-full bg-linear-to-r from-rose-500 to-pink-500 text-white font-semibold py-4 rounded-lg hover:from-rose-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+            className="w-full bg-linear-to-r from-blue-500 to-indigo-500 text-white font-semibold py-4 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
           >
             {isUploading ? (
               <div className="flex items-center justify-center gap-2">
@@ -219,7 +219,7 @@ export function PhotoUpload() {
                 Uploading {Object.keys(uploadProgress).length}/{selectedImages.length}...
               </div>
             ) : (
-              `Upload ${selectedImages.length} Photo${selectedImages.length !== 1 ? 's' : ''} 💕`
+              `Upload ${selectedImages.length} Photo${selectedImages.length !== 1 ? 's' : ''} 💙`
             )}
           </button>
         </form>
@@ -227,7 +227,7 @@ export function PhotoUpload() {
         <div className="mt-6 p-4 bg-card-bg rounded-lg dark:bg-card-bg/30 dark:border dark:border-card-border">
           <p className="text-sm text-card-text dark:text-card-text">
             <strong>Note:</strong> All photos will be reviewed before appearing in the gallery. 
-            Thank you for helping us create beautiful memories! 🌹
+            Thank you for helping us create beautiful memories! 📸
           </p>
         </div>
       </div>

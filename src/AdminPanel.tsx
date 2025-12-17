@@ -80,7 +80,7 @@ export function AdminPanel() {
   if (pendingPosts === undefined || approvedPosts === undefined || rejectedPosts === undefined) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-card-border"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400"></div>
       </div>
     );
   }
@@ -107,7 +107,7 @@ export function AdminPanel() {
           onClick={() => setActiveTab("pending")}
           className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
             activeTab === "pending"
-              ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
+              ? "border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400"
               : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >
@@ -117,7 +117,7 @@ export function AdminPanel() {
           onClick={() => setActiveTab("approved")}
           className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
             activeTab === "approved"
-              ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
+              ? "border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400"
               : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >
@@ -127,7 +127,7 @@ export function AdminPanel() {
           onClick={() => setActiveTab("rejected")}
           className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
             activeTab === "rejected"
-              ? "border-rose-500 text-rose-600 dark:border-rose-400 dark:text-rose-400"
+              ? "border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400"
               : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >

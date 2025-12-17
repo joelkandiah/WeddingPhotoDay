@@ -125,7 +125,7 @@ export function SlideshowContent({ category }: SlideshowContentProps) {
   if (posts === undefined) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500 dark:border-rose-400"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400"></div>
       </div>
     );
   }
@@ -164,7 +164,7 @@ export function SlideshowContent({ category }: SlideshowContentProps) {
           <select
             value={intervalDuration}
             onChange={e => setIntervalDuration(Number(e.target.value))}
-            className="px-4 py-3 rounded-lg border border-card-border focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none bg-card-bg text-fg"
+            className="px-4 py-3 rounded-lg border border-card-border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none bg-card-bg text-fg"
           >
             <option value={3000}>3 seconds</option>
             <option value={5000}>5 seconds</option>
@@ -267,7 +267,7 @@ export function SlideshowContent({ category }: SlideshowContentProps) {
               key={photo._id}
               onClick={() => setCurrentIndex(index)}
               className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                index === currentIndex ? "border-rose-500 ring-2 ring-rose-200" : "border-card-border hover:border-accent-text"
+                index === currentIndex ? "border-blue-500 ring-2 ring-blue-200" : "border-card-border hover:border-accent-text"
               }`}
             >
               <img src={photo.url} alt="" className="w-full h-full object-cover" />

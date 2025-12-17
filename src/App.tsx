@@ -30,8 +30,8 @@ export default function App() {
       <header className="sticky top-0 z-10 bg-card-bg/90 backdrop-blur-xs border-b border-card-border shadow-xs">
         <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent dark:from-rose-400 dark:to-pink-400">
-              💕 Our Wedding Memories
+            <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400">
+              💙 Our Wedding Memories
             </h2>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
@@ -44,8 +44,8 @@ export default function App() {
                     onClick={() => setCurrentView(item.id)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                       currentView === item.id
-                        ? "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-100"
-                        : "text-gray-600 hover:text-rose-600 dark:text-gray-300 dark:hover:text-rose-400"
+                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100"
+                        : "text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
                     }`}
                   >
                     {item.label}
@@ -75,8 +75,8 @@ export default function App() {
                 onClick={() => setCurrentView(item.id)}
                 className={`touch-target flex flex-col items-center justify-center gap-1 rounded-lg transition-colors ${
                   currentView === item.id
-                    ? "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-100"
-                    : "text-gray-600 hover:text-rose-600 dark:text-gray-300 dark:hover:text-rose-400"
+                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100"
+                    : "text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
                 }`}
               >
                 <span className="text-xl">{item.icon}</span>
@@ -100,7 +100,7 @@ function Content({ currentView }: { currentView: string }) {
   if (loggedInUser === undefined) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500 dark:border-rose-400"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400"></div>
       </div>
     );
   }
@@ -127,7 +127,7 @@ function Content({ currentView }: { currentView: string }) {
             Welcome!
           </h1>
           <p>
-            Thank you for being part of our special day 💕
+            Thank you for being part of our special day 💙
           </p>
         </div>
 

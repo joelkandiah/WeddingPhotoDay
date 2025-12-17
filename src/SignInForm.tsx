@@ -65,7 +65,7 @@ export function SignInForm() {
           autoFocus
         />
         <button 
-          className="auth-button bg-linear-to-r from-rose-600 to-pink-600 text-white rounded-lg font-medium hover:from-rose-700 hover:to-pink-700 transition-all"
+          className="auth-button bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all"
           type="submit" 
           disabled={submitting}
         >
