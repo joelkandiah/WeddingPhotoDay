@@ -47,6 +47,17 @@ export const getApprovedPosts = query({
     },
 });
 
+export const getApprovedPostsCount = query({
+    args: {},
+    handler: async (ctx) => {
+        const posts = await ctx.db
+            .query("posts")
+            .withIndex("by_status", (q) => q.eq("status", "approved"))
+            .collect();
+        return posts.length;
+    },
+});
+
 export const getApprovedPostsPaginated = query({
     args: {
         paginationOpts: paginationOptsValidator,
