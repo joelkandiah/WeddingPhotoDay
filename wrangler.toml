@@ -7,22 +7,27 @@ compatibility_date = "2024-01-01"
 
 # R2 bucket binding
 # The bucket must be created in your Cloudflare account before deploying
+# Replace "wedding-photos" with your actual bucket name
 [[r2_buckets]]
 binding = "R2_BUCKET"
-bucket_name = "${BUCKET_NAME}"
+bucket_name = "wedding-photos"
+# Note: You can also use a variable: bucket_name = "${BUCKET_NAME}"
+# and set it with: wrangler secret put BUCKET_NAME
 
 # Environment variables
-# Set these using: wrangler secret put BUCKET_NAME
-# Set these using: wrangler secret put PUBLIC_ORIGIN
+# BUCKET_NAME and PUBLIC_ORIGIN can be set as secrets or variables
+# For secrets: wrangler secret put BUCKET_NAME
+# For variables: add them to [vars] section below
 [vars]
-# These will be set via secrets or environment variables
-# BUCKET_NAME = "wedding-photos"
-# PUBLIC_ORIGIN = "https://your-worker.workers.dev"
+BUCKET_NAME = "wedding-photos"
+PUBLIC_ORIGIN = "https://wedding-photo-worker.your-account.workers.dev"
 
 # Development configuration
 [env.development]
 # You can override settings for local development here
+# name = "wedding-photo-worker-dev"
 
 # Production configuration
 [env.production]
 # You can override settings for production here
+# name = "wedding-photo-worker-prod"

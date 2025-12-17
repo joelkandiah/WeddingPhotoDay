@@ -1,30 +1,25 @@
+// Note: The 'components' export will be generated when you run 'npx convex dev'
+// or 'npx convex deploy' after the convex.config.ts is processed.
+// If you see a TypeScript error here, run 'npx convex dev' to generate the types.
 import { components } from "./_generated/api";
 import { R2 } from "@convex-dev/r2";
-import { mutation } from "./_generated/server";
 
 // R2 component client
 export const r2 = new R2(components.r2);
 
-// Server callback for onSyncMetadata
-// This is called when R2 syncs metadata about uploaded files
-export const onSyncMetadata = r2.onSyncMetadata(async (ctx, metadata) => {
-  // Log metadata sync for debugging
-  console.log("R2 metadata synced:", metadata);
-  // You can add custom logic here to track uploads in your database
-  // For example, update a tracking table or send notifications
-});
-
-// Export generateUploadUrl mutation to be used by posts and photos
-// This maintains compatibility with the existing upload flow
-export const generateUploadUrl = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // Generate upload URL using the R2 component
-    // This returns an upload URL and storage key compatible with the current flow
-    const { url, storageKey } = await r2.generateUploadUrl(ctx);
-    
-    // Return just the URL to match the existing interface
-    // The storageKey is embedded in the response from the fetch
-    return url;
+// Export the client API functions that the frontend will use
+// This includes generateUploadUrl and syncMetadata
+export const { generateUploadUrl, syncMetadata } = r2.clientApi({
+  // Optional: Check if user is allowed to upload
+  checkUpload: async (ctx, bucket) => {
+    // Allow all uploads for now
+    // You can add authentication/authorization here if needed
+    console.log(`Upload check for bucket: ${bucket}`);
+  },
+  // Optional: Handle successful upload
+  onUpload: async (ctx, bucket, key) => {
+    // Log when a file is uploaded
+    console.log(`File uploaded to bucket ${bucket} with key: ${key}`);
+    // You can add custom logic here, like updating a database record
   },
 });

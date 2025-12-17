@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { getIsAdmin } from "./adminHelper";
-import { r2 } from "./r2";
+import { generateUploadUrl as r2GenerateUploadUrl } from "./r2";
 
 // Public queries
 export const getApprovedPhotos = query({
@@ -23,14 +23,7 @@ export const getApprovedPhotos = query({
   },
 });
 
-export const generateUploadUrl = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // Delegate to R2 component for generating upload URLs
-    const { url } = await r2.generateUploadUrl(ctx);
-    return url;
-  },
-});
+export const generateUploadUrl = r2GenerateUploadUrl;
 
 export const uploadPhoto = mutation({
   args: {

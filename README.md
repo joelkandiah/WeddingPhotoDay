@@ -22,6 +22,10 @@ This app uses **Cloudflare R2** for image storage and **Cloudflare Image Resizin
 3. Caches derived images back to R2 to reduce transform costs
 4. Returns responses with long immutable Cache-Control headers
 
+### Quick Start
+
+**Important:** You may see TypeScript errors in `convex/r2.ts` about missing `components` export until you complete the R2 setup below. This is expected - the types will be generated when you run `npx convex dev`.
+
 ### R2 Setup
 
 1. **Install dependencies:**
@@ -33,21 +37,55 @@ This app uses **Cloudflare R2** for image storage and **Cloudflare Image Resizin
    - Go to [Cloudflare Dashboard](https://dash.cloudflare.com/) → R2
    - Create a new bucket (e.g., `wedding-photos`)
    - Note the bucket name for later configuration
+   
+3. **Add CORS policy to the bucket:**
+   - In your R2 bucket settings, click on **Settings** → **CORS Policy**
+   - Add a CORS policy allowing GET and PUT requests from your Convex app:
+   ```json
+   [
+     {
+       "AllowedOrigins": ["*"],
+       "AllowedMethods": ["GET", "PUT"],
+       "AllowedHeaders": ["Content-Type"]
+     }
+   ]
+   ```
+   - For production, replace `"*"` with your specific domain
 
-3. **Configure Convex environment variables:**
+4. **Create an R2 API Token:**
+   - On the main R2 page in your Cloudflare dashboard, click **Manage R2 API Tokens**
+   - Click **Create API Token**
+   - Edit the token name (e.g., "Wedding Photo App")
+   - Set permissions to **Object Read & Write**
+   - Under **Specify bucket**, select the bucket you created
+   - Optionally change TTL
+   - Click **Create API Token**
+   - On the next screen, save these values:
+     - **Access Key ID**: `R2_ACCESS_KEY_ID`
+     - **Secret Access Key**: `R2_SECRET_ACCESS_KEY`
+     - **Endpoint**: `R2_ENDPOINT` (looks like: `https://<account-id>.r2.cloudflarestorage.com`)
+     - You also need your bucket name: `R2_BUCKET`
+
+5. **Configure Convex environment variables:**
    ```bash
-   npx convex env set R2_BUCKET_NAME your-bucket-name
-   npx convex env set R2_ACCOUNT_ID your-cloudflare-account-id
-   npx convex env set R2_ACCESS_KEY_ID your-r2-access-key
-   npx convex env set R2_SECRET_ACCESS_KEY your-r2-secret-key
+   npx convex env set R2_TOKEN your-token-value
+   npx convex env set R2_ACCESS_KEY_ID your-access-key-id
+   npx convex env set R2_SECRET_ACCESS_KEY your-secret-access-key
+   npx convex env set R2_ENDPOINT your-r2-endpoint
+   npx convex env set R2_BUCKET your-bucket-name
    ```
 
-   To get R2 credentials:
-   - Go to Cloudflare Dashboard → R2 → Manage R2 API Tokens
-   - Create a new API token with R2 read/write permissions
-   - Copy the Access Key ID and Secret Access Key
-
-4. **Deploy the Convex component:**
+6. **Deploy the Convex component:**
+   ```bash
+   npx convex dev
+   ```
+   
+   This will:
+   - Register the R2 component
+   - Generate the `components` export in `convex/_generated/api.d.ts`
+   - Clear any TypeScript errors in `convex/r2.ts`
+   
+   For production deployment:
    ```bash
    npx convex deploy
    ```
