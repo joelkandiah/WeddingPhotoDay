@@ -8,7 +8,9 @@ import { R2 } from "@convex-dev/r2";
 export const r2 = new R2(components.r2);
 
 // Export the client API functions that the frontend will use
-// This includes generateUploadUrl and syncMetadata
+// The client calls generateUploadUrl() which returns { url, key }
+// - url: presigned URL for direct upload to R2
+// - key: the R2 object key (storage identifier) for the uploaded file
 export const { generateUploadUrl, syncMetadata } = r2.clientApi({
   // Optional: Check if user is allowed to upload
   checkUpload: async (ctx, bucket) => {
@@ -34,5 +36,5 @@ export function getPhotoUrl(storageId: string) {
     );
   }
   const normalizedBase = baseEndpoint.replace(/\/+$/, "");
-  return `${normalizedBase}/images/compressed/${storageId}?quality=20`;
+  return `${normalizedBase}/images/compressed/${storageId}?quality=60`;
 }

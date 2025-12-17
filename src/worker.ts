@@ -52,6 +52,22 @@ export default {
       const targetFormat = imageRequest.format === 'auto' ? getBestFormat(request) : (imageRequest.format || 'webp');
       const finalKey = `${baseDerivedKey}.${targetFormat}`;
 
+      // OPTIMIZATION: Cloudflare Cache API Integration
+      // To prevent race conditions where multiple concurrent requests trigger duplicate transformations,
+      // you can use Cloudflare's Cache API to coordinate requests:
+      //
+      // const cache = caches.default;
+      // const cacheKey = new Request(`https://cache/${finalKey}`, { method: 'GET' });
+      // let cachedResponse = await cache.match(cacheKey);
+      // if (cachedResponse) return cachedResponse;
+      //
+      // Then after transformation:
+      // const responseToCache = new Response(imageBuffer, { headers: ... });
+      // ctx.waitUntil(cache.put(cacheKey, responseToCache.clone()));
+      //
+      // This provides faster CDN-level caching and prevents duplicate transformations during
+      // concurrent requests. The R2 cache below serves as a durable backup.
+
       const cachedObject = await env.R2_BUCKET.get(finalKey);
       if (cachedObject) {
         return serveResponse(cachedObject.body, cachedObject.httpMetadata?.contentType, 'HIT-R2-CACHE');
@@ -84,6 +100,17 @@ export default {
 
     } catch (error) {
       console.error('Worker Error:', error);
+      
+      // Provide more specific error responses
+      if (error instanceof Error) {
+        if (error.message.includes('Not Found') || error.message.includes('not found')) {
+          return new Response('Image not found', { status: 404 });
+        }
+        if (error.message.includes('Resizing')) {
+          return new Response('Image transformation failed', { status: 502 });
+        }
+      }
+      
       return new Response('Internal Server Error', { status: 500 });
     }
   },
@@ -134,23 +161,47 @@ function parseImageRequest(url: URL): ImageRequest | null {
 
   if (parts[1] === 'original') return { key };
 
+  // Validate and parse quality parameter (1-100)
+  const qualityParam = url.searchParams.get('quality');
+  let quality = 85; // default
+  if (qualityParam) {
+    const parsed = parseInt(qualityParam, 10);
+    if (!isNaN(parsed) && parsed >= 1 && parsed <= 100) {
+      quality = parsed;
+    }
+  }
+
+  // Validate format parameter
+  const formatParam = url.searchParams.get('format');
+  const validFormats = ['webp', 'jpeg', 'png', 'avif', 'auto'];
+  const format = formatParam && validFormats.includes(formatParam) ? formatParam : 'auto';
+
   if (parts[1] === 'compressed') {
     return {
       key,
       compressed: true,
-      quality: parseInt(url.searchParams.get('quality') || '85'),
-      format: url.searchParams.get('format') || 'auto'
+      quality,
+      format
     };
   }
 
   const dimMatch = parts[1].match(/^(\d+)?x(\d+)?$/);
   if (dimMatch) {
+    const width = dimMatch[1] ? parseInt(dimMatch[1]) : undefined;
+    const height = dimMatch[2] ? parseInt(dimMatch[2]) : undefined;
+    
+    // Validate dimensions - max 8K resolution (7680x4320)
+    const MAX_DIMENSION = 7680;
+    if ((width && width > MAX_DIMENSION) || (height && height > MAX_DIMENSION)) {
+      return null; // Invalid dimensions
+    }
+
     return {
       key,
-      width: dimMatch[1] ? parseInt(dimMatch[1]) : undefined,
-      height: dimMatch[2] ? parseInt(dimMatch[2]) : undefined,
-      quality: parseInt(url.searchParams.get('quality') || '85'),
-      format: url.searchParams.get('format') || 'auto'
+      width,
+      height,
+      quality,
+      format
     };
   }
 
