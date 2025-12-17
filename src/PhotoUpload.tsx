@@ -182,7 +182,7 @@ export function PhotoUpload() {
                     Click to select photos
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">
-                    JPG, PNG up to 10MB each • Multiple photos allowed
+                    JPG, PNG, HEIC up to 10MB each • Multiple photos allowed
                   </div>
                 </div>
               </button>

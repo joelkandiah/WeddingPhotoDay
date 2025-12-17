@@ -133,13 +133,27 @@ The Cloudflare Worker serves images from R2 with on-demand resizing capabilities
 
 The Worker supports the following URL patterns:
 
-- **Original images:** `/images/original/{key}`
-- **Width only:** `/images/{width}x/{key}` (maintains aspect ratio)
-- **Height only:** `/images/x{height}/{key}` (maintains aspect ratio)
-- **Both dimensions:** `/images/{width}x{height}/{key}`
-- **Query parameters:**
+- **Original images:** `/images/original/{key}` - Serves the original, unmodified image
+- **Compressed images:** `/images/compressed/{key}` - Auto-compresses with 85% quality and optimal format (recommended for serving photos)
+  - Automatically converts HEIC/HEIF (iPhone photos) to web-friendly formats
+  - Query params: `?quality=80` (default: 85), `?format=webp` (default: auto)
+- **Width only:** `/images/{width}x/{key}` - Resizes to specific width (maintains aspect ratio)
+- **Height only:** `/images/x{height}/{key}` - Resizes to specific height (maintains aspect ratio)
+- **Both dimensions:** `/images/{width}x{height}/{key}` - Resizes to specific dimensions
+- **Query parameters (for all derived images):**
   - `?quality=80` - Set JPEG/WebP quality (1-100)
-  - `?format=webp` - Convert to WebP, JPEG, PNG, etc.
+  - `?format=webp` - Convert to WebP, JPEG, PNG, AVIF, or 'auto' (browser-specific)
+
+**Example URLs:**
+```
+/images/original/{key}                    # Original, unmodified
+/images/compressed/{key}                  # Auto-compressed (85% quality, auto format)
+/images/compressed/{key}?quality=75       # Compressed with custom quality
+/images/800x/{key}                        # Resized to 800px wide
+/images/1200x800/{key}?format=webp        # Specific dimensions as WebP
+```
+
+**HEIC/HEIF Support:** iPhone photos in HEIC format are automatically detected and converted to web-friendly formats (WebP for modern browsers, JPEG for others) by Cloudflare Image Resizing.
 
 ### How the Upload Flow Works
 
@@ -163,8 +177,14 @@ After deployment, test the setup:
    
    Once you have uploaded images, test the Worker URLs:
    ```bash
-   # Original image
+   # Original image (unmodified)
    curl -I https://your-worker.workers.dev/images/original/{your-image-key}
+   
+   # Compressed image (recommended - auto-quality, HEIC converted to WebP/JPEG)
+   curl -I https://your-worker.workers.dev/images/compressed/{your-image-key}
+   
+   # Compressed with custom quality
+   curl -I https://your-worker.workers.dev/images/compressed/{your-image-key}?quality=75
    
    # Resized image (800px wide)
    curl -I https://your-worker.workers.dev/images/800x/{your-image-key}
@@ -179,7 +199,7 @@ After deployment, test the setup:
    - Make the same request twice
    - The first request transforms the image
    - The second request serves the cached version from R2
-   - Check your R2 bucket - you should see derived images in a `derived/` prefix
+   - Check your R2 bucket - you should see derived images in `derived/compressed/` or `derived/{width}x{height}/` prefixes
 
 ## App authentication
 

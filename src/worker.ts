@@ -3,9 +3,12 @@
  * 
  * This worker:
  * 1. Serves original images from R2 at /images/original/{key}
- * 2. Generates derived images on-demand using Cloudflare Image Resizing
- * 3. Stores derived images back to R2 to reduce repeated transform costs
- * 4. Returns responses with long immutable Cache-Control headers
+ * 2. Serves auto-compressed images at /images/compressed/{key} (default 85% quality, auto format)
+ * 3. Generates derived images on-demand using Cloudflare Image Resizing
+ * 4. Stores derived images back to R2 to reduce repeated transform costs
+ * 5. Returns responses with long immutable Cache-Control headers
+ * 
+ * Supports HEIC/HEIF images from iPhones - automatically converts to web-friendly formats
  */
 
 interface Env {
@@ -20,6 +23,7 @@ interface ImageRequest {
   height?: number;
   quality?: number;
   format?: string;
+  compressed?: boolean;  // For automatic compression without specifying dimensions
 }
 
 export default {
@@ -40,7 +44,7 @@ export default {
       }
 
       // Check if this is a derived image request (has transformation params)
-      const isDerived = imageRequest.width || imageRequest.height || imageRequest.format;
+      const isDerived = imageRequest.width || imageRequest.height || imageRequest.format || imageRequest.compressed;
       
       if (isDerived) {
         // For derived images, try to serve from cache first
@@ -92,15 +96,30 @@ export default {
 function parseImageRequest(url: URL): ImageRequest | null {
   const pathParts = url.pathname.split('/').filter(Boolean);
   
-  // Expected format: /images/original/{key} or /images/{width}x{height}/{key}
+  // Expected format: /images/original/{key}, /images/compressed/{key}, or /images/{width}x{height}/{key}
   if (pathParts.length < 3 || pathParts[0] !== 'images') {
     return null;
   }
   
   if (pathParts[1] === 'original') {
-    // Original image request
+    // Original image request - no transformations
     const key = pathParts.slice(2).join('/');
     return { key };
+  }
+  
+  if (pathParts[1] === 'compressed') {
+    // Compressed image request - auto quality/format optimization
+    // Defaults to 85% quality and automatic format selection (HEIC → WebP/JPEG)
+    const key = pathParts.slice(2).join('/');
+    const quality = url.searchParams.get('quality');
+    const format = url.searchParams.get('format');
+    
+    return {
+      key,
+      compressed: true,
+      quality: quality ? parseInt(quality, 10) : 85,
+      format: format || 'auto',
+    };
   }
   
   // Derived image request - parse dimensions
@@ -132,6 +151,10 @@ function parseImageRequest(url: URL): ImageRequest | null {
 function getDerivedImageKey(request: ImageRequest): string {
   const parts = ['derived'];
   
+  if (request.compressed) {
+    parts.push('compressed');
+  }
+  
   if (request.width || request.height) {
     parts.push(`${request.width || ''}x${request.height || ''}`);
   }
@@ -152,18 +175,25 @@ function getDerivedImageKey(request: ImageRequest): string {
 /**
  * Interface for Cloudflare Image Resizing options
  * See: https://developers.cloudflare.com/images/transform-images/transform-via-workers/
+ * 
+ * Note: Cloudflare automatically handles HEIC/HEIF images from iPhones and converts
+ * them to web-friendly formats. Using format: 'auto' lets Cloudflare choose the best
+ * output format based on browser support (WebP for modern browsers, JPEG for others).
  */
 interface ImageTransformOptions {
   width?: number;
   height?: number;
   quality?: number;
   format?: 'webp' | 'jpeg' | 'png' | 'avif' | 'auto';
+  fit?: 'scale-down' | 'contain' | 'cover' | 'crop' | 'pad';
 }
 
 /**
  * Transform an image using Cloudflare Image Resizing
  * Note: This uses Cloudflare's Image Resizing service which requires
  * the service to be enabled in your Cloudflare account
+ * 
+ * Supports HEIC/HEIF images from iPhones - automatically converts to web-friendly formats
  */
 async function transformImage(
   original: R2ObjectBody,
@@ -182,12 +212,20 @@ async function transformImage(
     options.height = request.height;
   }
   
-  if (request.quality) {
+  // Default quality for compression
+  if (request.quality !== undefined) {
     options.quality = request.quality;
   }
   
+  // Handle format - 'auto' lets Cloudflare choose best format (WebP for modern browsers)
   if (request.format) {
     options.format = request.format as ImageTransformOptions['format'];
+  }
+  
+  // For compressed images without dimensions, use scale-down to preserve aspect ratio
+  // and prevent upscaling
+  if (request.compressed && !request.width && !request.height) {
+    options.fit = 'scale-down';
   }
   
   // Use Cloudflare Image Resizing via fetch with cf.image
