@@ -36,22 +36,23 @@ export function SignInForm() {
             // This will throw an error if the password is invalid
             const verifyResult = await verifyPassword({ password });
             
+            // Store the role in localStorage to be applied once the session is established
+            localStorage.setItem("pending_role", verifyResult.role);
+            
             // Only sign in anonymously if password is valid
             await signIn("anonymous");
             
-            // Wait a moment for the user record to be created in the database
-            // This ensures the mutation can find the user
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Set the role on the user
-            const result = await setUserRole({ role: verifyResult.role });
-            
-            if (result.success) {
-              toast.success(`Welcome! Signed in as ${result.role}`);
-            }
+            // The SessionInitializer in App.tsx will handle the role assignment
+            // once the Authenticated state is reached.
           } catch (error: any) {
-            console.error("Sign in error:", error);
-            toast.error(error.message || "Invalid password. Please try again.");
+            console.error("Sign in error details:", error);
+            const errorMessage = error.message || "";
+            
+            if (errorMessage.includes("Server Error") || errorMessage.includes("action failed")) {
+              toast.error("Server Configuration Error: Please ensure JWKS keys and Environment Variables are set in the Convex Dashboard.");
+            } else {
+              toast.error(errorMessage || "Invalid password. Please try again.");
+            }
             setSubmitting(false);
           }
         }}

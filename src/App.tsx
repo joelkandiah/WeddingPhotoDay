@@ -8,7 +8,40 @@ import { PhotoGallery } from "./PhotoGallery";
 import { AdminPanel } from "./AdminPanel";
 import { Slideshow } from "./Slideshow";
 import { ThemeToggle } from "./components/ThemeToggle";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useMutation } from "convex/react";
+import { toast } from "sonner";
+
+
+function SessionInitializer() {
+  const setUserRole = useMutation(api.auth.signInWithPassword);
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    const applyPendingRole = async () => {
+      const pendingRole = localStorage.getItem("pending_role");
+      if (pendingRole && !initialized) {
+        try {
+          console.log("Applying pending role:", pendingRole);
+          const result = await setUserRole({ role: pendingRole as "user" | "admin" });
+          if (result.success) {
+            toast.success(`Welcome! Signed in as ${result.role}`);
+            localStorage.removeItem("pending_role");
+            setInitialized(true);
+          }
+        } catch (error) {
+          console.error("Error applying pending role:", error);
+          // If it fails because of session, we'll try again on next render
+          // which is fine since it's reactive.
+        }
+      }
+    };
+
+    applyPendingRole();
+  }, [setUserRole, initialized]);
+
+  return null;
+}
 
 export default function App() {
   const [currentView, setCurrentView] = useState<"gallery" | "upload" | "admin" | "slideshow">("gallery");
@@ -122,6 +155,7 @@ function Content({ currentView }: { currentView: string }) {
       </Unauthenticated>
 
       <Authenticated>
+        <SessionInitializer />
         <div className="mb-8 text-center">
           <h1>
             Welcome!

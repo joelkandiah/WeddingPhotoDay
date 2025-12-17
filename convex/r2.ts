@@ -1,40 +1,28 @@
-import { components } from "./_generated/api";
+// convex/photos.ts
 import { R2 } from "@convex-dev/r2";
+import { components } from "./_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { rateLimiter } from "./rateLimit";
 
-let r2: R2 | undefined;
-
-function getR2() {
-  if (!r2) {
-    r2 = new R2(components.r2);
-  }
-  return r2;
-}
+export const r2 = new R2(components.r2);
 
 export const { generateUploadUrl, syncMetadata, deleteObject } =
-  getR2().clientApi({
+  r2.clientApi({
     checkUpload: async (ctx, bucket) => {
       const userId = await getAuthUserId(ctx);
-      if (!userId) {
-        throw new Error("Not authenticated");
-      }
+      if (!userId) throw new Error("Not authenticated");
 
       const user = await ctx.db.get(userId);
-      if (!user || !user.role) {
-        throw new Error("Not authorized");
-      }
+      if (!user || !user.role) throw new Error("Not authorized");
 
       if ("runMutation" in ctx) {
         await rateLimiter.limit(ctx as any, "upload", { key: userId });
       }
     },
-
     onUpload: async (_ctx, bucket, key) => {
       console.log(`Uploaded ${bucket}/${key}`);
     },
   });
-
 
 // Write a function that constructs the URL from the storageId
 // Note: Uses quality=60 for thumbnails/previews (lower than worker's default of 85 for full images)

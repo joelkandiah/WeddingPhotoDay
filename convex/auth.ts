@@ -35,9 +35,15 @@ export const verifyPassword = mutation({
     const userPasswordHash = process.env.USER_PASSWORD_HASH;
     const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
 
+    if (!userPasswordHash) {
+      console.error("USER_PASSWORD_HASH is missing in environment variables");
+    }
+    if (!adminPasswordHash) {
+      console.error("ADMIN_PASSWORD_HASH is missing in environment variables");
+    }
+
     if (!userPasswordHash || !adminPasswordHash) {
-      console.error("USER_PASSWORD_HASH or ADMIN_PASSWORD_HASH not set in environment");
-      throw new Error("Server configuration error. Please contact the administrator.");
+      throw new Error("Authenticaton is currently unavailable due to missing server configuration. Please check USER_PASSWORD_HASH and ADMIN_PASSWORD_HASH environment variables in the Convex dashboard.");
     }
 
     // Determine role based on password match
