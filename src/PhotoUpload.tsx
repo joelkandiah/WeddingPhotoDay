@@ -48,55 +48,51 @@ export function PhotoUpload() {
     setUploadProgress({});
 
     try {
-      // Upload all photos
-      const storageIds: Id<"_storage">[] = [];
-      
-      for (let i = 0; i < selectedImages.length; i++) {
-        const file = selectedImages[i];
-        
-        // Get upload URL
-        const postUrl = await generateUploadUrl();
+      const storageIds: string[] = [];
 
-        // Upload file
-        const result = await fetch(postUrl, {
-          method: "POST",
+      for (const file of selectedImages) {
+        // Generate signed URL from Convex
+        const { url, key } = await generateUploadUrl();
+
+        console.log("Upload URL:", url);
+        console.log("Upload Key:", key);
+
+        // Upload file to R2
+        const res = await fetch(url, {
+          method: "PUT",
           headers: { "Content-Type": file.type },
           body: file,
         });
 
-        const json = await result.json();
-        if (!result.ok) {
-          throw new Error(`Upload failed for ${file.name}: ${JSON.stringify(json)}`);
+        if (!res.ok) {
+          throw new Error(`Upload failed for ${file.name}`);
         }
 
-        storageIds.push(json.storageId as Id<"_storage">);
-        
-        // Update progress
-        setUploadProgress(prev => ({
-          ...prev,
-          [file.name]: true
-        }));
+        // Store R2 object key for Convex post
+        storageIds.push(key);
+
+        // Update progress immediately after each file
+        setUploadProgress(prev => ({ ...prev, [file.name]: true }));
       }
 
-      // Create post with all photos
+      // Call mutation once with all keys
       await uploadPost({
         photoStorageIds: storageIds,
         uploaderName: uploaderName.trim(),
         caption: caption.trim() || undefined,
-        category: category,
+        category,
       });
 
-      toast.success(`${selectedImages.length} photo${selectedImages.length > 1 ? 's' : ''} uploaded successfully! They will appear after admin approval.`);
-      
+      toast.success(`${selectedImages.length} photo${selectedImages.length > 1 ? "s" : ""} uploaded successfully! They will appear after admin approval.`);
+
       // Reset form
       setUploaderName("");
       setCaption("");
       setCategory("US Ceremony");
       setSelectedImages([]);
       setUploadProgress({});
-      if (imageInput.current) {
-        imageInput.current.value = "";
-      }
+      if (imageInput.current) imageInput.current.value = "";
+
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Failed to upload photos. Please try again.");

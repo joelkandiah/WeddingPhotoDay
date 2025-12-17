@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { getIsAdmin } from "./adminHelper";
-import { generateUploadUrl as r2GenerateUploadUrl } from "./r2";
+import { generateUploadUrl as r2GenerateUploadUrl, getPhotoUrl } from "./r2";
 
 // Public queries
 export const getApprovedPhotos = query({
@@ -17,7 +17,7 @@ export const getApprovedPhotos = query({
     return Promise.all(
       photos.map(async (photo) => ({
         ...photo,
-        url: await ctx.storage.getUrl(photo.storageId),
+        url: getPhotoUrl(photo.storageId),
       }))
     );
   },
@@ -27,7 +27,7 @@ export const generateUploadUrl = r2GenerateUploadUrl;
 
 export const uploadPhoto = mutation({
   args: {
-    storageId: v.id("_storage"),
+    storageId: v.string(),
     uploaderName: v.string(),
     caption: v.optional(v.string()),
   },
@@ -69,7 +69,7 @@ export const getPendingPhotos = query({
     return Promise.all(
       photos.map(async (photo) => ({
         ...photo,
-        url: await ctx.storage.getUrl(photo.storageId),
+        url: getPhotoUrl(photo.storageId),
       }))
     );
   },
@@ -120,7 +120,7 @@ export const getApprovedPhotosForAdmin = query({
   args: {},
   handler: async (ctx) => {
     const isAdmin = await getIsAdmin(ctx);
-    
+
     if (!isAdmin) {
       throw new Error("Not authorized");
     }
@@ -134,7 +134,7 @@ export const getApprovedPhotosForAdmin = query({
     return Promise.all(
       photos.map(async (photo) => ({
         ...photo,
-        url: await ctx.storage.getUrl(photo.storageId),
+        url: getPhotoUrl(photo.storageId),
       }))
     );
   },
@@ -177,7 +177,7 @@ export const getRejectedPhotosForAdmin = query({
     return Promise.all(
       photos.map(async (photo) => ({
         ...photo,
-        url: await ctx.storage.getUrl(photo.storageId),
+        url: getPhotoUrl(photo.storageId),
       }))
     );
   },

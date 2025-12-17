@@ -18,18 +18,17 @@ bucket_name = "wedding-photos"  # TODO: Change this to your actual bucket name
 # PUBLIC_ORIGIN should be your Worker's URL (you'll get this after first deployment)
 [vars]
 BUCKET_NAME = "wedding-photos"  # TODO: Change this to your actual bucket name
-PUBLIC_ORIGIN = "https://wedding-photo-worker.workers.dev"  # TODO: Update after deployment
+PUBLIC_ORIGIN = "https://images.ferrerkandiahwedding.com"  # TODO: Update after deployment
 
-# Development configuration
-[env.development]
-# You can override settings for local development here
-# For example:
-# name = "wedding-photo-worker-dev"
-# vars = { BUCKET_NAME = "wedding-photos-dev" }
+# Route configuration
+# This tells Cloudflare to invoke the Worker for all /images/* paths
+routes = ["images-cdn.ferrerkandiahwedding.com/images/*"]
 
-# Production configuration
-[env.production]
-# You can override settings for production here
-# For example:
-# name = "wedding-photo-worker-prod"
-# vars = { BUCKET_NAME = "wedding-photos-prod" }
+[env.production.vars]
+BUCKET_NAME = "wedding-photos"
+PUBLIC_ORIGIN = "https://images.ferrerkandiahwedding.com"
+routes = ["images-cdn.ferrerkandiahwedding.com/images/*"]
+
+[[env.production.r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "wedding-photos"

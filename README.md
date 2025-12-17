@@ -73,6 +73,7 @@ This app uses **Cloudflare R2** for image storage and **Cloudflare Image Resizin
    npx convex env set R2_SECRET_ACCESS_KEY your-secret-access-key
    npx convex env set R2_ENDPOINT your-r2-endpoint
    npx convex env set R2_BUCKET your-bucket-name
+   npx convex env set R2_PUBLIC_ENDPOINT your-bucket-name
    ```
 
 6. **Deploy the Convex component:**

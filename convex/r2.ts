@@ -23,3 +23,8 @@ export const { generateUploadUrl, syncMetadata } = r2.clientApi({
     // You can add custom logic here, like updating a database record
   },
 });
+
+// Write a function that constructs the URL from the storageId
+export function getPhotoUrl(storageId: string) {
+  return `${process.env.R2_PUBLIC_ENDPOINT}/images/compressed/${storageId}?quality=20`;
+}
