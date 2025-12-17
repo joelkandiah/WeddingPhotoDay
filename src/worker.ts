@@ -93,12 +93,13 @@ export default {
  * Triggers Cloudflare Resizing by fetching the "Original" URL from itself
  */
 async function transformViaResizer(request: ImageRequest, origin: string): Promise<Response> {
+  const hasDimensions = typeof request.width === 'number' || typeof request.height === 'number';
   const resizingOptions = {
     width: request.width,
     height: request.height,
     quality: request.quality || 85,
     format: request.format || 'auto',
-    fit: request.compressed ? 'scale-down' : 'cover',
+    fit: hasDimensions ? 'cover' : 'scale-down',
   };
 
   const originalUrl = `${origin}/images/original/${request.key}`;
