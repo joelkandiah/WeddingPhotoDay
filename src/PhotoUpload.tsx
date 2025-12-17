@@ -57,7 +57,6 @@ export function PhotoUpload() {
         // Upload file to R2
         const res = await fetch(url, {
           method: "PUT",
-          headers: { "Content-Type": file.type },
           body: file,
         });
 
