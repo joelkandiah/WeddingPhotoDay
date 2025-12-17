@@ -73,7 +73,7 @@ This app uses **Cloudflare R2** for image storage and **Cloudflare Image Resizin
    npx convex env set R2_SECRET_ACCESS_KEY your-secret-access-key
    npx convex env set R2_ENDPOINT your-r2-endpoint
    npx convex env set R2_BUCKET your-bucket-name
-   npx convex env set R2_PUBLIC_ENDPOINT your-bucket-name
+   npx convex env set R2_PUBLIC_ENDPOINT your-public-endpoint
    ```
 
 6. **Deploy the Convex component:**
@@ -206,26 +206,43 @@ After deployment, test the setup:
 
 This app uses **sitewide login** with [Convex Auth](https://auth.convex.dev/). Users enter a single password to access the site, and the backend automatically determines their role (user or admin) based on which password matches.
 
-### Setting up passwords
+### Setting up passwords (Hashed)
 
-To configure the site passwords, set the following environment variables in your Convex deployment:
+This app uses **hashed password comparison** with `bcrypt` for enhanced security. Instead of plaintext passwords, you must provide bcrypt hashes in your environment variables.
 
-- `USER_PASSWORD` - Password for regular users (default: `user123`)
-- `ADMIN_PASSWORD` - Password for admin users (default: `admin123`)
+#### 1. Generate password hashes
 
-**Important:** The default passwords are for development only. Change them before deploying to production!
+Run the following utility script for both your guest and admin passwords:
 
-To set environment variables in Convex:
 ```bash
-npx convex env set USER_PASSWORD your_user_password
-npx convex env set ADMIN_PASSWORD your_admin_password
+# For regular users
+node scripts/hash-password.js your_guest_password
+
+# For admins
+node scripts/hash-password.js your_admin_password
 ```
 
+The script will output a hash like `$2b$10$...`.
+
+#### 2. Configure Convex environment variables
+
+Set the following environment variables in your Convex deployment using the hashes you generated:
+
+- `USER_PASSWORD_HASH` - The bcrypt hash for regular users
+- `ADMIN_PASSWORD_HASH` - The bcrypt hash for admin users
+
+```bash
+npx convex env set USER_PASSWORD_HASH '$2b$10$your_user_hash_here'
+npx convex env set ADMIN_PASSWORD_HASH '$2b$10$your_admin_hash_here'
+```
+
+> [!IMPORTANT]
+> Always wrap the hash in single quotes when using the CLI to avoid shell interpretation issues.
+
 **Security Notes:**
-- Passwords are compared using constant-time comparison to prevent timing attacks
-- For production, use strong, unique passwords for both roles
-- The current implementation uses plain text passwords stored in environment variables
-- For enhanced security, consider implementing bcrypt hashing for password storage
+- Passwords are compared using `bcrypt` which is resistant to brute-force and timing attacks.
+- Plaintext passwords are NEVER stored in the database or environment variables.
+- Default passwords have been removed to ensure a secure-by-default setup.
 
 ### How it works
 

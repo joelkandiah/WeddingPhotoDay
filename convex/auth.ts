@@ -1,35 +1,25 @@
 import { convexAuth } from "@convex-dev/auth/server";
 import { Anonymous } from "@convex-dev/auth/providers/Anonymous";
-import { DataModel } from "./_generated/dataModel";
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
-
-// Define interface for user identity with role
-interface UserIdentity {
-  subject: string;
-  email?: string;
-  name?: string;
-  role?: 'user' | 'admin';
-}
+import bcrypt from "bcryptjs";
 
 // Use Anonymous provider as the base for sitewide login
 export const { auth, signIn, signOut, store } = convexAuth({
   providers: [Anonymous],
 });
 
-// Simple constant-time comparison helper
-// This helps prevent timing attacks by ensuring comparison takes the same time
-// regardless of where the mismatch occurs
-const secureCompare = (a: string, b: string): boolean => {
-  if (a.length !== b.length) {
+const secureCompare = (password: string, hash: string): boolean => {
+  try {
+    console.log("Comparing password with hash:", hash.substring(0, 7) + "...");
+    const result = bcrypt.compareSync(password, hash);
+    console.log("Comparison result:", result);
+    return result;
+  } catch (error) {
+    console.error("Error comparing passwords:", error);
     return false;
   }
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-  return result === 0;
 };
 
 // Custom mutation to verify password before sign-in
@@ -41,17 +31,22 @@ export const verifyPassword = mutation({
   handler: async (ctx, args) => {
     const { password } = args;
 
-    // Get passwords from environment variables
-    const userPassword = process.env.USER_PASSWORD || 'user123';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    // Get hashed passwords from environment variables
+    const userPasswordHash = process.env.USER_PASSWORD_HASH;
+    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
+
+    if (!userPasswordHash || !adminPasswordHash) {
+      console.error("USER_PASSWORD_HASH or ADMIN_PASSWORD_HASH not set in environment");
+      throw new Error("Server configuration error. Please contact the administrator.");
+    }
 
     // Determine role based on password match
-    if (secureCompare(password, adminPassword)) {
+    if (secureCompare(password, adminPasswordHash)) {
       return {
         success: true,
         role: 'admin' as const,
       };
-    } else if (secureCompare(password, userPassword)) {
+    } else if (secureCompare(password, userPasswordHash)) {
       return {
         success: true,
         role: 'user' as const,
@@ -73,7 +68,7 @@ export const signInWithPassword = mutation({
 
     // Get the current user ID using the auth library helper
     const userId = await getAuthUserId(ctx);
-    
+
     if (!userId) {
       throw new Error("No active session. Please try signing in again.");
     }
@@ -113,13 +108,13 @@ export const loggedInUser = query({
     if (!user) {
       return null;
     }
-    
+
     // If user doesn't have a role yet, they haven't completed the password verification
     // Treat them as unauthenticated
     if (!user.role) {
       return null;
     }
-    
+
     // Return user info
     return {
       id: user._id,
