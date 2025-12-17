@@ -211,7 +211,9 @@ export function PhotoUpload() {
           <button
             type="submit"
             disabled={isUploading || selectedImages.length === 0 || !uploaderName.trim()}
-            className="w-full bg-linear-to-r from-blue-500 to-indigo-500 text-white font-semibold py-4 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+            className={`w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white font-semibold py-4 rounded-lg hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl ${
+              !isUploading && selectedImages.length > 0 && uploaderName.trim() ? "pulse-playful" : ""
+            }`}
           >
             {isUploading ? (
               <div className="flex items-center justify-center gap-2">

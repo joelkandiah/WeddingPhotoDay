@@ -4,7 +4,7 @@
 :root {
   color-scheme: light dark;
 
-  --color-bg: #EFF6FF;
+  --color-bg: #F5F3FF;
   --color-fg: #171717;
 
   --color-input-bg: #FFFFFF;
@@ -12,11 +12,11 @@
 
   --color-accent-text: #475569;
 
-  --color-bg-start: #EFF6FF;
-  --color-bg-end: #ffffff;
+  --color-bg-start: #F0F9FF;
+  --color-bg-end: #FAF5FF;
 
   --color-card-bg: #ffffff;
-  --color-card-border: #DBEAFE;
+  --color-card-border: #E0E7FF;
 }
 
 .dark {
@@ -24,15 +24,15 @@
   --color-fg: #f5f5f5;
 
   --color-input-bg: #1a1a1a;
-  --color-input-border: #1E3A8A;
+  --color-input-border: #312E81;
 
   --color-accent-text: #94a3b8;
 
   --color-bg-start: #0f0f0f;
-  --color-bg-end: #1a1a1a;
+  --color-bg-end: #1e1b4b;
 
   --color-card-bg: #101010;
-  --color-card-border: #1E3A8A;
+  --color-card-border: #312E81;
 }
 
 /* only use this to update the style of the auth input fields. use a different class for all other input fields */
@@ -52,7 +52,7 @@
 
 @layer base {
   h1 {
-    @apply text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6 dark:from-blue-400 dark:to-indigo-400 leading-[1.3];
+    @apply text-5xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 leading-[1.3];
   }
 
   h2 {
@@ -69,8 +69,8 @@
 }
 
 @theme {
-  --color-primary: #2563EB;
-  --color-primary-hover: #1D4ED8;
+  --color-primary: #7C3AED;
+  --color-primary-hover: #6D28D9;
   --color-dark-gray: #1f2937;
 
   --color-secondary: #6b7280;
@@ -180,4 +180,41 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
   /* Chrome, Safari and Opera */
+}
+
+@keyframes morphGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes playfulPulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.bg-animate-morph {
+  background-size: 200% 200%;
+  animation: morphGradient 20s ease infinite;
+}
+
+.pulse-playful {
+  animation: playfulPulse 2s ease-in-out infinite;
 }

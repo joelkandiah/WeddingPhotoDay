@@ -107,7 +107,7 @@ export function AdminPanel() {
           onClick={() => setActiveTab("pending")}
           className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
             activeTab === "pending"
-              ? "border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400"
+              ? "border-violet-500 text-violet-600 dark:border-violet-400 dark:text-violet-400"
               : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >
@@ -117,7 +117,7 @@ export function AdminPanel() {
           onClick={() => setActiveTab("approved")}
           className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
             activeTab === "approved"
-              ? "border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400"
+              ? "border-violet-500 text-violet-600 dark:border-violet-400 dark:text-violet-400"
               : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >
@@ -127,7 +127,7 @@ export function AdminPanel() {
           onClick={() => setActiveTab("rejected")}
           className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
             activeTab === "rejected"
-              ? "border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400"
+              ? "border-violet-500 text-violet-600 dark:border-violet-400 dark:text-violet-400"
               : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >

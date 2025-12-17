@@ -164,7 +164,7 @@ export function SlideshowContent({ category }: SlideshowContentProps) {
           <select
             value={intervalDuration}
             onChange={e => setIntervalDuration(Number(e.target.value))}
-            className="px-4 py-3 rounded-lg border border-card-border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none bg-card-bg text-fg"
+            className="px-4 py-3 rounded-lg border border-card-border focus:border-violet-500 focus:ring-2 focus:ring-violet-200 outline-none bg-card-bg text-fg"
           >
             <option value={3000}>3 seconds</option>
             <option value={5000}>5 seconds</option>
@@ -267,7 +267,7 @@ export function SlideshowContent({ category }: SlideshowContentProps) {
               key={photo._id}
               onClick={() => setCurrentIndex(index)}
               className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                index === currentIndex ? "border-blue-500 ring-2 ring-blue-200" : "border-card-border hover:border-accent-text"
+                index === currentIndex ? "border-violet-500 ring-2 ring-violet-200" : "border-card-border hover:border-accent-text"
               }`}
             >
               <img src={photo.url} alt="" className="w-full h-full object-cover" />
