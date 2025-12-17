@@ -111,13 +111,22 @@ function parseImageRequest(url: URL): ImageRequest | null {
     // Compressed image request - auto quality/format optimization
     // Defaults to 85% quality and automatic format selection (HEIC → WebP/JPEG)
     const key = pathParts.slice(2).join('/');
-    const quality = url.searchParams.get('quality');
+    const qualityParam = url.searchParams.get('quality');
     const format = url.searchParams.get('format');
+    
+    // Parse and validate quality parameter
+    let quality = 85; // default
+    if (qualityParam) {
+      const parsed = parseInt(qualityParam, 10);
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= 100) {
+        quality = parsed;
+      }
+    }
     
     return {
       key,
       compressed: true,
-      quality: quality ? parseInt(quality, 10) : 85,
+      quality,
       format: format || 'auto',
     };
   }
@@ -133,14 +142,23 @@ function parseImageRequest(url: URL): ImageRequest | null {
   const key = pathParts.slice(2).join('/');
   
   // Parse quality and format from query params
-  const quality = url.searchParams.get('quality');
+  const qualityParam = url.searchParams.get('quality');
   const format = url.searchParams.get('format');
+  
+  // Parse and validate quality parameter
+  let quality: number | undefined = undefined;
+  if (qualityParam) {
+    const parsed = parseInt(qualityParam, 10);
+    if (!isNaN(parsed) && parsed >= 1 && parsed <= 100) {
+      quality = parsed;
+    }
+  }
   
   return {
     key,
     width,
     height,
-    quality: quality ? parseInt(quality, 10) : undefined,
+    quality,
     format: format || undefined,
   };
 }
@@ -222,9 +240,9 @@ async function transformImage(
     options.format = request.format as ImageTransformOptions['format'];
   }
   
-  // For compressed images without dimensions, use scale-down to preserve aspect ratio
-  // and prevent upscaling
-  if (request.compressed && !request.width && !request.height) {
+  // For compressed images, always use scale-down to preserve aspect ratio
+  // and prevent upscaling regardless of whether dimensions are specified
+  if (request.compressed) {
     options.fit = 'scale-down';
   }
   
