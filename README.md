@@ -13,6 +13,106 @@ The backend code is in the `convex` directory.
   
 `npm run dev` will start the frontend and backend servers.
 
+## Image Storage and Delivery
+
+This app uses **Cloudflare R2** for image storage and **Cloudflare Image Resizing** for on-demand image transformations. Images are served through a Cloudflare Worker that:
+
+1. Serves original images from R2
+2. Generates derived images on-demand using Cloudflare Image Resizing
+3. Caches derived images back to R2 to reduce transform costs
+4. Returns responses with long immutable Cache-Control headers
+
+### R2 Setup
+
+1. **Install dependencies:**
+   ```bash
+   npm install @convex-dev/r2
+   ```
+
+2. **Create an R2 bucket in Cloudflare:**
+   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com/) → R2
+   - Create a new bucket (e.g., `wedding-photos`)
+   - Note the bucket name for later configuration
+
+3. **Configure Convex environment variables:**
+   ```bash
+   npx convex env set R2_BUCKET_NAME your-bucket-name
+   npx convex env set R2_ACCOUNT_ID your-cloudflare-account-id
+   npx convex env set R2_ACCESS_KEY_ID your-r2-access-key
+   npx convex env set R2_SECRET_ACCESS_KEY your-r2-secret-key
+   ```
+
+   To get R2 credentials:
+   - Go to Cloudflare Dashboard → R2 → Manage R2 API Tokens
+   - Create a new API token with R2 read/write permissions
+   - Copy the Access Key ID and Secret Access Key
+
+4. **Deploy the Convex component:**
+   ```bash
+   npx convex deploy
+   ```
+
+### Cloudflare Worker Setup
+
+The Cloudflare Worker serves images from R2 with on-demand resizing capabilities.
+
+1. **Install Wrangler (Cloudflare Workers CLI):**
+   ```bash
+   npm install -g wrangler
+   ```
+
+2. **Login to Cloudflare:**
+   ```bash
+   wrangler login
+   ```
+
+3. **Configure environment variables for the Worker:**
+   
+   Edit `wrangler.toml` to set your bucket name, or set via secrets:
+   ```bash
+   wrangler secret put BUCKET_NAME
+   # Enter: your-bucket-name
+   
+   wrangler secret put PUBLIC_ORIGIN
+   # Enter: https://your-worker.workers.dev (or your custom domain)
+   ```
+
+4. **Create R2 bucket binding:**
+   
+   The `wrangler.toml` already includes the R2 bucket binding configuration. Make sure the bucket name matches your actual R2 bucket.
+
+5. **Deploy the Worker:**
+   ```bash
+   wrangler deploy
+   ```
+
+6. **Test the Worker:**
+   
+   After deployment, you can access images at:
+   - Original: `https://your-worker.workers.dev/images/original/{storage-key}`
+   - Resized: `https://your-worker.workers.dev/images/800x600/{storage-key}`
+   - Custom format: `https://your-worker.workers.dev/images/1200x/{storage-key}?format=webp&quality=80`
+
+### Image URL Patterns
+
+The Worker supports the following URL patterns:
+
+- **Original images:** `/images/original/{key}`
+- **Width only:** `/images/{width}x/{key}` (maintains aspect ratio)
+- **Height only:** `/images/x{height}/{key}` (maintains aspect ratio)
+- **Both dimensions:** `/images/{width}x{height}/{key}`
+- **Query parameters:**
+  - `?quality=80` - Set JPEG/WebP quality (1-100)
+  - `?format=webp` - Convert to WebP, JPEG, PNG, etc.
+
+### How the Upload Flow Works
+
+1. Client calls `api.posts.generateUploadUrl()` or `api.photos.generateUploadUrl()`
+2. The Convex backend delegates to the R2 component to generate an upload URL
+3. Client uploads the file directly to R2 via the upload URL
+4. R2 component syncs metadata back to Convex
+5. The Worker serves images from R2 with automatic resizing and caching
+
 ## App authentication
 
 This app uses **sitewide login** with [Convex Auth](https://auth.convex.dev/). Users enter a single password to access the site, and the backend automatically determines their role (user or admin) based on which password matches.

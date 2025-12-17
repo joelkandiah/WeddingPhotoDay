@@ -1,0 +1,28 @@
+# Cloudflare Worker configuration for image serving with R2 integration
+# See: https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "wedding-photo-worker"
+main = "src/worker.ts"
+compatibility_date = "2024-01-01"
+
+# R2 bucket binding
+# The bucket must be created in your Cloudflare account before deploying
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "${BUCKET_NAME}"
+
+# Environment variables
+# Set these using: wrangler secret put BUCKET_NAME
+# Set these using: wrangler secret put PUBLIC_ORIGIN
+[vars]
+# These will be set via secrets or environment variables
+# BUCKET_NAME = "wedding-photos"
+# PUBLIC_ORIGIN = "https://your-worker.workers.dev"
+
+# Development configuration
+[env.development]
+# You can override settings for local development here
+
+# Production configuration
+[env.production]
+# You can override settings for production here

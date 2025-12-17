@@ -4,6 +4,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server"; // Added pagination validator
 import { getIsAdmin } from "./adminHelper";
 import { categoryValidator } from "./constants";
+import { r2 } from "./r2";
 
 // Public queries
 export const getApprovedPosts = query({
@@ -93,7 +94,9 @@ export const getApprovedPostsPaginated = query({
 export const generateUploadUrl = mutation({
     args: {},
     handler: async (ctx) => {
-        return await ctx.storage.generateUploadUrl();
+        // Delegate to R2 component for generating upload URLs
+        const { url } = await r2.generateUploadUrl(ctx);
+        return url;
     },
 });
 
