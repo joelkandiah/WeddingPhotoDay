@@ -12,6 +12,11 @@ interface ImageRequest {
   compressed?: boolean;
 }
 
+// Configuration constants
+const DEFAULT_QUALITY = 85;
+const THUMBNAIL_QUALITY = 60; // Used for thumbnail/preview URLs
+const MAX_DIMENSION = 7680; // 8K resolution limit (7680x4320) to prevent DoS attacks and excessive memory usage
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
@@ -124,7 +129,7 @@ async function transformViaResizer(request: ImageRequest, origin: string): Promi
   const resizingOptions = {
     width: request.width,
     height: request.height,
-    quality: request.quality || 85,
+    quality: request.quality || DEFAULT_QUALITY,
     format: request.format || 'auto',
     fit: hasDimensions ? 'cover' : 'scale-down',
   };
@@ -163,7 +168,7 @@ function parseImageRequest(url: URL): ImageRequest | null {
 
   // Validate and parse quality parameter (1-100)
   const qualityParam = url.searchParams.get('quality');
-  let quality = 85; // default
+  let quality = DEFAULT_QUALITY;
   if (qualityParam) {
     const parsed = parseInt(qualityParam, 10);
     if (!isNaN(parsed) && parsed >= 1 && parsed <= 100) {
@@ -190,8 +195,7 @@ function parseImageRequest(url: URL): ImageRequest | null {
     const width = dimMatch[1] ? parseInt(dimMatch[1]) : undefined;
     const height = dimMatch[2] ? parseInt(dimMatch[2]) : undefined;
     
-    // Validate dimensions - max 8K resolution (7680x4320)
-    const MAX_DIMENSION = 7680;
+    // Validate dimensions against MAX_DIMENSION to prevent DoS attacks
     if ((width && width > MAX_DIMENSION) || (height && height > MAX_DIMENSION)) {
       return null; // Invalid dimensions
     }
@@ -210,7 +214,7 @@ function parseImageRequest(url: URL): ImageRequest | null {
 
 function getDerivedImageBaseKey(req: ImageRequest): string {
   // Ensure quality is part of the filename so q=1 and q=85 are different files
-  const q = req.quality || 85;
+  const q = req.quality || DEFAULT_QUALITY;
   const dims = `${req.width || 0}x${req.height || 0}`;
   return `derived/${dims}_q${q}_${req.key}`;
 }

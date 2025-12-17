@@ -27,6 +27,7 @@ export const { generateUploadUrl, syncMetadata } = r2.clientApi({
 });
 
 // Write a function that constructs the URL from the storageId
+// Note: Uses quality=60 for thumbnails/previews (lower than worker's default of 85 for full images)
 export function getPhotoUrl(storageId: string) {
   const baseEndpoint = process.env.R2_PUBLIC_ENDPOINT;
   if (!baseEndpoint) {
