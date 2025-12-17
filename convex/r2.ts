@@ -26,5 +26,13 @@ export const { generateUploadUrl, syncMetadata } = r2.clientApi({
 
 // Write a function that constructs the URL from the storageId
 export function getPhotoUrl(storageId: string) {
-  return `${process.env.R2_PUBLIC_ENDPOINT}/images/compressed/${storageId}?quality=20`;
+  const baseEndpoint = process.env.R2_PUBLIC_ENDPOINT;
+  if (!baseEndpoint) {
+    throw new Error(
+      "R2_PUBLIC_ENDPOINT environment variable is not set. " +
+        "Configure it in the Convex deployment environment to generate photo URLs."
+    );
+  }
+  const normalizedBase = baseEndpoint.replace(/\/+$/, "");
+  return `${normalizedBase}/images/compressed/${storageId}?quality=20`;
 }
