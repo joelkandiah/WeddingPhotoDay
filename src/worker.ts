@@ -72,6 +72,11 @@ export default {
       ctx.waitUntil(
         env.R2_BUCKET.put(actualKey, imageBuffer, {
           httpMetadata: { contentType: contentType }
+        }).catch((err) => {
+          console.error('Failed to store derived image in R2', {
+            key: actualKey,
+            error: err instanceof Error ? err.message : String(err),
+          });
         })
       );
 
