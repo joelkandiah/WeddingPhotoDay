@@ -34,13 +34,18 @@ export function SignInForm() {
             
             // First, verify the password WITHOUT signing in
             // This will throw an error if the password is invalid
+            console.log("Verifying password...");
             const verifyResult = await verifyPassword({ password });
+            console.log("Password verified, role:", verifyResult.role);
             
             // Store the role in localStorage to be applied once the session is established
             localStorage.setItem("pending_role", verifyResult.role);
+            console.log("Stored pending_role in localStorage:", verifyResult.role);
             
             // Only sign in anonymously if password is valid
+            console.log("Calling signIn('anonymous')...");
             await signIn("anonymous");
+            console.log("signIn('anonymous') succeeded");
             
             // The SessionInitializer in App.tsx will handle the role assignment
             // once the Authenticated state is reached.

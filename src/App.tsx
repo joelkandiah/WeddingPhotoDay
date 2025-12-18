@@ -18,12 +18,15 @@ function SessionInitializer() {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
+    console.log("SessionInitializer useEffect running, initialized:", initialized);
     const applyPendingRole = async () => {
       const pendingRole = localStorage.getItem("pending_role");
+      console.log("SessionInitializer: pendingRole from localStorage:", pendingRole);
       if (pendingRole && !initialized) {
         try {
           console.log("Applying pending role:", pendingRole);
           const result = await setUserRole({ role: pendingRole as "user" | "admin" });
+          console.log("signInWithPassword result:", result);
           if (result.success) {
             toast.success(`Welcome! Signed in as ${result.role}`);
             localStorage.removeItem("pending_role");
@@ -34,6 +37,8 @@ function SessionInitializer() {
           // If it fails because of session, we'll try again on next render
           // which is fine since it's reactive.
         }
+      } else {
+        console.log("SessionInitializer: Skipping role application. pendingRole:", pendingRole, "initialized:", initialized);
       }
     };
 
