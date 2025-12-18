@@ -43,8 +43,11 @@ export function SignInForm() {
             await signIn("anonymous");
             console.log("signIn('anonymous') succeeded");
             
+            // Wait a moment for the auth token to propagate to the server
+            console.log("Waiting for auth token to propagate...");
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
             // Now that we're signed in anonymously, assign the role
-            // This must happen immediately after sign-in, not stored in localStorage
             console.log("Calling signInWithPassword with role:", verifyResult.role);
             const roleResult = await setUserRole({ role: verifyResult.role });
             console.log("signInWithPassword result:", roleResult);
