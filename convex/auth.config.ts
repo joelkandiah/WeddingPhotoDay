@@ -8,7 +8,7 @@ if (!siteUrl && process.env.NODE_ENV === "production") {
 export default {
   providers: [
     {
-      domain: siteUrl || "https://kindly-horse-40.convex.site",
+      domain: siteUrl || "https://cool-kookabura-203.convex.site",
       applicationID: "convex",
     },
   ],
