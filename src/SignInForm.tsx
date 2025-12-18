@@ -43,14 +43,29 @@ export function SignInForm() {
             await signIn("anonymous");
             console.log("signIn('anonymous') succeeded");
             
-            // Wait a moment for the auth token to propagate to the server
-            console.log("Waiting for auth token to propagate...");
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // Now that we're signed in anonymously, assign the role
+            // Retry calling signInWithPassword with exponential backoff
+            // The auth token needs to propagate to the server after signIn
             console.log("Calling signInWithPassword with role:", verifyResult.role);
-            const roleResult = await setUserRole({ role: verifyResult.role });
-            console.log("signInWithPassword result:", roleResult);
+            let roleResult;
+            let retries = 0;
+            const maxRetries = 3;
+            
+            while (retries < maxRetries) {
+              try {
+                roleResult = await setUserRole({ role: verifyResult.role });
+                console.log("signInWithPassword result:", roleResult);
+                break; // Success, exit retry loop
+              } catch (error: any) {
+                retries++;
+                if (retries >= maxRetries) {
+                  throw error; // Max retries reached, propagate error
+                }
+                // Wait with exponential backoff: 200ms, 400ms, 800ms
+                const delay = 200 * Math.pow(2, retries - 1);
+                console.log(`Retry ${retries}/${maxRetries} after ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+              }
+            }
             
             if (roleResult.success) {
               toast.success(`Welcome! Signed in as ${roleResult.role}`);
