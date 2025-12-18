@@ -46,7 +46,7 @@ export function SignInForm() {
             // Retry calling signInWithPassword with exponential backoff
             // The auth token needs to propagate to the server after signIn
             console.log("Calling signInWithPassword with role:", verifyResult.role);
-            let roleResult;
+            let roleResult = null;
             let retries = 0;
             const maxRetries = 3;
             
@@ -67,7 +67,7 @@ export function SignInForm() {
               }
             }
             
-            if (roleResult.success) {
+            if (roleResult && roleResult.success) {
               toast.success(`Welcome! Signed in as ${roleResult.role}`);
             }
           } catch (error: any) {
