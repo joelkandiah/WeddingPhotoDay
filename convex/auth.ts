@@ -4,16 +4,10 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import bcrypt from "bcryptjs";
-import authConfig from "./auth.config";
 
 // Use Anonymous provider as the base for sitewide login
 export const { auth, signIn, signOut, store } = convexAuth({
-  providers: [
-    {
-      ...Anonymous,
-      ...authConfig.providers[0], // Apply domain and applicationID configuration
-    },
-  ],
+  providers: [Anonymous],
 });
 
 const secureCompare = (password: string, hash: string): boolean => {
