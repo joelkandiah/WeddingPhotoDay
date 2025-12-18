@@ -2,7 +2,7 @@
 const siteUrl = process.env.CONVEX_SITE_URL?.replace(/\/$/, '');
 
 if (!siteUrl && process.env.NODE_ENV === "production") {
-  throw new Error("CONVEX_SITE_URL is not set in production. Anonymous sign-in will fail. Please set CONVEX_SITE_URL environment variable in the Convex dashboard.");
+  console.warn("CONVEX_SITE_URL is not set in production. Anonymous sign-in will likely fail. Please set CONVEX_SITE_URL environment variable in the Convex dashboard.");
 }
 
 export default {
