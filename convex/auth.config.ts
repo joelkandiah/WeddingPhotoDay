@@ -1,7 +1,5 @@
-const rawSiteUrl = process.env.CONVEX_SITE_URL;
-
 // Strip trailing slashes from CONVEX_SITE_URL
-const siteUrl = rawSiteUrl ? rawSiteUrl.replace(/\/+$/, '') : rawSiteUrl;
+const siteUrl = process.env.CONVEX_SITE_URL?.replace(/\/+$/, '');
 
 if (!siteUrl && process.env.NODE_ENV === "production") {
   throw new Error("CONVEX_SITE_URL is not set in production. Anonymous sign-in will fail. Please set CONVEX_SITE_URL environment variable in the Convex dashboard.");
