@@ -8,45 +8,8 @@ import { PhotoGallery } from "./PhotoGallery";
 import { AdminPanel } from "./AdminPanel";
 import { Slideshow } from "./Slideshow";
 import { ThemeToggle } from "./components/ThemeToggle";
-import { useState, useEffect } from "react";
-import { useMutation } from "convex/react";
-import { toast } from "sonner";
+import { useState } from "react";
 
-
-function SessionInitializer() {
-  const setUserRole = useMutation(api.auth.signInWithPassword);
-  const [initialized, setInitialized] = useState(false);
-
-  useEffect(() => {
-    console.log("SessionInitializer useEffect running, initialized:", initialized);
-    const applyPendingRole = async () => {
-      const pendingRole = localStorage.getItem("pending_role");
-      console.log("SessionInitializer: pendingRole from localStorage:", pendingRole);
-      if (pendingRole && !initialized) {
-        try {
-          console.log("Applying pending role:", pendingRole);
-          const result = await setUserRole({ role: pendingRole as "user" | "admin" });
-          console.log("signInWithPassword result:", result);
-          if (result.success) {
-            toast.success(`Welcome! Signed in as ${result.role}`);
-            localStorage.removeItem("pending_role");
-            setInitialized(true);
-          }
-        } catch (error) {
-          console.error("Error applying pending role:", error);
-          // If it fails because of session, we'll try again on next render
-          // which is fine since it's reactive.
-        }
-      } else {
-        console.log("SessionInitializer: Skipping role application. pendingRole:", pendingRole, "initialized:", initialized);
-      }
-    };
-
-    applyPendingRole();
-  }, [setUserRole, initialized]);
-
-  return null;
-}
 
 export default function App() {
   const [currentView, setCurrentView] = useState<"gallery" | "upload" | "admin" | "slideshow">("gallery");
@@ -160,7 +123,6 @@ function Content({ currentView }: { currentView: string }) {
       </Unauthenticated>
 
       <Authenticated>
-        <SessionInitializer />
         <div className="mb-8 text-center">
           <h1>
             Welcome!

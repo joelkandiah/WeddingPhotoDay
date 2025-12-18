@@ -38,17 +38,20 @@ export function SignInForm() {
             const verifyResult = await verifyPassword({ password });
             console.log("Password verified, role:", verifyResult.role);
             
-            // Store the role in localStorage to be applied once the session is established
-            localStorage.setItem("pending_role", verifyResult.role);
-            console.log("Stored pending_role in localStorage:", verifyResult.role);
-            
             // Only sign in anonymously if password is valid
             console.log("Calling signIn('anonymous')...");
             await signIn("anonymous");
             console.log("signIn('anonymous') succeeded");
             
-            // The SessionInitializer in App.tsx will handle the role assignment
-            // once the Authenticated state is reached.
+            // Now that we're signed in anonymously, assign the role
+            // This must happen immediately after sign-in, not stored in localStorage
+            console.log("Calling signInWithPassword with role:", verifyResult.role);
+            const roleResult = await setUserRole({ role: verifyResult.role });
+            console.log("signInWithPassword result:", roleResult);
+            
+            if (roleResult.success) {
+              toast.success(`Welcome! Signed in as ${roleResult.role}`);
+            }
           } catch (error: any) {
             console.error("Sign in error details:", error);
             const errorMessage = error.message || "";
