@@ -76,6 +76,7 @@ export const signInWithPassword = mutation({
     const userId = await getAuthUserId(ctx);
 
     if (!userId) {
+      console.error("signInWithPassword: getAuthUserId failed - no active session found. This might indicate an auth token validation issue.");
       throw new Error("No active session. Please try signing in again.");
     }
 

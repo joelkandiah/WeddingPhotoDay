@@ -34,16 +34,42 @@ export function SignInForm() {
             
             // First, verify the password WITHOUT signing in
             // This will throw an error if the password is invalid
+            console.log("Verifying password...");
             const verifyResult = await verifyPassword({ password });
-            
-            // Store the role in localStorage to be applied once the session is established
-            localStorage.setItem("pending_role", verifyResult.role);
+            console.log("Password verified, role:", verifyResult.role);
             
             // Only sign in anonymously if password is valid
+            console.log("Calling signIn('anonymous')...");
             await signIn("anonymous");
+            console.log("signIn('anonymous') succeeded");
             
-            // The SessionInitializer in App.tsx will handle the role assignment
-            // once the Authenticated state is reached.
+            // Retry calling signInWithPassword with exponential backoff
+            // The auth token needs to propagate to the server after signIn
+            console.log("Calling signInWithPassword with role:", verifyResult.role);
+            let roleResult = null;
+            let retries = 0;
+            const maxRetries = 3;
+            
+            while (retries < maxRetries) {
+              try {
+                roleResult = await setUserRole({ role: verifyResult.role });
+                console.log("signInWithPassword result:", roleResult);
+                break; // Success, exit retry loop
+              } catch (error: any) {
+                retries++;
+                if (retries >= maxRetries) {
+                  throw error; // Max retries reached, propagate error
+                }
+                // Wait with exponential backoff: 200ms, 400ms, 800ms
+                const delay = 200 * Math.pow(2, retries - 1);
+                console.log(`Retry ${retries}/${maxRetries} after ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+              }
+            }
+            
+            if (roleResult && roleResult.success) {
+              toast.success(`Welcome! Signed in as ${roleResult.role}`);
+            }
           } catch (error: any) {
             console.error("Sign in error details:", error);
             const errorMessage = error.message || "";
