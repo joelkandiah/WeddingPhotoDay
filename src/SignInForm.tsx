@@ -5,10 +5,13 @@ import { api } from "../convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
 
+// Configuration for session establishment retry logic
+const SESSION_RETRY_ATTEMPTS = 5;
+const SESSION_RETRY_DELAY_MS = 200;
+
 export function SignInForm() {
-  const { signIn } = useAuthActions();
-  const verifyPassword = useMutation(api.auth.verifyPassword);
-  const setUserRole = useMutation(api.auth.signInWithPassword);
+  const { signIn, signOut } = useAuthActions();
+  const signInWithPassword = useMutation(api.auth.signInWithPassword);
   const [submitting, setSubmitting] = useState(false);
 
   return (
@@ -32,21 +35,48 @@ export function SignInForm() {
             const formData = new FormData(e.target as HTMLFormElement);
             const password = formData.get("password") as string;
             
-            // First, verify the password WITHOUT signing in
-            // This will throw an error if the password is invalid
-            const verifyResult = await verifyPassword({ password });
-            
-            // Store the role in localStorage to be applied once the session is established
-            localStorage.setItem("pending_role", verifyResult.role);
-            
-            // Only sign in anonymously if password is valid
+            // First, sign in anonymously to establish a session
             await signIn("anonymous");
             
-            // The SessionInitializer in App.tsx will handle the role assignment
-            // once the Authenticated state is reached.
+            // Retry logic: the session may take a moment to be established
+            // Try calling signInWithPassword with retries
+            let retries = SESSION_RETRY_ATTEMPTS;
+            
+            while (retries > 0) {
+              try {
+                const result = await signInWithPassword({ password });
+                
+                // The mutation returns success: true if role was assigned
+                if (result.success) {
+                  toast.success(`Welcome! Signed in as ${result.role}`);
+                  // Success - break out of retry loop
+                  break;
+                } else {
+                  // Unexpected: mutation didn't throw but also didn't succeed
+                  throw new Error("Authentication failed unexpectedly");
+                }
+              } catch (error: any) {
+                const errorMessage = error.message || "";
+                
+                // If it's a "No active session" error, retry after a short delay
+                // Note: This string matching is fragile but necessary as Convex errors don't have codes
+                if (errorMessage.includes("No active session") && retries > 1) {
+                  console.log(`Session not ready yet, retrying... (${retries - 1} retries left)`);
+                  await new Promise(resolve => setTimeout(resolve, SESSION_RETRY_DELAY_MS));
+                  retries--;
+                } else {
+                  // Other errors or out of retries - throw
+                  throw error;
+                }
+              }
+            }
           } catch (error: any) {
-            console.error("Sign in error details:", error);
+            console.error("SignInForm: Sign in error:", error);
             const errorMessage = error.message || "";
+            
+            // Sign out the user since password verification failed
+            // This prevents them from being stuck in authenticated state without a role
+            await signOut();
             
             if (errorMessage.includes("Server Error") || errorMessage.includes("action failed")) {
               toast.error("Server Configuration Error: Please ensure JWKS keys and Environment Variables are set in the Convex Dashboard.");

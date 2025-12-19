@@ -22,14 +22,31 @@ const secureCompare = (password: string, hash: string): boolean => {
   }
 };
 
-// Custom mutation to verify password before sign-in
-// This is called BEFORE anonymous sign-in to validate the password
-export const verifyPassword = mutation({
+// Server-authoritative mutation to verify password and assign role
+// This is called AFTER anonymous sign-in to validate password and set role
+// The server determines the role based on password match, preventing client tampering
+export const signInWithPassword = mutation({
   args: {
     password: v.string(),
   },
   handler: async (ctx, args) => {
     const { password } = args;
+
+    // Get the current user ID - must be authenticated first via anonymous sign-in
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      console.error("signInWithPassword: No userId found");
+      throw new Error("No active session. Please sign in first.");
+    }
+
+    // Get the user record
+    const user = await ctx.db.get(userId);
+
+    if (!user) {
+      console.error("signInWithPassword: User record not found for userId:", userId);
+      throw new Error("User session not found. Please try signing in again.");
+    }
 
     // Get hashed passwords from environment variables
     const userPasswordHash = process.env.USER_PASSWORD_HASH;
@@ -43,47 +60,17 @@ export const verifyPassword = mutation({
     }
 
     if (!userPasswordHash || !adminPasswordHash) {
-      throw new Error("Authenticaton is currently unavailable due to missing server configuration. Please check USER_PASSWORD_HASH and ADMIN_PASSWORD_HASH environment variables in the Convex dashboard.");
+      throw new Error("Authentication is currently unavailable due to missing server configuration. Please check USER_PASSWORD_HASH and ADMIN_PASSWORD_HASH environment variables in the Convex dashboard.");
     }
 
-    // Determine role based on password match
+    // Determine role based on password match - SERVER DECIDES, not client
+    let role: 'admin' | 'user';
     if (secureCompare(password, adminPasswordHash)) {
-      return {
-        success: true,
-        role: 'admin' as const,
-      };
+      role = 'admin';
     } else if (secureCompare(password, userPasswordHash)) {
-      return {
-        success: true,
-        role: 'user' as const,
-      };
+      role = 'user';
     } else {
       throw new Error("Invalid password");
-    }
-  },
-});
-
-// Custom mutation for setting user role after anonymous sign-in
-// This is called AFTER anonymous sign-in to set the role on the user
-export const signInWithPassword = mutation({
-  args: {
-    role: v.union(v.literal('user'), v.literal('admin')),
-  },
-  handler: async (ctx, args) => {
-    const { role } = args;
-
-    // Get the current user ID using the auth library helper
-    const userId = await getAuthUserId(ctx);
-
-    if (!userId) {
-      throw new Error("No active session. Please try signing in again.");
-    }
-
-    // Get the user record
-    const user = await ctx.db.get(userId);
-
-    if (!user) {
-      throw new Error("User session not found. Please try signing in again.");
     }
 
     // Update the user's role and other info
@@ -92,6 +79,8 @@ export const signInWithPassword = mutation({
       email: `${role}@wedding.local`,
       name: role === 'admin' ? 'Admin' : 'Guest',
     });
+
+    console.log("signInWithPassword: Successfully set role to:", role);
 
     return {
       success: true,
