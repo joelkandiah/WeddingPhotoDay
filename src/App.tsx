@@ -15,33 +15,39 @@ import { toast } from "sonner";
 
 function SessionInitializer() {
   const setUserRole = useMutation(api.auth.signInWithPassword);
-  const [initialized, setInitialized] = useState(false);
+  const loggedInUser = useQuery(api.auth.loggedInUser);
+  const [hasAttemptedInit, setHasAttemptedInit] = useState(false);
 
   useEffect(() => {
     const applyPendingRole = async () => {
       const pendingRole = localStorage.getItem("pending_role");
-      console.log("SessionInitializer: checking pending role:", pendingRole, "initialized:", initialized, "mutation ready:", setUserRole !== undefined);
       
-      if (pendingRole && !initialized && setUserRole !== undefined) {
+      // Only apply if there's a pending role, user exists but has no role yet, and we haven't tried yet
+      if (pendingRole && loggedInUser === null && !hasAttemptedInit) {
+        console.log("SessionInitializer: User has no role, applying pending role:", pendingRole);
+        setHasAttemptedInit(true);
         try {
-          console.log("SessionInitializer: Applying pending role:", pendingRole);
           const result = await setUserRole({ role: pendingRole as "user" | "admin" });
           console.log("SessionInitializer: Role application result:", result);
           if (result.success) {
             toast.success(`Welcome! Signed in as ${result.role}`);
             localStorage.removeItem("pending_role");
-            setInitialized(true);
           }
         } catch (error) {
           console.error("SessionInitializer: Error applying pending role:", error);
-          // If it fails because of session, we'll try again on next render
-          // which is fine since it's reactive.
+          // Reset the flag so we can retry
+          setHasAttemptedInit(false);
         }
+      } else if (loggedInUser && pendingRole) {
+        // User has a role now, clear the pending role
+        console.log("SessionInitializer: User has role, clearing pending role from localStorage");
+        localStorage.removeItem("pending_role");
       }
     };
 
     applyPendingRole();
-  }, [setUserRole, initialized]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loggedInUser, hasAttemptedInit]);
 
   return null;
 }
