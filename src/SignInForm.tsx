@@ -31,7 +31,6 @@ export function SignInForm() {
             const formData = new FormData(e.target as HTMLFormElement);
             const password = formData.get("password") as string;
             
-            console.log("SignInForm: Starting password verification");
             // First, verify the password WITHOUT signing in
             // This will throw an error if the password is invalid
             const verifyResult = await verifyPassword({ password });
@@ -39,17 +38,14 @@ export function SignInForm() {
             
             // Store the role in localStorage to be applied once the session is established
             localStorage.setItem("pending_role", verifyResult.role);
-            console.log("SignInForm: Stored pending role in localStorage:", verifyResult.role);
             
             // Sign in anonymously - the SessionInitializer will set the role
-            console.log("SignInForm: Calling signIn('anonymous')");
             await signIn("anonymous");
-            console.log("SignInForm: signIn completed successfully");
             
             // The SessionInitializer in App.tsx will handle the role assignment
             // once the Authenticated component mounts
           } catch (error: any) {
-            console.error("SignInForm: Sign in error details:", error);
+            console.error("SignInForm: Sign in error:", error);
             const errorMessage = error.message || "";
             
             if (errorMessage.includes("Server Error") || errorMessage.includes("action failed")) {

@@ -23,8 +23,6 @@ function SessionInitializer() {
     const applyPendingRole = async () => {
       const pendingRole = localStorage.getItem("pending_role");
       
-      console.log("SessionInitializer: Check - pendingRole:", pendingRole, "loggedInUser:", loggedInUser, "attemptedRef:", attemptedRef.current);
-      
       // Only apply if there's a pending role, user exists but has no role yet (loggedInUser is null),
       // and we haven't already attempted to set the role
       if (pendingRole && loggedInUser === null && !attemptedRef.current) {
@@ -32,7 +30,6 @@ function SessionInitializer() {
         console.log("SessionInitializer: Applying pending role:", pendingRole);
         try {
           const result = await setUserRole({ role: pendingRole as "user" | "admin" });
-          console.log("SessionInitializer: Role application result:", result);
           if (result.success) {
             toast.success(`Welcome! Signed in as ${result.role}`);
             localStorage.removeItem("pending_role");
@@ -43,7 +40,6 @@ function SessionInitializer() {
         }
       } else if (loggedInUser && pendingRole) {
         // User has a role now, clear the pending role and reset the ref
-        console.log("SessionInitializer: User has role, clearing pending role from localStorage");
         localStorage.removeItem("pending_role");
         attemptedRef.current = false;
       }
