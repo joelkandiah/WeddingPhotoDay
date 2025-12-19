@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 export function SignInForm() {
   const { signIn } = useAuthActions();
-  const verifyPassword = useMutation(api.auth.verifyPassword);
+  const signInWithPassword = useMutation(api.auth.signInWithPassword);
   const [submitting, setSubmitting] = useState(false);
 
   return (
@@ -31,19 +31,16 @@ export function SignInForm() {
             const formData = new FormData(e.target as HTMLFormElement);
             const password = formData.get("password") as string;
             
-            // First, verify the password WITHOUT signing in
-            // This will throw an error if the password is invalid
-            const verifyResult = await verifyPassword({ password });
-            console.log("SignInForm: Password verified, role:", verifyResult.role);
-            
-            // Store the role in localStorage to be applied once the session is established
-            localStorage.setItem("pending_role", verifyResult.role);
-            
-            // Sign in anonymously - the SessionInitializer will set the role
+            // First, sign in anonymously to establish a session
             await signIn("anonymous");
             
-            // The SessionInitializer in App.tsx will handle the role assignment
-            // once the Authenticated component mounts
+            // Then verify password and assign role on the server
+            // The server determines the role based on password match
+            const result = await signInWithPassword({ password });
+            
+            if (result.success) {
+              toast.success(`Welcome! Signed in as ${result.role}`);
+            }
           } catch (error: any) {
             console.error("SignInForm: Sign in error:", error);
             const errorMessage = error.message || "";

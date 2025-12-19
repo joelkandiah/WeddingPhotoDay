@@ -8,48 +8,9 @@ import { PhotoGallery } from "./PhotoGallery";
 import { AdminPanel } from "./AdminPanel";
 import { Slideshow } from "./Slideshow";
 import { ThemeToggle } from "./components/ThemeToggle";
-import { useState, useEffect, useRef } from "react";
-import { useMutation } from "convex/react";
-import { toast } from "sonner";
+import { useState } from "react";
 
 
-
-function SessionInitializer() {
-  const setUserRole = useMutation(api.auth.signInWithPassword);
-  const loggedInUser = useQuery(api.auth.loggedInUser);
-  const attemptedRef = useRef(false);
-
-  useEffect(() => {
-    const applyPendingRole = async () => {
-      const pendingRole = localStorage.getItem("pending_role");
-      
-      // Only apply if there's a pending role, user exists but has no role yet (loggedInUser is null),
-      // and we haven't already attempted to set the role
-      if (pendingRole && loggedInUser === null && !attemptedRef.current) {
-        attemptedRef.current = true; // Mark as attempted
-        console.log("SessionInitializer: Applying pending role:", pendingRole);
-        try {
-          const result = await setUserRole({ role: pendingRole as "user" | "admin" });
-          if (result.success) {
-            toast.success(`Welcome! Signed in as ${result.role}`);
-            localStorage.removeItem("pending_role");
-          }
-        } catch (error) {
-          console.error("SessionInitializer: Error applying pending role:", error);
-          attemptedRef.current = false; // Reset on error so we can retry
-        }
-      } else if (loggedInUser && pendingRole) {
-        // User has a role now, clear the pending role and reset the ref
-        localStorage.removeItem("pending_role");
-        attemptedRef.current = false;
-      }
-    };
-
-    applyPendingRole();
-  }, [loggedInUser, setUserRole]);
-
-  return null;
-}
 
 export default function App() {
   const [currentView, setCurrentView] = useState<"gallery" | "upload" | "admin" | "slideshow">("gallery");
@@ -163,7 +124,6 @@ function Content({ currentView }: { currentView: string }) {
       </Unauthenticated>
 
       <Authenticated>
-        <SessionInitializer />
         <div className="mb-8 text-center">
           <h1>
             Welcome!
