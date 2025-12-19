@@ -109,8 +109,6 @@ export const generateUploadUrl = r2GenerateUploadUrl;
 export const uploadPost = mutation({
     args: {
         photoStorageIds: v.array(v.string()),
-        uploaderName: v.string(),
-        uploaderEmail: v.optional(v.string()),
         caption: v.optional(v.string()),
         category: categoryValidator,
     },
@@ -121,8 +119,8 @@ export const uploadPost = mutation({
         }
 
         const user = await ctx.db.get(userId);
-        if (!user || !user.role) {
-            throw new Error("Not authorized: Role required to upload");
+        if (!user) {
+            throw new Error("User not found");
         }
 
         // Rate limit check: 150 photos per hour
@@ -133,7 +131,7 @@ export const uploadPost = mutation({
 
         const postId = await ctx.db.insert("posts", {
             photoStorageIds: args.photoStorageIds,
-            uploaderName: args.uploaderName,
+            uploaderName: user.name || "Guest",
             uploaderId: userId,
             caption: args.caption,
             status: "pending",

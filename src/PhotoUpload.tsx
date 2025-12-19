@@ -1,12 +1,10 @@
 import { useState, useRef } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { Id } from "../convex/_generated/dataModel";
 import { toast } from "sonner";
 import { POST_CATEGORIES, PostCategory } from "../convex/constants";
 
 export function PhotoUpload() {
-  const [uploaderName, setUploaderName] = useState("");
   const [caption, setCaption] = useState("");
   const [category, setCategory] = useState<PostCategory>("US Ceremony");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
@@ -39,8 +37,8 @@ export function PhotoUpload() {
   const handleUpload = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    if (selectedImages.length === 0 || !uploaderName.trim()) {
-      toast.error("Please fill in all required fields");
+    if (selectedImages.length === 0) {
+      toast.error("Please select at least one photo");
       return;
     }
 
@@ -74,7 +72,6 @@ export function PhotoUpload() {
       // Call mutation once with all keys
       await uploadPost({
         photoStorageIds: storageIds,
-        uploaderName: uploaderName.trim(),
         caption: caption.trim() || undefined,
         category,
       });
@@ -82,7 +79,6 @@ export function PhotoUpload() {
       toast.success(`${selectedImages.length} photo${selectedImages.length > 1 ? "s" : ""} uploaded successfully! They will appear after admin approval.`);
 
       // Reset form
-      setUploaderName("");
       setCaption("");
       setCategory("US Ceremony");
       setSelectedImages([]);
@@ -105,20 +101,6 @@ export function PhotoUpload() {
         </h2>
         
         <form onSubmit={handleUpload} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-card-text mb-2">
-              Your Name *
-            </label>
-            <input
-              type="text"
-              value={uploaderName}
-              onChange={(e) => setUploaderName(e.target.value)}
-              className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
-              placeholder="Enter your name"
-              required
-            />
-          </div>
-
           <div>
             <label className="block text-sm font-medium text-card-text mb-2">
               Category *
@@ -210,9 +192,9 @@ export function PhotoUpload() {
 
           <button
             type="submit"
-            disabled={isUploading || selectedImages.length === 0 || !uploaderName.trim()}
+            disabled={isUploading || selectedImages.length === 0}
             className={`w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white font-semibold py-4 rounded-lg hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl ${
-              !isUploading && selectedImages.length > 0 && uploaderName.trim() ? "pulse-playful" : ""
+              !isUploading && selectedImages.length > 0 ? "pulse-playful" : ""
             }`}
           >
             {isUploading ? (

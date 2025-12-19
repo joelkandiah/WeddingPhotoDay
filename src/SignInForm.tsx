@@ -1,108 +1,160 @@
 "use client";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useMutation } from "convex/react";
-import { api } from "../convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
 
-// Configuration for session establishment retry logic
-const SESSION_RETRY_ATTEMPTS = 5;
-const SESSION_RETRY_DELAY_MS = 200;
-
 export function SignInForm() {
-  const { signIn, signOut } = useAuthActions();
-  const signInWithPassword = useMutation(api.auth.signInWithPassword);
+  const { signIn } = useAuthActions();
   const [submitting, setSubmitting] = useState(false);
+  const [flow, setFlow] = useState<"signIn" | "signUp" | "reset">("signIn");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSubmitting(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const name = formData.get("name") as string;
+
+    try {
+      if (flow === "signUp") {
+        await signIn("password", { email, password, name, flow: "signUp" });
+        toast.success("Account created successfully!");
+      } else if (flow === "signIn") {
+        await signIn("password", { email, password, flow: "signIn" });
+        toast.success("Signed in successfully!");
+      } else if (flow === "reset") {
+        await signIn("password", { email, flow: "reset" });
+        toast.success("Password reset email sent (if configured)");
+        setFlow("signIn"); // Return to sign in page
+      }
+    } catch (error: any) {
+      console.error("Auth error:", error);
+      const msg = error.message || "Authentication failed";
+      // Handle "Password is too short" etc
+      if (msg.includes("short")) {
+        toast.error("Password must be at least 8 characters");
+      } else {
+        toast.error(msg);
+      }
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <div className="w-full">
-      <div className="text-center mb-6">
-        <h2>
-          Enter Site Password
-        </h2>
-        <p className="text-sm">
-          Enter the password to access the wedding photo gallery
-        </p>
+    <div className="max-w-md mx-auto">
+      <div className="bg-card-bg rounded-2xl shadow-lg border border-card-border p-8">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-card-text">
+            {flow === "signIn" && "Welcome Back"}
+            {flow === "signUp" && "Create Account"}
+            {flow === "reset" && "Reset Password"}
+          </h2>
+          <p className="text-sm text-card-text/80 mt-2">
+            {flow === "signIn" && "Sign in to access the gallery"}
+            {flow === "signUp" && "Join us to share your photos"}
+            {flow === "reset" && "Enter your email to receive a reset link"}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {flow === "signUp" && (
+            <div>
+              <label className="block text-sm font-medium text-card-text mb-2">Name</label>
+              <input
+                className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all text-card-text placeholder-card-text/50"
+                type="text"
+                name="name"
+                placeholder="Your Name"
+                required
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-card-text mb-2">Email</label>
+            <input
+              className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all text-card-text placeholder-card-text/50"
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          {flow !== "reset" && (
+            <div>
+              <label className="block text-sm font-medium text-card-text mb-2">Password</label>
+              <input
+                className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all text-card-text placeholder-card-text/50"
+                type="password"
+                name="password"
+                placeholder="••••••••"
+                required
+                minLength={8}
+              />
+            </div>
+          )}
+
+          <button
+            className="w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white font-semibold py-4 rounded-lg hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            type="submit"
+            disabled={submitting}
+          >
+            {submitting ? "Processing..." : (
+              flow === "signIn" ? "Sign In" :
+              flow === "signUp" ? "Create Account" :
+              "Send Reset Link"
+            )}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center text-sm text-card-text space-y-2">
+          {flow === "signIn" && (
+            <>
+              <p>
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => setFlow("signUp")}
+                  className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
+                >
+                  Sign up
+                </button>
+              </p>
+              <button
+                type="button"
+                onClick={() => setFlow("reset")}
+                className="text-card-text/70 hover:text-card-text transition-colors"
+              >
+                Forgot password?
+              </button>
+            </>
+          )}
+          {flow === "signUp" && (
+            <p>
+              Already have an account?{" "}
+              <button
+                type="button"
+                onClick={() => setFlow("signIn")}
+                className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
+              >
+                Sign in
+              </button>
+            </p>
+          )}
+          {flow === "reset" && (
+            <button
+              type="button"
+              onClick={() => setFlow("signIn")}
+              className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
+            >
+              Back to Sign In
+            </button>
+          )}
+        </div>
       </div>
-      
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setSubmitting(true);
-          
-          try {
-            const formData = new FormData(e.target as HTMLFormElement);
-            const password = formData.get("password") as string;
-            
-            // First, sign in anonymously to establish a session
-            await signIn("anonymous");
-            
-            // Retry logic: the session may take a moment to be established
-            // Try calling signInWithPassword with retries
-            let retries = SESSION_RETRY_ATTEMPTS;
-            
-            while (retries > 0) {
-              try {
-                const result = await signInWithPassword({ password });
-                
-                // The mutation returns success: true if role was assigned
-                if (result.success) {
-                  toast.success(`Welcome! Signed in as ${result.role}`);
-                  // Success - break out of retry loop
-                  break;
-                } else {
-                  // Unexpected: mutation didn't throw but also didn't succeed
-                  throw new Error("Authentication failed unexpectedly");
-                }
-              } catch (error: any) {
-                const errorMessage = error.message || "";
-                
-                // If it's a "No active session" error, retry after a short delay
-                // Note: This string matching is fragile but necessary as Convex errors don't have codes
-                if (errorMessage.includes("No active session") && retries > 1) {
-                  console.log(`Session not ready yet, retrying... (${retries - 1} retries left)`);
-                  await new Promise(resolve => setTimeout(resolve, SESSION_RETRY_DELAY_MS));
-                  retries--;
-                } else {
-                  // Other errors or out of retries - throw
-                  throw error;
-                }
-              }
-            }
-          } catch (error: any) {
-            console.error("SignInForm: Sign in error:", error);
-            const errorMessage = error.message || "";
-            
-            // Sign out the user since password verification failed
-            // This prevents them from being stuck in authenticated state without a role
-            await signOut();
-            
-            if (errorMessage.includes("Server Error") || errorMessage.includes("action failed")) {
-              toast.error("Server Configuration Error: Please ensure JWKS keys and Environment Variables are set in the Convex Dashboard.");
-            } else {
-              toast.error(errorMessage || "Invalid password. Please try again.");
-            }
-            setSubmitting(false);
-          }
-        }}
-      >
-        <input
-          className="auth-input-field text-lg"
-          type="password"
-          name="password"
-          placeholder="Enter password"
-          required
-          autoFocus
-        />
-        <button 
-          className="auth-button bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 transition-all"
-          type="submit" 
-          disabled={submitting}
-        >
-          {submitting ? "Signing in..." : "Enter Site"}
-        </button>
-      </form>
     </div>
   );
 }
