@@ -5,6 +5,10 @@ import { api } from "../convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
 
+// Configuration for session establishment retry logic
+const SESSION_RETRY_ATTEMPTS = 5;
+const SESSION_RETRY_DELAY_MS = 200;
+
 export function SignInForm() {
   const { signIn } = useAuthActions();
   const signInWithPassword = useMutation(api.auth.signInWithPassword);
@@ -36,8 +40,7 @@ export function SignInForm() {
             
             // Retry logic: the session may take a moment to be established
             // Try calling signInWithPassword with retries
-            let retries = 5;
-            let lastError: Error | null = null;
+            let retries = SESSION_RETRY_ATTEMPTS;
             
             while (retries > 0) {
               try {
@@ -49,24 +52,18 @@ export function SignInForm() {
                 // Success - break out of retry loop
                 break;
               } catch (error: any) {
-                lastError = error;
                 const errorMessage = error.message || "";
                 
                 // If it's a "No active session" error, retry after a short delay
                 if (errorMessage.includes("No active session") && retries > 1) {
                   console.log(`Session not ready yet, retrying... (${retries - 1} retries left)`);
-                  await new Promise(resolve => setTimeout(resolve, 200));
+                  await new Promise(resolve => setTimeout(resolve, SESSION_RETRY_DELAY_MS));
                   retries--;
                 } else {
                   // Other errors or out of retries - throw
                   throw error;
                 }
               }
-            }
-            
-            // If we exhausted retries, throw the last error
-            if (retries === 0 && lastError) {
-              throw lastError;
             }
           } catch (error: any) {
             console.error("SignInForm: Sign in error:", error);
