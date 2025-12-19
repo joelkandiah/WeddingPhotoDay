@@ -2,7 +2,6 @@ import { v } from "convex/values";
 
 // Post categories
 export const POST_CATEGORIES = [
-  "Couple's Favourite Memories",
   "US Ceremony",
   "Reception",
   "Getting Ready",
@@ -11,13 +10,13 @@ export const POST_CATEGORIES = [
   "UK Celebration",
   "Legal Ceremony",
   "Engagement",
+  "Couple's Favourite Memories",
 ] as const;
 
 export type PostCategory = typeof POST_CATEGORIES[number];
 
 // Category validator for Convex
 export const categoryValidator = v.union(
-  v.literal("Couple's Favourite Memories"),
   v.literal("US Ceremony"),
   v.literal("Reception"),
   v.literal("Getting Ready"),
@@ -25,5 +24,6 @@ export const categoryValidator = v.union(
   v.literal("The Journey Home"),
   v.literal("UK Celebration"),
   v.literal("Legal Ceremony"),
-  v.literal("Engagement")
+  v.literal("Engagement"),
+  v.literal("Couple's Favourite Memories")
 );

@@ -7,10 +7,12 @@ export function SignInForm() {
   const { signIn } = useAuthActions();
   const [submitting, setSubmitting] = useState(false);
   const [flow, setFlow] = useState<"signIn" | "signUp" | "reset">("signIn");
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
+    setError(null);
     
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
@@ -29,14 +31,15 @@ export function SignInForm() {
         toast.success("Password reset email sent (if configured)");
         setFlow("signIn"); // Return to sign in page
       }
-    } catch (error: any) {
-      console.error("Auth error:", error);
-      const msg = error.message || "Authentication failed";
-      // Handle "Password is too short" etc
-      if (msg.includes("short")) {
-        toast.error("Password must be at least 8 characters");
+    } catch (e: any) {
+      console.error("Auth error:", e);
+      // Simplify error message for the user
+      if (flow === "signIn") {
+        setError("Your email or password may be incorrect. Please try again.");
+      } else if (flow === "signUp" && e.message?.includes("short")) {
+        setError("Password must be at least 8 characters");
       } else {
-        toast.error(msg);
+        setError(e.message || "Something went wrong. Please try again.");
       }
       setSubmitting(false);
     }
@@ -57,6 +60,14 @@ export function SignInForm() {
             {flow === "reset" && "Enter your email to receive a reset link"}
           </p>
         </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-shake">
+            <p className="text-sm text-red-600 dark:text-red-400 text-center font-medium">
+              {error}
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {flow === "signUp" && (
@@ -117,7 +128,7 @@ export function SignInForm() {
                 Don't have an account?{" "}
                 <button
                   type="button"
-                  onClick={() => setFlow("signUp")}
+                  onClick={() => { setFlow("signUp"); setError(null); }}
                   className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
                 >
                   Sign up
@@ -125,7 +136,7 @@ export function SignInForm() {
               </p>
               <button
                 type="button"
-                onClick={() => setFlow("reset")}
+                onClick={() => { setFlow("reset"); setError(null); }}
                 className="text-card-text/70 hover:text-card-text transition-colors"
               >
                 Forgot password?
@@ -137,7 +148,7 @@ export function SignInForm() {
               Already have an account?{" "}
               <button
                 type="button"
-                onClick={() => setFlow("signIn")}
+                onClick={() => { setFlow("signIn"); setError(null); }}
                 className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
               >
                 Sign in
@@ -147,7 +158,7 @@ export function SignInForm() {
           {flow === "reset" && (
             <button
               type="button"
-              onClick={() => setFlow("signIn")}
+              onClick={() => { setFlow("signIn"); setError(null); }}
               className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
             >
               Back to Sign In
