@@ -6,7 +6,26 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 
 // Use Password provider for authentication
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [Password],
+  providers: [
+    Password({
+      profile(params) {
+        return {
+          email: params.email as string,
+          name: params.name as string,
+        };
+      },
+    }),
+  ],
+  callbacks: {
+    async afterUserCreatedOrUpdated(ctx, args) {
+      const { userId } = args;
+      const user = await ctx.db.get(userId);
+      // If user has no role, assign default 'user' role
+      if (user && !user.role) {
+        await ctx.db.patch(userId, { role: "user" });
+      }
+    },
+  },
 });
 
 export const loggedInUser = query({

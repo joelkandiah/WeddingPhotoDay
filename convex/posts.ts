@@ -7,6 +7,7 @@ import { getIsAdmin } from "./adminHelper";
 import { categoryValidator } from "./constants";
 import { generateUploadUrl as r2GenerateUploadUrl, getPhotoUrl } from "./r2";
 import { rateLimiter } from "./rateLimit";
+import { ensureUserRole } from "./users";
 
 // Public queries
 export const getApprovedPosts = query({
@@ -118,7 +119,7 @@ export const uploadPost = mutation({
             throw new Error("Not authenticated");
         }
 
-        const user = await ctx.db.get(userId);
+        const user = await ensureUserRole(ctx, userId);
         if (!user) {
             throw new Error("User not found");
         }

@@ -5,6 +5,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { getIsAdmin } from "./adminHelper";
 import { generateUploadUrl as r2GenerateUploadUrl, getPhotoUrl } from "./r2";
 import { rateLimiter } from "./rateLimit";
+import { ensureUserRole } from "./users";
 
 // Public queries
 export const getApprovedPhotos = query({
@@ -38,7 +39,7 @@ export const uploadPhoto = mutation({
       throw new Error("Not authenticated");
     }
 
-    const user = await ctx.db.get(userId);
+    const user = await ensureUserRole(ctx, userId);
     if (!user) {
       throw new Error("User not found");
     }

@@ -3,6 +3,7 @@ import { R2 } from "@convex-dev/r2";
 import { components } from "./_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { rateLimiter } from "./rateLimit";
+import { ensureUserRole } from "./users";
 
 export const r2 = new R2(components.r2);
 
@@ -12,8 +13,8 @@ export const { generateUploadUrl, syncMetadata, deleteObject } =
       const userId = await getAuthUserId(ctx);
       if (!userId) throw new Error("Not authenticated");
 
-      const user = await ctx.db.get(userId);
-      if (!user || !user.role) throw new Error("Not authorized");
+      const user = await ensureUserRole(ctx as any, userId);
+      if (!user) throw new Error("Not authorized");
 
       if ("runMutation" in ctx) {
         await rateLimiter.limit(ctx as any, "upload", { key: userId });
