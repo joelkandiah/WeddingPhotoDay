@@ -72,26 +72,37 @@ export const signInWithPassword = mutation({
   handler: async (ctx, args) => {
     const { role } = args;
 
+    console.log("signInWithPassword: Starting, role:", role);
+
     // Get the current user ID using the auth library helper
     const userId = await getAuthUserId(ctx);
 
+    console.log("signInWithPassword: userId:", userId);
+
     if (!userId) {
+      console.error("signInWithPassword: No userId found");
       throw new Error("No active session. Please try signing in again.");
     }
 
     // Get the user record
     const user = await ctx.db.get(userId);
 
+    console.log("signInWithPassword: user record:", user ? "found" : "not found", user ? `id=${user._id}` : "");
+
     if (!user) {
+      console.error("signInWithPassword: User record not found for userId:", userId);
       throw new Error("User session not found. Please try signing in again.");
     }
 
     // Update the user's role and other info
+    console.log("signInWithPassword: Updating user role to:", role);
     await ctx.db.patch(user._id, {
       role: role,
       email: `${role}@wedding.local`,
       name: role === 'admin' ? 'Admin' : 'Guest',
     });
+
+    console.log("signInWithPassword: Successfully updated user with role:", role);
 
     return {
       success: true,

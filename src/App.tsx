@@ -20,17 +20,20 @@ function SessionInitializer() {
   useEffect(() => {
     const applyPendingRole = async () => {
       const pendingRole = localStorage.getItem("pending_role");
-      if (pendingRole && !initialized) {
+      console.log("SessionInitializer: checking pending role:", pendingRole, "initialized:", initialized, "mutation ready:", setUserRole !== undefined);
+      
+      if (pendingRole && !initialized && setUserRole !== undefined) {
         try {
-          console.log("Applying pending role:", pendingRole);
+          console.log("SessionInitializer: Applying pending role:", pendingRole);
           const result = await setUserRole({ role: pendingRole as "user" | "admin" });
+          console.log("SessionInitializer: Role application result:", result);
           if (result.success) {
             toast.success(`Welcome! Signed in as ${result.role}`);
             localStorage.removeItem("pending_role");
             setInitialized(true);
           }
         } catch (error) {
-          console.error("Error applying pending role:", error);
+          console.error("SessionInitializer: Error applying pending role:", error);
           // If it fails because of session, we'll try again on next render
           // which is fine since it's reactive.
         }
