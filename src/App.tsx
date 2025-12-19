@@ -16,16 +16,17 @@ import { toast } from "sonner";
 function SessionInitializer() {
   const setUserRole = useMutation(api.auth.signInWithPassword);
   const loggedInUser = useQuery(api.auth.loggedInUser);
-  const [hasAttemptedInit, setHasAttemptedInit] = useState(false);
 
   useEffect(() => {
     const applyPendingRole = async () => {
       const pendingRole = localStorage.getItem("pending_role");
       
-      // Only apply if there's a pending role, user exists but has no role yet, and we haven't tried yet
-      if (pendingRole && loggedInUser === null && !hasAttemptedInit) {
-        console.log("SessionInitializer: User has no role, applying pending role:", pendingRole);
-        setHasAttemptedInit(true);
+      console.log("SessionInitializer: Check - pendingRole:", pendingRole, "loggedInUser:", loggedInUser);
+      
+      // Only apply if there's a pending role and user exists but has no role yet (loggedInUser is null)
+      // loggedInUser is null when the user is authenticated but doesn't have a role
+      if (pendingRole && loggedInUser === null) {
+        console.log("SessionInitializer: Applying pending role:", pendingRole);
         try {
           const result = await setUserRole({ role: pendingRole as "user" | "admin" });
           console.log("SessionInitializer: Role application result:", result);
@@ -35,8 +36,7 @@ function SessionInitializer() {
           }
         } catch (error) {
           console.error("SessionInitializer: Error applying pending role:", error);
-          // Reset the flag so we can retry
-          setHasAttemptedInit(false);
+          // Error will be caught and logged, user can try signing in again
         }
       } else if (loggedInUser && pendingRole) {
         // User has a role now, clear the pending role
@@ -46,8 +46,7 @@ function SessionInitializer() {
     };
 
     applyPendingRole();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loggedInUser, hasAttemptedInit]);
+  }, [loggedInUser, setUserRole]);
 
   return null;
 }

@@ -8,7 +8,6 @@ import { toast } from "sonner";
 export function SignInForm() {
   const { signIn } = useAuthActions();
   const verifyPassword = useMutation(api.auth.verifyPassword);
-  const signInWithPassword = useMutation(api.auth.signInWithPassword);
   const [submitting, setSubmitting] = useState(false);
 
   return (
@@ -38,24 +37,17 @@ export function SignInForm() {
             const verifyResult = await verifyPassword({ password });
             console.log("SignInForm: Password verified, role:", verifyResult.role);
             
-            // Store the role in localStorage as a backup
+            // Store the role in localStorage to be applied once the session is established
             localStorage.setItem("pending_role", verifyResult.role);
             console.log("SignInForm: Stored pending role in localStorage:", verifyResult.role);
             
-            // Sign in anonymously
+            // Sign in anonymously - the SessionInitializer will set the role
             console.log("SignInForm: Calling signIn('anonymous')");
             await signIn("anonymous");
             console.log("SignInForm: signIn completed successfully");
             
-            // Now that we're signed in, set the role immediately
-            console.log("SignInForm: Calling signInWithPassword with role:", verifyResult.role);
-            const roleResult = await signInWithPassword({ role: verifyResult.role });
-            console.log("SignInForm: signInWithPassword result:", roleResult);
-            
-            if (roleResult.success) {
-              toast.success(`Welcome! Signed in as ${roleResult.role}`);
-              localStorage.removeItem("pending_role");
-            }
+            // The SessionInitializer in App.tsx will handle the role assignment
+            // once the Authenticated component mounts
           } catch (error: any) {
             console.error("SignInForm: Sign in error details:", error);
             const errorMessage = error.message || "";
