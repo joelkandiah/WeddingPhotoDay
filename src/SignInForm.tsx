@@ -46,15 +46,20 @@ export function SignInForm() {
               try {
                 const result = await signInWithPassword({ password });
                 
+                // The mutation returns success: true if role was assigned
                 if (result.success) {
                   toast.success(`Welcome! Signed in as ${result.role}`);
+                  // Success - break out of retry loop
+                  break;
+                } else {
+                  // Unexpected: mutation didn't throw but also didn't succeed
+                  throw new Error("Authentication failed unexpectedly");
                 }
-                // Success - break out of retry loop
-                break;
               } catch (error: any) {
                 const errorMessage = error.message || "";
                 
                 // If it's a "No active session" error, retry after a short delay
+                // Note: This string matching is fragile but necessary as Convex errors don't have codes
                 if (errorMessage.includes("No active session") && retries > 1) {
                   console.log(`Session not ready yet, retrying... (${retries - 1} retries left)`);
                   await new Promise(resolve => setTimeout(resolve, SESSION_RETRY_DELAY_MS));
