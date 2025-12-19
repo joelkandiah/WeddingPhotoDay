@@ -17,6 +17,7 @@ import type * as posts from "../posts.js";
 import type * as r2 from "../r2.js";
 import type * as rateLimit from "../rateLimit.js";
 import type * as router from "../router.js";
+import type * as userSettings from "../userSettings.js";
 import type * as users from "../users.js";
 
 import type {
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   r2: typeof r2;
   rateLimit: typeof rateLimit;
   router: typeof router;
+  userSettings: typeof userSettings;
   users: typeof users;
 }>;
 

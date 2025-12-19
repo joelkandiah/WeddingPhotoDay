@@ -7,24 +7,30 @@ import { PhotoUpload } from "./PhotoUpload";
 import { PhotoGallery } from "./PhotoGallery";
 import { AdminPanel } from "./AdminPanel";
 import { Slideshow } from "./Slideshow";
+import { SettingsPage } from "./SettingsPage";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { useState } from "react";
 
 
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<"gallery" | "upload" | "admin" | "slideshow">("gallery");
+  const [currentView, setCurrentView] = useState<"gallery" | "upload" | "admin" | "slideshow" | "settings">("gallery");
   const isAdmin = useQuery(api.photos.isUserAdmin);
 
   const navItems = [
     { id: "gallery" as const, label: "Gallery", icon: "🖼️" },
     { id: "upload" as const, label: "Upload", icon: "📤" },
     { id: "slideshow" as const, label: "Slideshow", icon: "▶️" },
+    { id: "settings" as const, label: "Settings", icon: "⚙️" },
   ];
 
   // Add admin to nav items if user is admin
   const allNavItems = isAdmin 
-    ? [...navItems, { id: "admin" as const, label: "Admin", icon: "⚙️" }]
+    ? [{ id: "gallery" as const, label: "Gallery", icon: "🖼️" },
+       { id: "upload" as const, label: "Upload", icon: "📤" },
+       { id: "slideshow" as const, label: "Slideshow", icon: "▶️" },
+       { id: "admin" as const, label: "Admin", icon: "🛡️" },
+       { id: "settings" as const, label: "Settings", icon: "⚙️" }]
     : navItems;
 
   return (
@@ -69,6 +75,7 @@ export default function App() {
       <Authenticated>
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-card-bg/90 backdrop-blur-xs border-t border-card-border shadow-lg pb-safe  dark:border-card-border">
           <div className={`grid gap-1 px-2 py-2 ${
+            allNavItems.length === 5 ? 'grid-cols-5' : 
             allNavItems.length === 4 ? 'grid-cols-4' : 'grid-cols-3'
           }`}>
             {allNavItems.map((item) => (
@@ -128,19 +135,22 @@ function Content({ currentView }: { currentView: string }) {
             Note: loggedInUser query returns null if user has no role */}
         {loggedInUser ? (
           <>
-            <div className="mb-8 text-center">
-              <h1>
-                Welcome!
-              </h1>
-              <p>
-                Thank you for being part of our special day ✨
-              </p>
-            </div>
+            {currentView !== "settings" && currentView !== "admin" && (
+              <div className="mb-8 text-center">
+                <h1>
+                  Welcome!
+                </h1>
+                <p>
+                  Thank you for being part of our special day ✨
+                </p>
+              </div>
+            )}
 
             {currentView === "gallery" && <PhotoGallery />}
             {currentView === "upload" && <PhotoUpload />}
             {currentView === "slideshow" && <Slideshow />}
             {currentView === "admin" && <AdminPanel />}
+            {currentView === "settings" && <SettingsPage />}
           </>
         ) : (
           // User is authenticated but loggedInUser is null (no role = password verification in progress or failed)
