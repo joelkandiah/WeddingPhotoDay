@@ -10,7 +10,7 @@ const SESSION_RETRY_ATTEMPTS = 5;
 const SESSION_RETRY_DELAY_MS = 200;
 
 export function SignInForm() {
-  const { signIn } = useAuthActions();
+  const { signIn, signOut } = useAuthActions();
   const signInWithPassword = useMutation(api.auth.signInWithPassword);
   const [submitting, setSubmitting] = useState(false);
 
@@ -73,6 +73,10 @@ export function SignInForm() {
           } catch (error: any) {
             console.error("SignInForm: Sign in error:", error);
             const errorMessage = error.message || "";
+            
+            // Sign out the user since password verification failed
+            // This prevents them from being stuck in authenticated state without a role
+            await signOut();
             
             if (errorMessage.includes("Server Error") || errorMessage.includes("action failed")) {
               toast.error("Server Configuration Error: Please ensure JWKS keys and Environment Variables are set in the Convex Dashboard.");

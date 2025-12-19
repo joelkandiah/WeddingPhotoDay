@@ -124,19 +124,32 @@ function Content({ currentView }: { currentView: string }) {
       </Unauthenticated>
 
       <Authenticated>
-        <div className="mb-8 text-center">
-          <h1>
-            Welcome!
-          </h1>
-          <p>
-            Thank you for being part of our special day ✨
-          </p>
-        </div>
+        {/* Only show content if user has a role (password was verified) */}
+        {loggedInUser ? (
+          <>
+            <div className="mb-8 text-center">
+              <h1>
+                Welcome!
+              </h1>
+              <p>
+                Thank you for being part of our special day ✨
+              </p>
+            </div>
 
-        {currentView === "gallery" && <PhotoGallery />}
-        {currentView === "upload" && <PhotoUpload />}
-        {currentView === "slideshow" && <Slideshow />}
-        {currentView === "admin" && <AdminPanel />}
+            {currentView === "gallery" && <PhotoGallery />}
+            {currentView === "upload" && <PhotoUpload />}
+            {currentView === "slideshow" && <Slideshow />}
+            {currentView === "admin" && <AdminPanel />}
+          </>
+        ) : (
+          // User is authenticated but has no role yet (password verification in progress)
+          <div className="flex justify-center items-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Verifying password...</p>
+            </div>
+          </div>
+        )}
       </Authenticated>
     </div>
   );
