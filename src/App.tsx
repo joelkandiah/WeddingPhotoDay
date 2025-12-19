@@ -124,7 +124,8 @@ function Content({ currentView }: { currentView: string }) {
       </Unauthenticated>
 
       <Authenticated>
-        {/* Only show content if user has a role (password was verified) */}
+        {/* Only show content if user has a role (password was verified)
+            Note: loggedInUser query returns null if user has no role */}
         {loggedInUser ? (
           <>
             <div className="mb-8 text-center">
@@ -142,7 +143,7 @@ function Content({ currentView }: { currentView: string }) {
             {currentView === "admin" && <AdminPanel />}
           </>
         ) : (
-          // User is authenticated but has no role yet (password verification in progress)
+          // User is authenticated but loggedInUser is null (no role = password verification in progress or failed)
           <div className="flex justify-center items-center min-h-[400px]">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
