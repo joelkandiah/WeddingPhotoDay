@@ -34,12 +34,39 @@ export function SignInForm() {
             // First, sign in anonymously to establish a session
             await signIn("anonymous");
             
-            // Then verify password and assign role on the server
-            // The server determines the role based on password match
-            const result = await signInWithPassword({ password });
+            // Retry logic: the session may take a moment to be established
+            // Try calling signInWithPassword with retries
+            let retries = 5;
+            let lastError: Error | null = null;
             
-            if (result.success) {
-              toast.success(`Welcome! Signed in as ${result.role}`);
+            while (retries > 0) {
+              try {
+                const result = await signInWithPassword({ password });
+                
+                if (result.success) {
+                  toast.success(`Welcome! Signed in as ${result.role}`);
+                }
+                // Success - break out of retry loop
+                break;
+              } catch (error: any) {
+                lastError = error;
+                const errorMessage = error.message || "";
+                
+                // If it's a "No active session" error, retry after a short delay
+                if (errorMessage.includes("No active session") && retries > 1) {
+                  console.log(`Session not ready yet, retrying... (${retries - 1} retries left)`);
+                  await new Promise(resolve => setTimeout(resolve, 200));
+                  retries--;
+                } else {
+                  // Other errors or out of retries - throw
+                  throw error;
+                }
+              }
+            }
+            
+            // If we exhausted retries, throw the last error
+            if (retries === 0 && lastError) {
+              throw lastError;
             }
           } catch (error: any) {
             console.error("SignInForm: Sign in error:", error);
