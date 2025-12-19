@@ -8,24 +8,27 @@ import { PhotoGallery } from "./PhotoGallery";
 import { AdminPanel } from "./AdminPanel";
 import { Slideshow } from "./Slideshow";
 import { ThemeToggle } from "./components/ThemeToggle";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
+
 
 
 function SessionInitializer() {
   const setUserRole = useMutation(api.auth.signInWithPassword);
   const loggedInUser = useQuery(api.auth.loggedInUser);
+  const attemptedRef = useRef(false);
 
   useEffect(() => {
     const applyPendingRole = async () => {
       const pendingRole = localStorage.getItem("pending_role");
       
-      console.log("SessionInitializer: Check - pendingRole:", pendingRole, "loggedInUser:", loggedInUser);
+      console.log("SessionInitializer: Check - pendingRole:", pendingRole, "loggedInUser:", loggedInUser, "attemptedRef:", attemptedRef.current);
       
-      // Only apply if there's a pending role and user exists but has no role yet (loggedInUser is null)
-      // loggedInUser is null when the user is authenticated but doesn't have a role
-      if (pendingRole && loggedInUser === null) {
+      // Only apply if there's a pending role, user exists but has no role yet (loggedInUser is null),
+      // and we haven't already attempted to set the role
+      if (pendingRole && loggedInUser === null && !attemptedRef.current) {
+        attemptedRef.current = true; // Mark as attempted
         console.log("SessionInitializer: Applying pending role:", pendingRole);
         try {
           const result = await setUserRole({ role: pendingRole as "user" | "admin" });
@@ -36,12 +39,13 @@ function SessionInitializer() {
           }
         } catch (error) {
           console.error("SessionInitializer: Error applying pending role:", error);
-          // Error will be caught and logged, user can try signing in again
+          attemptedRef.current = false; // Reset on error so we can retry
         }
       } else if (loggedInUser && pendingRole) {
-        // User has a role now, clear the pending role
+        // User has a role now, clear the pending role and reset the ref
         console.log("SessionInitializer: User has role, clearing pending role from localStorage");
         localStorage.removeItem("pending_role");
+        attemptedRef.current = false;
       }
     };
 
