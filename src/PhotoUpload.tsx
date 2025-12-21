@@ -10,7 +10,7 @@ export function PhotoUpload() {
   
   const imageInput = useRef<HTMLInputElement>(null);
 
-  // Using signals for better performance - they don't cause re-renders when unchanged
+  // Using signals for reactive state management - component re-renders when signals change
   const caption = useSignal("");
   const category = useSignal<PostCategory>("US Ceremony");
   const selectedImages = useSignal<File[]>([]);
