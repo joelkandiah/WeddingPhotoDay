@@ -263,9 +263,10 @@ function getDerivedImageBaseKey(req: ImageRequest): string {
   // Ensure quality is part of the filename so q=1 and q=85 are different files
   const q = req.quality || DEFAULT_QUALITY;
   
-  // Handle blur placeholders specially
+  // Handle blur placeholders specially, include format to prevent cache collisions
   if (req.blur) {
-    return `derived/blur_${req.key}`;
+    const fmt = req.format || 'auto';
+    return `derived/blur_${fmt}_${req.key}`;
   }
   
   const dims = `${req.width || 0}x${req.height || 0}`;

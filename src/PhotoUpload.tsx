@@ -1,4 +1,4 @@
-import { useRef, useCallback, useMemo } from "react";
+import { useRef, useCallback, useMemo, memo } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { toast } from "sonner";
@@ -240,7 +240,7 @@ interface ImagePreviewProps {
   onRemove: (index: number) => void;
 }
 
-function ImagePreview({ file, index, isUploading, isUploaded, onRemove }: ImagePreviewProps) {
+const ImagePreview = memo(function ImagePreview({ file, index, isUploading, isUploaded, onRemove }: ImagePreviewProps) {
   return (
     <div className="relative group">
       <img
@@ -262,4 +262,4 @@ function ImagePreview({ file, index, isUploading, isUploaded, onRemove }: ImageP
       )}
     </div>
   );
-}
+});
