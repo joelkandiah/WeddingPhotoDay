@@ -65,9 +65,9 @@ export function getResponsivePhotoUrls(storageId: string) {
   
   return {
     // Mobile: max 768px width
-    mobile: `${normalizedBase}/images/768x/${storageId}?quality=75`,
+    mobile: `${normalizedBase}/images/768x/${storageId}?quality=60`,
     // Tablet: max 1024px width
-    tablet: `${normalizedBase}/images/1024x/${storageId}?quality=80`,
+    tablet: `${normalizedBase}/images/1024x/${storageId}?quality=70`,
     // Desktop: max 1920px width
     desktop: `${normalizedBase}/images/1920x/${storageId}?quality=85`,
     // Original compressed

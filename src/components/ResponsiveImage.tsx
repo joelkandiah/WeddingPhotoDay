@@ -44,14 +44,14 @@ export function ResponsiveImage({
   };
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative bg-black/10 overflow-hidden ${className}`}>
       {/* Blur placeholder - loads first */}
       {showBlur && (
         <img
           src={urls.blur}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-contain blur-xl scale-110"
+          className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 animate-pulse-fade pointer-events-none"
           style={{
             filter: 'blur(20px)',
             transform: 'scale(1.1)',

@@ -218,3 +218,19 @@ body {
 .pulse-playful {
   animation: playfulPulse 2s ease-in-out infinite;
 }
+
+@keyframes pulseFade {
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-fade {
+  animation: pulseFade 3s ease-in-out infinite;
+}

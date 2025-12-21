@@ -162,7 +162,7 @@ export const getPendingPosts = query({
         return Promise.all(
             posts.map(async (post) => {
                 const urls = await Promise.all(
-                    post.photoStorageIds.map((id) => getPhotoUrl(id))
+                    post.photoStorageIds.map((id) => getResponsivePhotoUrls(id))
                 );
                 return {
                     ...post,
@@ -191,7 +191,7 @@ export const getApprovedPostsForAdmin = query({
         return Promise.all(
             posts.map(async (post) => {
                 const urls = await Promise.all(
-                    post.photoStorageIds.map((id) => getPhotoUrl(id))
+                    post.photoStorageIds.map((id) => getResponsivePhotoUrls(id))
                 );
                 return {
                     ...post,
@@ -220,7 +220,7 @@ export const getRejectedPostsForAdmin = query({
         return Promise.all(
             posts.map(async (post) => {
                 const urls = await Promise.all(
-                    post.photoStorageIds.map((id) => getPhotoUrl(id))
+                    post.photoStorageIds.map((id) => getResponsivePhotoUrls(id))
                 );
                 return {
                     ...post,
