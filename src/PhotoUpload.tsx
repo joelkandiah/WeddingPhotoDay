@@ -3,9 +3,11 @@ import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { toast } from "sonner";
 import { POST_CATEGORIES, PostCategory } from "../convex/constants";
-import { useSignal, useComputed } from "@preact/signals-react";
+import { useSignal, useComputed, useSignals } from "@preact/signals-react/runtime";
 
 export function PhotoUpload() {
+  useSignals(); // Make this component reactive to signal changes
+  
   const imageInput = useRef<HTMLInputElement>(null);
 
   // Using signals for better performance - they don't cause re-renders when unchanged
