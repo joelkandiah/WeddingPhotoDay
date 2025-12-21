@@ -38,3 +38,41 @@ export function getPhotoUrl(storageId: string) {
   const normalizedBase = baseEndpoint.replace(/\/+$/, "");
   return `${normalizedBase}/images/compressed/${storageId}?quality=60`;
 }
+
+// Generate a blur placeholder URL (30x30 max, very low quality)
+export function getBlurPlaceholderUrl(storageId: string) {
+  const baseEndpoint = process.env.R2_PUBLIC_ENDPOINT;
+  if (!baseEndpoint) {
+    throw new Error(
+      "R2_PUBLIC_ENDPOINT environment variable is not set. " +
+      "Configure it in the Convex deployment environment to generate photo URLs."
+    );
+  }
+  const normalizedBase = baseEndpoint.replace(/\/+$/, "");
+  return `${normalizedBase}/images/blur/${storageId}`;
+}
+
+// Generate responsive image URLs for different device sizes
+export function getResponsivePhotoUrls(storageId: string) {
+  const baseEndpoint = process.env.R2_PUBLIC_ENDPOINT;
+  if (!baseEndpoint) {
+    throw new Error(
+      "R2_PUBLIC_ENDPOINT environment variable is not set. " +
+      "Configure it in the Convex deployment environment to generate photo URLs."
+    );
+  }
+  const normalizedBase = baseEndpoint.replace(/\/+$/, "");
+  
+  return {
+    // Mobile: max 768px width
+    mobile: `${normalizedBase}/images/768x/${storageId}?quality=75`,
+    // Tablet: max 1024px width
+    tablet: `${normalizedBase}/images/1024x/${storageId}?quality=80`,
+    // Desktop: max 1920px width
+    desktop: `${normalizedBase}/images/1920x/${storageId}?quality=85`,
+    // Original compressed
+    full: `${normalizedBase}/images/compressed/${storageId}?quality=85`,
+    // Blur placeholder
+    blur: `${normalizedBase}/images/blur/${storageId}`,
+  };
+}

@@ -10,12 +10,21 @@ interface ImageRequest {
   quality?: number;
   format?: string;
   compressed?: boolean;
+  blur?: boolean;
 }
 
 // Configuration constants
 const DEFAULT_QUALITY = 85;
 const THUMBNAIL_QUALITY = 60; // Used for thumbnail/preview URLs
+const MIN_QUALITY = 50; // Minimum quality allowed to ensure good image quality
+const BLUR_PLACEHOLDER_SIZE = 30; // Maximum dimension for blur placeholder
+const BLUR_PLACEHOLDER_QUALITY = 30; // Low quality for blur placeholders
 const MAX_DIMENSION = 7680; // 8K resolution limit (7680x4320) to prevent DoS attacks and excessive memory usage
+
+// Device-specific maximum resolutions
+const MOBILE_MAX_WIDTH = 768;
+const TABLET_MAX_WIDTH = 1024;
+const DESKTOP_MAX_WIDTH = 1920;
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -41,7 +50,7 @@ export default {
       }
 
       // 3. Handle Original Images
-      const isDerived = !!(imageRequest.width || imageRequest.height || imageRequest.format || imageRequest.compressed);
+      const isDerived = !!(imageRequest.width || imageRequest.height || imageRequest.format || imageRequest.compressed || imageRequest.blur);
       if (!isDerived) {
         const object = await env.R2_BUCKET.get(imageRequest.key);
         if (!object) return new Response('Not Found', { status: 404 });
@@ -125,11 +134,35 @@ export default {
  * Triggers Cloudflare Resizing by fetching the "Original" URL from itself
  */
 async function transformViaResizer(request: ImageRequest, origin: string): Promise<Response> {
+  // Handle blur placeholders: small dimensions, low quality
+  if (request.blur) {
+    const resizingOptions = {
+      width: BLUR_PLACEHOLDER_SIZE,
+      height: BLUR_PLACEHOLDER_SIZE,
+      quality: BLUR_PLACEHOLDER_QUALITY,
+      format: request.format || 'auto',
+      fit: 'cover',
+      blur: 10, // Apply blur to the placeholder
+    };
+
+    const originalUrl = `${origin}/images/original/${request.key}`;
+
+    const res = await fetch(originalUrl, {
+      headers: { 'x-source': 'image-resizer' },
+      cf: { image: resizingOptions }
+    });
+
+    if (!res.ok) throw new Error('Resizing service failed');
+    return res;
+  }
+
+  // Regular image transformation with minimum quality enforcement
   const hasDimensions = typeof request.width === 'number' || typeof request.height === 'number';
+  const quality = request.quality || DEFAULT_QUALITY;
   const resizingOptions = {
     width: request.width,
     height: request.height,
-    quality: request.quality || DEFAULT_QUALITY,
+    quality: Math.max(quality, MIN_QUALITY), // Enforce minimum quality
     format: request.format || 'auto',
     fit: hasDimensions ? 'cover' : 'scale-down',
   };
@@ -181,12 +214,25 @@ function parseImageRequest(url: URL): ImageRequest | null {
   const validFormats = ['webp', 'jpeg', 'png', 'avif', 'auto'];
   const format = formatParam && validFormats.includes(formatParam) ? formatParam : 'auto';
 
+  // Check for blur placeholder request
+  const blurParam = url.searchParams.get('blur');
+  const isBlur = blurParam === 'true' || blurParam === '1';
+
+  if (parts[1] === 'blur') {
+    return {
+      key,
+      blur: true,
+      format
+    };
+  }
+
   if (parts[1] === 'compressed') {
     return {
       key,
       compressed: true,
       quality,
-      format
+      format,
+      blur: isBlur
     };
   }
 
@@ -205,7 +251,8 @@ function parseImageRequest(url: URL): ImageRequest | null {
       width,
       height,
       quality,
-      format
+      format,
+      blur: isBlur
     };
   }
 
@@ -215,6 +262,12 @@ function parseImageRequest(url: URL): ImageRequest | null {
 function getDerivedImageBaseKey(req: ImageRequest): string {
   // Ensure quality is part of the filename so q=1 and q=85 are different files
   const q = req.quality || DEFAULT_QUALITY;
+  
+  // Handle blur placeholders specially
+  if (req.blur) {
+    return `derived/blur_${req.key}`;
+  }
+  
   const dims = `${req.width || 0}x${req.height || 0}`;
   return `derived/${dims}_q${q}_${req.key}`;
 }

@@ -5,7 +5,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { paginationOptsValidator } from "convex/server"; // Added pagination validator
 import { getIsAdmin } from "./adminHelper";
 import { categoryValidator } from "./constants";
-import { generateUploadUrl as r2GenerateUploadUrl, getPhotoUrl } from "./r2";
+import { generateUploadUrl as r2GenerateUploadUrl, getPhotoUrl, getResponsivePhotoUrls } from "./r2";
 import { rateLimiter } from "./rateLimit";
 import { ensureUserRole } from "./users";
 
@@ -39,7 +39,7 @@ export const getApprovedPosts = query({
         return Promise.all(
             posts.map(async (post) => {
                 const urls = await Promise.all(
-                    post.photoStorageIds.map((id) => getPhotoUrl(id))
+                    post.photoStorageIds.map((id) => getResponsivePhotoUrls(id))
                 );
                 return {
                     ...post,
@@ -92,7 +92,7 @@ export const getApprovedPostsPaginated = query({
         const page = await Promise.all(
             result.page.map(async (post) => {
                 const urls = await Promise.all(
-                    post.photoStorageIds.map((id) => getPhotoUrl(id))
+                    post.photoStorageIds.map((id) => getResponsivePhotoUrls(id))
                 );
                 return {
                     ...post,

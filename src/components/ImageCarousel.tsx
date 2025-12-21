@@ -1,7 +1,16 @@
 import { useState, useRef, useEffect, TouchEvent, MouseEvent as ReactMouseEvent } from "react";
+import { ResponsiveImage } from "./ResponsiveImage";
+
+interface ResponsiveImageUrls {
+  mobile: string;
+  tablet: string;
+  desktop: string;
+  full: string;
+  blur: string;
+}
 
 interface ImageCarouselProps {
-  images: string[];
+  images: (string | ResponsiveImageUrls)[];
   alt: string;
   onImageClick?: (index: number) => void;
   className?: string;
@@ -231,9 +240,35 @@ export function ImageCarousel({
 }
 
 // Sub-component to handle individual image loading state
-function CarouselSlide({ src, alt, priority }: { src: string, alt: string, priority: boolean }) {
+function CarouselSlide({ 
+  src, 
+  alt, 
+  priority 
+}: { 
+  src: string | ResponsiveImageUrls, 
+  alt: string, 
+  priority: boolean 
+}) {
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Check if src is a responsive URLs object or a string
+  const isResponsive = typeof src === 'object' && 'blur' in src;
+
+  if (isResponsive) {
+    return (
+      <div className="w-full h-full relative flex items-center justify-center">
+        <ResponsiveImage
+          urls={src}
+          alt={alt}
+          priority={priority}
+          className="w-full h-full"
+          onLoad={() => setIsLoaded(true)}
+        />
+      </div>
+    );
+  }
+
+  // Fallback for old string URLs
   return (
     <div className="w-full h-full relative flex items-center justify-center">
       {!isLoaded && (
