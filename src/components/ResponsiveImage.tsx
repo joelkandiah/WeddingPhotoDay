@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface ResponsiveImageUrls {
   mobile: string;
@@ -35,13 +35,26 @@ export function ResponsiveImage({
 }: ResponsiveImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [showBlur, setShowBlur] = useState(true);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   const handleLoad = () => {
+    // If already marked as loaded (e.g. by effect), don't re-trigger animation logic
+    if (isLoaded) return;
+    
     setIsLoaded(true);
     // Keep blur visible briefly for smooth transition
     setTimeout(() => setShowBlur(false), 100);
     onLoad?.();
   };
+
+  // Check for cached image on mount
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setIsLoaded(true);
+      setShowBlur(false);
+      onLoad?.();
+    }
+  }, [onLoad]);
 
   return (
     <div className={`relative bg-black/10 overflow-hidden ${className}`}>
@@ -91,6 +104,7 @@ export function ResponsiveImage({
         
         {/* Fallback image */}
         <img
+          ref={imgRef}
           src={urls.desktop}
           alt={alt}
           loading={priority ? "eager" : "lazy"}
