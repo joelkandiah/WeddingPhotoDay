@@ -49,7 +49,10 @@ export default function App() {
                 {allNavItems.map((item) => (
                   <button
                     key={item.id}
-                    onClick={() => setCurrentView(item.id)}
+                    onClick={() => {
+                      setCurrentView(item.id);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                       currentView === item.id
                         ? "bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-100"
