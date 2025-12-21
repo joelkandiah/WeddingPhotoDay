@@ -3,29 +3,29 @@ import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { toast } from "sonner";
 import { POST_CATEGORIES, PostCategory } from "../convex/constants";
-import { signal, computed } from "@preact/signals-react";
-
-// Using signals for better performance - they don't cause re-renders when unchanged
-const caption = signal("");
-const category = signal<PostCategory>("US Ceremony");
-const selectedImages = signal<File[]>([]);
-const isUploading = signal(false);
-const uploadProgress = signal<Record<string, boolean>>({});
-
-// Computed signal for upload button state
-const canUpload = computed(() => !isUploading.value && selectedImages.value.length > 0);
-const uploadButtonText = computed(() => {
-  if (isUploading.value) {
-    const uploaded = Object.keys(uploadProgress.value).length;
-    const total = selectedImages.value.length;
-    return `Uploading ${uploaded}/${total}...`;
-  }
-  const count = selectedImages.value.length;
-  return `Upload ${count} Photo${count !== 1 ? 's' : ''} 💙`;
-});
+import { useSignal, useComputed } from "@preact/signals-react";
 
 export function PhotoUpload() {
   const imageInput = useRef<HTMLInputElement>(null);
+
+  // Using signals for better performance - they don't cause re-renders when unchanged
+  const caption = useSignal("");
+  const category = useSignal<PostCategory>("US Ceremony");
+  const selectedImages = useSignal<File[]>([]);
+  const isUploading = useSignal(false);
+  const uploadProgress = useSignal<Record<string, boolean>>({});
+
+  // Computed signal for upload button state
+  const canUpload = useComputed(() => !isUploading.value && selectedImages.value.length > 0);
+  const uploadButtonText = useComputed(() => {
+    if (isUploading.value) {
+      const uploaded = Object.keys(uploadProgress.value).length;
+      const total = selectedImages.value.length;
+      return `Uploading ${uploaded}/${total}...`;
+    }
+    const count = selectedImages.value.length;
+    return `Upload ${count} Photo${count !== 1 ? 's' : ''} 💙`;
+  });
 
   const generateUploadUrl = useMutation(api.posts.generateUploadUrl);
   const uploadPost = useMutation(api.posts.uploadPost);
