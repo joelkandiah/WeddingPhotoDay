@@ -1,21 +1,37 @@
-import { useState, useRef } from "react";
+import { useRef, useCallback, useMemo, memo } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { toast } from "sonner";
 import { POST_CATEGORIES, PostCategory } from "../convex/constants";
+import { signal, computed } from "@preact/signals-react";
+
+// Using signals for better performance - they don't cause re-renders when unchanged
+const caption = signal("");
+const category = signal<PostCategory>("US Ceremony");
+const selectedImages = signal<File[]>([]);
+const isUploading = signal(false);
+const uploadProgress = signal<Record<string, boolean>>({});
+
+// Computed signal for upload button state
+const canUpload = computed(() => !isUploading.value && selectedImages.value.length > 0);
+const uploadButtonText = computed(() => {
+  if (isUploading.value) {
+    const uploaded = Object.keys(uploadProgress.value).length;
+    const total = selectedImages.value.length;
+    return `Uploading ${uploaded}/${total}...`;
+  }
+  const count = selectedImages.value.length;
+  return `Upload ${count} Photo${count !== 1 ? 's' : ''} 💙`;
+});
 
 export function PhotoUpload() {
-  const [caption, setCaption] = useState("");
-  const [category, setCategory] = useState<PostCategory>("US Ceremony");
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<Record<string, boolean>>({});
   const imageInput = useRef<HTMLInputElement>(null);
 
   const generateUploadUrl = useMutation(api.posts.generateUploadUrl);
   const uploadPost = useMutation(api.posts.uploadPost);
 
-  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Use useCallback to prevent unnecessary re-creations
+  const handleImageSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     
     // Validate file sizes
@@ -27,28 +43,28 @@ export function PhotoUpload() {
       return true;
     });
 
-    setSelectedImages(prev => [...prev, ...validFiles]);
-  };
+    selectedImages.value = [...selectedImages.value, ...validFiles];
+  }, []);
 
-  const removeImage = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
-  };
+  const removeImage = useCallback((index: number) => {
+    selectedImages.value = selectedImages.value.filter((_, i) => i !== index);
+  }, []);
 
-  const handleUpload = async (event: React.FormEvent) => {
+  const handleUpload = useCallback(async (event: React.FormEvent) => {
     event.preventDefault();
     
-    if (selectedImages.length === 0) {
+    if (selectedImages.value.length === 0) {
       toast.error("Please select at least one photo");
       return;
     }
 
-    setIsUploading(true);
-    setUploadProgress({});
+    isUploading.value = true;
+    uploadProgress.value = {};
 
     try {
       const storageIds: string[] = [];
 
-      for (const file of selectedImages) {
+      for (const file of selectedImages.value) {
         // Generate signed URL from Convex
         const { url, key } = await generateUploadUrl();
 
@@ -66,32 +82,52 @@ export function PhotoUpload() {
         storageIds.push(key);
 
         // Update progress immediately after each file
-        setUploadProgress(prev => ({ ...prev, [file.name]: true }));
+        uploadProgress.value = { ...uploadProgress.value, [file.name]: true };
       }
 
       // Call mutation once with all keys
       await uploadPost({
         photoStorageIds: storageIds,
-        caption: caption.trim() || undefined,
-        category,
+        caption: caption.value.trim() || undefined,
+        category: category.value,
       });
 
-      toast.success(`${selectedImages.length} photo${selectedImages.length > 1 ? "s" : ""} uploaded successfully! They will appear after admin approval.`);
+      toast.success(`${selectedImages.value.length} photo${selectedImages.value.length > 1 ? "s" : ""} uploaded successfully! They will appear after admin approval.`);
 
       // Reset form
-      setCaption("");
-      setCategory("US Ceremony");
-      setSelectedImages([]);
-      setUploadProgress({});
+      caption.value = "";
+      category.value = "US Ceremony";
+      selectedImages.value = [];
+      uploadProgress.value = {};
       if (imageInput.current) imageInput.current.value = "";
 
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Failed to upload photos. Please try again.");
     } finally {
-      setIsUploading(false);
+      isUploading.value = false;
     }
-  };
+  }, [generateUploadUrl, uploadPost]);
+
+  // Memoize the preview grid to avoid re-rendering on every signal change
+  const imagePreviewGrid = useMemo(() => {
+    if (selectedImages.value.length === 0) return null;
+    
+    return (
+      <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {selectedImages.value.map((file, index) => (
+          <ImagePreview
+            key={`${file.name}-${index}`}
+            file={file}
+            index={index}
+            isUploading={isUploading.value}
+            isUploaded={uploadProgress.value[file.name]}
+            onRemove={removeImage}
+          />
+        ))}
+      </div>
+    );
+  }, [selectedImages.value, isUploading.value, uploadProgress.value, removeImage]);
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -106,8 +142,8 @@ export function PhotoUpload() {
               Category *
             </label>
             <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value as PostCategory)}
+              value={category.value}
+              onChange={(e) => category.value = e.target.value as PostCategory}
               className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
               required
             >
@@ -124,8 +160,8 @@ export function PhotoUpload() {
               Photo Caption
             </label>
             <textarea
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
+              value={caption.value}
+              onChange={(e) => caption.value = e.target.value}
               className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
               placeholder="Share the story behind these moments..."
               rows={3}
@@ -134,7 +170,7 @@ export function PhotoUpload() {
 
           <div>
             <label className="block text-sm font-medium text-card-text mb-2">
-              Select Photos * {selectedImages.length > 0 && `(${selectedImages.length} selected)`}
+              Select Photos * {selectedImages.value.length > 0 && `(${selectedImages.value.length} selected)`}
             </label>
             <div className="relative">
               <input
@@ -162,48 +198,24 @@ export function PhotoUpload() {
               </button>
             </div>
 
-            {/* Photo Previews */}
-            {selectedImages.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {selectedImages.map((file, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      ✕
-                    </button>
-                    {isUploading && uploadProgress[file.name] && (
-                      <div className="absolute inset-0 bg-green-500 bg-opacity-20 rounded-lg flex items-center justify-center">
-                        <span className="text-green-700 font-bold">✓</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* Photo Previews using memoized grid */}
+            {imagePreviewGrid}
           </div>
 
           <button
             type="submit"
-            disabled={isUploading || selectedImages.length === 0}
+            disabled={!canUpload.value}
             className={`w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white font-semibold py-4 rounded-lg hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl ${
-              !isUploading && selectedImages.length > 0 ? "pulse-playful" : ""
+              canUpload.value ? "pulse-playful" : ""
             }`}
           >
-            {isUploading ? (
+            {isUploading.value ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                Uploading {Object.keys(uploadProgress).length}/{selectedImages.length}...
+                {uploadButtonText.value}
               </div>
             ) : (
-              `Upload ${selectedImages.length} Photo${selectedImages.length !== 1 ? 's' : ''} 💙`
+              uploadButtonText.value
             )}
           </button>
         </form>
@@ -218,3 +230,36 @@ export function PhotoUpload() {
     </div>
   );
 }
+
+// Memoized component for individual image preview to prevent unnecessary re-renders
+interface ImagePreviewProps {
+  file: File;
+  index: number;
+  isUploading: boolean;
+  isUploaded?: boolean;
+  onRemove: (index: number) => void;
+}
+
+const ImagePreview = memo(function ImagePreview({ file, index, isUploading, isUploaded, onRemove }: ImagePreviewProps) {
+  return (
+    <div className="relative group">
+      <img
+        src={URL.createObjectURL(file)}
+        alt={`Preview ${index + 1}`}
+        className="w-full h-32 object-cover rounded-lg"
+      />
+      <button
+        type="button"
+        onClick={() => onRemove(index)}
+        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        ✕
+      </button>
+      {isUploading && isUploaded && (
+        <div className="absolute inset-0 bg-green-500 bg-opacity-20 rounded-lg flex items-center justify-center">
+          <span className="text-green-700 font-bold">✓</span>
+        </div>
+      )}
+    </div>
+  );
+});
