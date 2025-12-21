@@ -132,29 +132,72 @@ The Cloudflare Worker serves images from R2 with on-demand resizing capabilities
 
 ### Image URL Patterns
 
-The Worker supports the following URL patterns:
+The Worker supports the following URL patterns with intelligent caching:
 
 - **Original images:** `/images/original/{key}` - Serves the original, unmodified image
-- **Compressed images:** `/images/compressed/{key}` - Auto-compresses with 85% quality and optimal format (recommended for serving photos)
+- **Blur placeholders:** `/images/blur/{key}` - Generates tiny 30x30 blurred placeholders for instant loading
+- **Compressed images:** `/images/compressed/{key}` - Auto-compresses with quality between 50-85 (default: 85)
   - Automatically converts HEIC/HEIF (iPhone photos) to web-friendly formats
-  - Query params: `?quality=80` (default: 85), `?format=webp` (default: auto)
+  - Query params: `?quality=80` (enforced minimum: 50), `?format=webp` (default: auto)
+  - Can request blur placeholder: `?blur=true`
 - **Width only:** `/images/{width}x/{key}` - Resizes to specific width (maintains aspect ratio)
 - **Height only:** `/images/x{height}/{key}` - Resizes to specific height (maintains aspect ratio)
 - **Both dimensions:** `/images/{width}x{height}/{key}` - Resizes to specific dimensions
 - **Query parameters (for all derived images):**
-  - `?quality=80` - Set JPEG/WebP quality (1-100)
+  - `?quality=80` - Set JPEG/WebP quality (50-100, enforced minimum: 50)
   - `?format=webp` - Convert to WebP, JPEG, PNG, AVIF, or 'auto' (browser-specific)
+  - `?blur=true` - Request blur placeholder version
+
+**Responsive Image URLs (recommended for best performance):**
+The app now uses device-optimized URLs:
+- Mobile (≤768px): `/images/768x/{key}?quality=75`
+- Tablet (769-1024px): `/images/1024x/{key}?quality=80`
+- Desktop (1025-1920px): `/images/1920x/{key}?quality=85`
+- Large Desktop (>1920px): `/images/compressed/{key}?quality=85`
 
 **Example URLs:**
 ```
 /images/original/{key}                    # Original, unmodified
+/images/blur/{key}                        # Blur placeholder (30x30, 10px blur)
 /images/compressed/{key}                  # Auto-compressed (85% quality, auto format)
-/images/compressed/{key}?quality=75       # Compressed with custom quality
-/images/800x/{key}                        # Resized to 800px wide
+/images/compressed/{key}?quality=75       # Compressed with custom quality (min: 50)
+/images/768x/{key}?quality=75             # Mobile-optimized (768px wide)
+/images/1024x/{key}?quality=80            # Tablet-optimized (1024px wide)
+/images/1920x/{key}?quality=85            # Desktop-optimized (1920px wide)
 /images/1200x800/{key}?format=webp        # Specific dimensions as WebP
 ```
 
 **HEIC/HEIF Support:** iPhone photos in HEIC format are automatically detected and converted to web-friendly formats (WebP for modern browsers, JPEG for others) by Cloudflare Image Resizing.
+
+### Image Caching Strategy
+
+The Worker implements an efficient multi-tier caching system to minimize transformation costs and improve performance:
+
+1. **R2 Bucket Cache (Durable Storage)**
+   - All derived images are automatically cached in R2 under the `derived/` prefix
+   - Cache keys include quality and dimensions: `derived/1920x0_q85_{key}.webp`
+   - Blur placeholders: `derived/blur_{key}.webp`
+   - **Once transformed, images are served directly from R2 without re-transformation**
+   - Cache is immutable - transformations only happen once per unique combination
+
+2. **Cloudflare CDN Cache**
+   - All responses include `Cache-Control: public, max-age=31536000, immutable`
+   - Images are cached globally at Cloudflare's edge locations
+   - Subsequent requests from the same region are served from CDN, bypassing the worker entirely
+
+3. **Browser Cache**
+   - Immutable cache headers tell browsers to cache indefinitely
+   - Resources never need revalidation
+
+**Performance Benefits:**
+- First request: Transform image via Cloudflare Image Resizing → Save to R2 → Return to client
+- Second request (same params): Serve directly from R2 cache (no transformation)
+- Third+ requests: Serve from Cloudflare edge cache (doesn't even hit the worker)
+
+**Cost Optimization:**
+- Transformations are billed once per unique image/quality/dimension combination
+- All subsequent requests are free (served from R2 or edge cache)
+- Blur placeholders (30x30) cost negligible compute due to small size
 
 ### How the Upload Flow Works
 
