@@ -129,7 +129,7 @@ function Content() {
           <Route 
             path="/reset-password" 
             element={
-              <div className="text-center mb-8 py-12 gap-4 margin-auto">
+              <div className="text-center mb-8 py-12 mx-auto">
                 <h1>
                   Reset Your Password
                 </h1>
@@ -145,7 +145,7 @@ function Content() {
           <Route 
             path="*" 
             element={
-              <div className="text-center mb-8 py-12 gap-4 margin-auto">
+              <div className="text-center mb-8 py-12 mx-auto">
                 <h1>
                   Share Our Wedding Joy
                 </h1>
@@ -167,7 +167,7 @@ function Content() {
           <Route 
             path="/reset-password" 
             element={
-              <div className="text-center mb-8 py-12 gap-4 margin-auto">
+              <div className="text-center mb-8 py-12 mx-auto">
                 <h1>
                   Reset Your Password
                 </h1>
