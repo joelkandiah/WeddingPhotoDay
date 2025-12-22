@@ -20,7 +20,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         };
       },
       reset: Email({
-        id: "password-reset",
+        id: "password",
         name: "Password Reset",
         from: RESET_EMAIL_FROM,
         maxAge: 60 * 15, // 15 minutes

@@ -68,6 +68,9 @@ export function SignInForm() {
         if (!resetToken) {
           throw new Error("Invalid reset link");
         }
+        if !newPassword || newPassword.length < 8) {
+            throw new Error("Password must be at least 8 characters");
+        }
         await signIn("password", { 
           email: validatedEmail, 
           code: resetToken,
