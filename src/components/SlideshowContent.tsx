@@ -21,13 +21,17 @@ export function SlideshowContent({ category }: SlideshowContentProps) {
   const slideshowRef = useRef<HTMLDivElement>(null);
   const hideControlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Track which images have been loaded
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0]));
+  const PRELOAD_RANGE = 3; // Load 3 images ahead and behind
+
   // Flatten posts into individual photos
   const photos = useMemo(() => {
     if (!posts) return [];
     return posts.flatMap(post =>
-      post.photoUrls.map(url => ({
-        _id: post._id + url,
-        url,
+      post.photoUrls.map((urls, index) => ({
+        _id: post._id + index,
+        urls,
         caption: post.caption,
         uploaderName: post.uploaderName,
         _creationTime: post._creationTime,
@@ -38,7 +42,23 @@ export function SlideshowContent({ category }: SlideshowContentProps) {
   // Reset index when photos change (e.g. category switch)
   useEffect(() => {
     setCurrentIndex(0);
+    setLoadedImages(new Set([0]));
   }, [category]);
+
+  // Preload images near current index
+  useEffect(() => {
+    if (photos.length === 0) return;
+
+    const imagesToLoad = new Set<number>();
+    for (let i = -PRELOAD_RANGE; i <= PRELOAD_RANGE; i++) {
+      const index = currentIndex + i;
+      if (index >= 0 && index < photos.length) {
+        imagesToLoad.add(index);
+      }
+    }
+
+    setLoadedImages(prev => new Set([...prev, ...imagesToLoad]));
+  }, [currentIndex, photos.length]);
 
   const currentPhoto = photos[currentIndex];
 
@@ -186,8 +206,8 @@ export function SlideshowContent({ category }: SlideshowContentProps) {
         }`}
       >
         <div className={`relative ${isFullscreen ? "w-full h-full" : "aspect-video"}`}>
-          {currentPhoto.url ? (
-            <img src={currentPhoto.url} alt={currentPhoto.caption || "Wedding photo"} className="w-full h-full object-contain" />
+          {currentPhoto.urls ? (
+            <img src={currentPhoto.urls.desktop} alt={currentPhoto.caption || "Wedding photo"} className="w-full h-full object-contain" />
           ) : (
             <div className="w-full h-full bg-input-bg flex items-center justify-center">
               <span className="text-accent-text">Loading...</span>
@@ -262,17 +282,26 @@ export function SlideshowContent({ category }: SlideshowContentProps) {
       {/* Thumbnails */}
       {!isFullscreen && (
         <div className="mt-6 flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
-          {photos.map((photo, index) => (
-            <button
-              key={photo._id}
-              onClick={() => setCurrentIndex(index)}
-              className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                index === currentIndex ? "border-violet-500 ring-2 ring-violet-200" : "border-card-border hover:border-accent-text"
-              }`}
-            >
-              <img src={photo.url} alt="" className="w-full h-full object-cover" />
-            </button>
-          ))}
+          {photos.map((photo, index) => {
+            const shouldLoad = loadedImages.has(index);
+            return (
+              <button
+                key={photo._id}
+                onClick={() => setCurrentIndex(index)}
+                className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                  index === currentIndex ? "border-violet-500 ring-2 ring-violet-200" : "border-card-border hover:border-accent-text"
+                }`}
+              >
+                {shouldLoad ? (
+                  <img src={photo.urls.mobile} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-input-bg flex items-center justify-center">
+                    <span className="text-xs text-accent-text">{index + 1}</span>
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 
