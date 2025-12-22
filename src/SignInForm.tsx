@@ -69,7 +69,7 @@ export function SignInForm() {
           throw new Error("Invalid reset link");
         }
         await signIn("password", { 
-          email, 
+          email: validatedEmail, 
           code: resetToken,
           newPassword,
           flow: "reset-verification"
