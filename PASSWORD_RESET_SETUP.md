@@ -179,6 +179,27 @@ npx convex env set RESEND_API_KEY your_resend_api_key
 
 **Solution:** Request a new password reset link.
 
+## Implementation Details
+
+### Magic Link Behavior
+
+The password reset implementation uses "magic link behavior" where only the reset token is needed for verification. This is accomplished by setting `authorize: undefined` in the Email provider configuration:
+
+```typescript
+reset: Email({
+  id: "password-reset",
+  authorize: undefined, // Skip email verification check for password reset magic link
+  // ... other configuration
+})
+```
+
+By default, the Email provider's `authorize` function checks that the email address provided during verification matches the account's email. However, for password reset flows, we want users to be able to reset their password using only the secure token from the email link, without requiring them to re-enter their email address correctly. Setting `authorize: undefined` disables this check and enables the magic link behavior.
+
+This approach:
+- Improves user experience by reducing friction
+- Maintains security through the cryptographically secure token
+- Is the recommended pattern for password reset flows per @convex-dev/auth documentation
+
 ## Email Customization
 
 The password reset email template is defined in `convex/auth.ts`. You can customize:
@@ -191,14 +212,14 @@ The password reset email template is defined in `convex/auth.ts`. You can custom
 
 Example customization:
 ```typescript
-reset: {
+reset: Email({
   id: "password-reset",
-  type: "email",
+  authorize: undefined, // Important: Keep this for magic link behavior
   maxAge: 60 * 30, // Change to 30 minutes
   async sendVerificationRequest({ identifier: email, token }) {
     // Customize email template here
   },
-},
+})
 ```
 
 ## Support

@@ -24,6 +24,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         name: "Password Reset",
         from: RESET_EMAIL_FROM,
         maxAge: 60 * 15, // 15 minutes
+        authorize: undefined, // Skip email verification check for password reset magic link
         async sendVerificationRequest({ identifier: email, url, token }: { identifier: string; url: string; token: string }) {
           const resendApiKey = process.env.RESEND_API_KEY;
           if (!resendApiKey) {

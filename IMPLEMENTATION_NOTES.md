@@ -17,6 +17,7 @@ Successfully implemented password reset functionality for the Wedding Photo Day 
 - Added 15-minute token expiration
 - Extracted email configuration to constant to avoid duplication
 - Properly handles environment variables for configuration
+- **Fixed**: Set `authorize: undefined` for password reset Email provider to enable magic link behavior (fixes "Could not verify code" error)
 
 ### 3. Frontend Changes (`src/SignInForm.tsx`)
 - Added URL parameter detection for password reset links
