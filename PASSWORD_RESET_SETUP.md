@@ -49,9 +49,9 @@ npx convex env set RESEND_FROM_EMAIL "Your App Name <noreply@yourdomain.com>"
 
 **Note:** If you use Resend's free tier, you can send emails from `onboarding@resend.dev` for testing purposes, but you'll need to add recipient email addresses to your account. For production, you should verify your own domain.
 
-### 3. SITE_URL or CONVEX_SITE_URL (Optional for development)
+### 3. SITE_URL (Required for production)
 
-The URL of your application where users will be redirected to reset their password.
+The URL of your **frontend application** (not the Convex backend) where users will be redirected to reset their password. This should point to your Vercel deployment or wherever your frontend is hosted.
 
 **Default value:** `http://localhost:5173` (for local development)
 
@@ -59,6 +59,8 @@ The URL of your application where users will be redirected to reset their passwo
 ```bash
 npx convex env set SITE_URL https://your-production-domain.com
 ```
+
+**Important:** Do NOT set this to your Convex backend URL (e.g., `https://xxx.convex.site`). It must be your frontend URL where users access your application.
 
 The password reset email will include a link like:
 ```

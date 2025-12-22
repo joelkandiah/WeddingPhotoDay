@@ -32,8 +32,10 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 
           const resend = new Resend(resendApiKey);
 
-          // Get the site URL from environment or use default
-          const siteUrl = process.env.CONVEX_SITE_URL || process.env.SITE_URL || "http://localhost:5173";
+          // Get the frontend site URL from environment or use default
+          // SITE_URL should point to the frontend (e.g., Vercel deployment)
+          // not CONVEX_SITE_URL which points to the Convex backend
+          const siteUrl = process.env.SITE_URL || "http://localhost:5173";
           
           // Construct the reset URL with code and email parameters
           const resetUrl = `${siteUrl}/?code=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
