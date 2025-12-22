@@ -449,6 +449,31 @@ export const approveAllPendingPosts = mutation({
     },
 });
 
+export const editPost = mutation({
+    args: {
+        postId: v.id("posts"),
+        caption: v.optional(v.string()),
+        category: categoryValidator,
+    },
+    handler: async (ctx, args) => {
+        const isAdmin = await getIsAdmin(ctx);
+
+        if (!isAdmin) {
+            throw new Error("Not authorized");
+        }
+
+        const post = await ctx.db.get(args.postId);
+        if (!post) {
+            throw new Error("Post not found");
+        }
+
+        await ctx.db.patch(args.postId, {
+            caption: args.caption,
+            category: args.category,
+        });
+    },
+});
+
 export const deletePost = mutation({
     args: {
         postId: v.id("posts"),
