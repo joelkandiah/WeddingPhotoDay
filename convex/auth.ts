@@ -1,5 +1,6 @@
 import { convexAuth } from "@convex-dev/auth/server";
 import { Password } from "@convex-dev/auth/providers/Password";
+import { Email } from "@convex-dev/auth/providers/Email";
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
@@ -18,13 +19,12 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
           name: params.name as string,
         };
       },
-      reset: {
+      reset: Email({
         id: "password-reset",
-        type: "email",
         name: "Password Reset",
         from: RESET_EMAIL_FROM,
         maxAge: 60 * 15, // 15 minutes
-        async sendVerificationRequest({ identifier: email, url, token }) {
+        async sendVerificationRequest({ identifier: email, url, token }: { identifier: string; url: string; token: string }) {
           const resendApiKey = process.env.RESEND_API_KEY;
           if (!resendApiKey) {
             throw new Error("RESEND_API_KEY environment variable is not set");
@@ -78,7 +78,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
             throw new Error("Failed to send password reset email");
           }
         },
-      },
+      }),
     }),
   ],
   callbacks: {
