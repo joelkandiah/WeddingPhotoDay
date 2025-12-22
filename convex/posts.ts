@@ -61,6 +61,36 @@ export const getApprovedPostsCount = query({
     },
 });
 
+export const getPendingPostsCount = query({
+    args: {},
+    handler: async (ctx) => {
+        const isAdmin = await getIsAdmin(ctx);
+        if (!isAdmin) {
+            throw new Error("Not authorized");
+        }
+        const posts = await ctx.db
+            .query("posts")
+            .withIndex("by_status", (q) => q.eq("status", "pending"))
+            .collect();
+        return posts.length;
+    },
+});
+
+export const getRejectedPostsCount = query({
+    args: {},
+    handler: async (ctx) => {
+        const isAdmin = await getIsAdmin(ctx);
+        if (!isAdmin) {
+            throw new Error("Not authorized");
+        }
+        const posts = await ctx.db
+            .query("posts")
+            .withIndex("by_status", (q) => q.eq("status", "rejected"))
+            .collect();
+        return posts.length;
+    },
+});
+
 export const getApprovedPostsPaginated = query({
     args: {
         paginationOpts: paginationOptsValidator,
@@ -173,6 +203,39 @@ export const getPendingPosts = query({
     },
 });
 
+export const getPendingPostsPaginated = query({
+    args: {
+        paginationOpts: paginationOptsValidator,
+    },
+    handler: async (ctx, args) => {
+        const isAdmin = await getIsAdmin(ctx);
+
+        if (!isAdmin) {
+            throw new Error("Not authorized");
+        }
+
+        const result = await ctx.db
+            .query("posts")
+            .withIndex("by_status", (q) => q.eq("status", "pending"))
+            .order("desc")
+            .paginate(args.paginationOpts);
+
+        const page = await Promise.all(
+            result.page.map(async (post) => {
+                const urls = await Promise.all(
+                    post.photoStorageIds.map((id) => getResponsivePhotoUrls(id))
+                );
+                return {
+                    ...post,
+                    photoUrls: urls,
+                };
+            })
+        );
+
+        return { ...result, page };
+    },
+});
+
 export const getApprovedPostsForAdmin = query({
     args: {},
     handler: async (ctx) => {
@@ -202,6 +265,39 @@ export const getApprovedPostsForAdmin = query({
     },
 });
 
+export const getApprovedPostsForAdminPaginated = query({
+    args: {
+        paginationOpts: paginationOptsValidator,
+    },
+    handler: async (ctx, args) => {
+        const isAdmin = await getIsAdmin(ctx);
+
+        if (!isAdmin) {
+            throw new Error("Not authorized");
+        }
+
+        const result = await ctx.db
+            .query("posts")
+            .withIndex("by_status", (q) => q.eq("status", "approved"))
+            .order("desc")
+            .paginate(args.paginationOpts);
+
+        const page = await Promise.all(
+            result.page.map(async (post) => {
+                const urls = await Promise.all(
+                    post.photoStorageIds.map((id) => getResponsivePhotoUrls(id))
+                );
+                return {
+                    ...post,
+                    photoUrls: urls,
+                };
+            })
+        );
+
+        return { ...result, page };
+    },
+});
+
 export const getRejectedPostsForAdmin = query({
     args: {},
     handler: async (ctx) => {
@@ -228,6 +324,39 @@ export const getRejectedPostsForAdmin = query({
                 };
             })
         );
+    },
+});
+
+export const getRejectedPostsForAdminPaginated = query({
+    args: {
+        paginationOpts: paginationOptsValidator,
+    },
+    handler: async (ctx, args) => {
+        const isAdmin = await getIsAdmin(ctx);
+
+        if (!isAdmin) {
+            throw new Error("Not authorized");
+        }
+
+        const result = await ctx.db
+            .query("posts")
+            .withIndex("by_status", (q) => q.eq("status", "rejected"))
+            .order("desc")
+            .paginate(args.paginationOpts);
+
+        const page = await Promise.all(
+            result.page.map(async (post) => {
+                const urls = await Promise.all(
+                    post.photoStorageIds.map((id) => getResponsivePhotoUrls(id))
+                );
+                return {
+                    ...post,
+                    photoUrls: urls,
+                };
+            })
+        );
+
+        return { ...result, page };
     },
 });
 

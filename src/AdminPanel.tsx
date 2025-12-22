@@ -3,14 +3,32 @@ import { api } from "../convex/_generated/api";
 import { toast } from "sonner";
 import { useState } from "react";
 import { ImageCarousel } from "./components/ImageCarousel";
+import { usePaginatedQuery } from "convex/react";
 
 export function AdminPanel() {
   const [activeTab, setActiveTab] = useState<"pending" | "approved" | "rejected">("pending");
   
-  // Use posts API instead of photos API
-  const pendingPosts = useQuery(api.posts.getPendingPosts);
-  const approvedPosts = useQuery(api.posts.getApprovedPostsForAdmin);
-  const rejectedPosts = useQuery(api.posts.getRejectedPostsForAdmin);
+  // Use paginated queries instead of loading all posts at once
+  const { results: pendingPosts, status: pendingStatus, loadMore: loadMorePending } = usePaginatedQuery(
+    api.posts.getPendingPostsPaginated,
+    {},
+    { initialNumItems: 10 }
+  );
+  const { results: approvedPosts, status: approvedStatus, loadMore: loadMoreApproved } = usePaginatedQuery(
+    api.posts.getApprovedPostsForAdminPaginated,
+    {},
+    { initialNumItems: 10 }
+  );
+  const { results: rejectedPosts, status: rejectedStatus, loadMore: loadMoreRejected } = usePaginatedQuery(
+    api.posts.getRejectedPostsForAdminPaginated,
+    {},
+    { initialNumItems: 10 }
+  );
+
+  // Get counts for tab labels
+  const pendingCount = useQuery(api.posts.getPendingPostsCount);
+  const approvedCount = useQuery(api.posts.getApprovedPostsCount);
+  const rejectedCount = useQuery(api.posts.getRejectedPostsCount);
   
   const approvePost = useMutation(api.posts.approvePost);
   const rejectPost = useMutation(api.posts.rejectPost);
@@ -64,7 +82,7 @@ export function AdminPanel() {
     if (!pendingPosts || pendingPosts.length === 0) return;
     
     const confirmed = window.confirm(
-      `Are you sure you want to approve all ${pendingPosts.length} pending posts?`
+      `Are you sure you want to approve all ${pendingPosts.length} pending posts shown?`
     );
     
     if (!confirmed) return;
@@ -77,7 +95,7 @@ export function AdminPanel() {
     }
   };
 
-  if (pendingPosts === undefined || approvedPosts === undefined || rejectedPosts === undefined) {
+  if (pendingStatus === "LoadingFirstPage" || approvedStatus === "LoadingFirstPage" || rejectedStatus === "LoadingFirstPage") {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400"></div>
@@ -89,6 +107,16 @@ export function AdminPanel() {
     activeTab === "pending" ? pendingPosts : 
     activeTab === "approved" ? approvedPosts : 
     rejectedPosts;
+
+  const currentStatus = 
+    activeTab === "pending" ? pendingStatus : 
+    activeTab === "approved" ? approvedStatus : 
+    rejectedStatus;
+
+  const loadMore = 
+    activeTab === "pending" ? loadMorePending : 
+    activeTab === "approved" ? loadMoreApproved : 
+    loadMoreRejected;
 
   return (
     <div>
@@ -111,7 +139,7 @@ export function AdminPanel() {
               : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >
-          Pending ({pendingPosts.length})
+          Pending ({pendingCount ?? 0})
         </button>
         <button
           onClick={() => setActiveTab("approved")}
@@ -121,7 +149,7 @@ export function AdminPanel() {
               : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >
-          Approved ({approvedPosts.length})
+          Approved ({approvedCount ?? 0})
         </button>
         <button
           onClick={() => setActiveTab("rejected")}
@@ -131,18 +159,18 @@ export function AdminPanel() {
               : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           }`}
         >
-          Rejected ({rejectedPosts.length})
+          Rejected ({rejectedCount ?? 0})
         </button>
       </div>
 
       {/* Approve All Button - only show on pending tab */}
-      {activeTab === "pending" && pendingPosts.length > 0 && (
+      {activeTab === "pending" && pendingCount && pendingCount > 0 && (
         <div className="mb-6 flex justify-end">
           <button
             onClick={handleApproveAll}
             className="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors"
           >
-            ✓ Approve All ({pendingPosts.length})
+            ✓ Approve All ({pendingCount})
           </button>
         </div>
       )}
@@ -241,6 +269,24 @@ export function AdminPanel() {
               </div>
             </div>
           ))}
+
+          {/* Load More Button */}
+          {currentStatus === "CanLoadMore" && (
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => loadMore(10)}
+                className="px-8 py-3 bg-violet-500 text-white font-semibold rounded-lg hover:bg-violet-600 transition-colors"
+              >
+                Load More Posts
+              </button>
+            </div>
+          )}
+
+          {currentStatus === "LoadingMore" && (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400"></div>
+            </div>
+          )}
         </div>
       )}
     </div>
