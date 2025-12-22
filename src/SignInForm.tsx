@@ -1,13 +1,26 @@
 "use client";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router-dom";
 
 export function SignInForm() {
   const { signIn } = useAuthActions();
+  const [searchParams] = useSearchParams();
   const [submitting, setSubmitting] = useState(false);
-  const [flow, setFlow] = useState<"signIn" | "signUp" | "reset">("signIn");
+  const [flow, setFlow] = useState<"signIn" | "signUp" | "reset" | "reset-verification">("signIn");
   const [error, setError] = useState<string | null>(null);
+  const [resetToken, setResetToken] = useState<string | null>(null);
+
+  // Check if URL contains password reset token
+  useEffect(() => {
+    const code = searchParams.get("code");
+    const email = searchParams.get("email");
+    if (code && email) {
+      setFlow("reset-verification");
+      setResetToken(code);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -18,6 +31,7 @@ export function SignInForm() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const name = formData.get("name") as string;
+    const newPassword = formData.get("newPassword") as string;
 
     try {
       if (flow === "signUp") {
@@ -28,8 +42,20 @@ export function SignInForm() {
         toast.success("Signed in successfully!");
       } else if (flow === "reset") {
         await signIn("password", { email, flow: "reset" });
-        toast.success("Password reset email sent (if configured)");
+        toast.success("Password reset link sent! Check your email.");
         setFlow("signIn"); // Return to sign in page
+      } else if (flow === "reset-verification") {
+        if (!resetToken) {
+          throw new Error("Invalid reset link");
+        }
+        await signIn("password", { 
+          email, 
+          code: resetToken,
+          newPassword,
+          flow: "reset-verification" 
+        });
+        toast.success("Password reset successfully! You can now sign in.");
+        setFlow("signIn");
       }
     } catch (e: any) {
       console.error("Auth error:", e);
@@ -38,6 +64,8 @@ export function SignInForm() {
         setError("Your email or password may be incorrect. Please try again.");
       } else if (flow === "signUp" && e.message?.includes("short")) {
         setError("Password must be at least 8 characters");
+      } else if (flow === "reset-verification") {
+        setError("Invalid or expired reset link. Please request a new one.");
       } else {
         setError(e.message || "Something went wrong. Please try again.");
       }
@@ -53,11 +81,13 @@ export function SignInForm() {
             {flow === "signIn" && "Welcome Back"}
             {flow === "signUp" && "Create Account"}
             {flow === "reset" && "Reset Password"}
+            {flow === "reset-verification" && "Set New Password"}
           </h2>
           <p className="text-sm text-card-text/80 mt-2">
             {flow === "signIn" && "Sign in to access the gallery"}
             {flow === "signUp" && "Join us to share your photos"}
             {flow === "reset" && "Enter your email to receive a reset link"}
+            {flow === "reset-verification" && "Choose a new password for your account"}
           </p>
         </div>
 
@@ -90,11 +120,26 @@ export function SignInForm() {
               type="email"
               name="email"
               placeholder="you@example.com"
+              defaultValue={searchParams.get("email") || ""}
               required
             />
           </div>
 
-          {flow !== "reset" && (
+          {flow === "reset-verification" && (
+            <div>
+              <label className="block text-sm font-medium text-card-text mb-2">New Password</label>
+              <input
+                className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all text-card-text placeholder-card-text/50"
+                type="password"
+                name="newPassword"
+                placeholder="••••••••"
+                required
+                minLength={8}
+              />
+            </div>
+          )}
+
+          {flow !== "reset" && flow !== "reset-verification" && (
             <div>
               <label className="block text-sm font-medium text-card-text mb-2">Password</label>
               <input
@@ -116,7 +161,8 @@ export function SignInForm() {
             {submitting ? "Processing..." : (
               flow === "signIn" ? "Sign In" :
               flow === "signUp" ? "Create Account" :
-              "Send Reset Link"
+              flow === "reset" ? "Send Reset Link" :
+              "Reset Password"
             )}
           </button>
         </form>
@@ -155,7 +201,7 @@ export function SignInForm() {
               </button>
             </p>
           )}
-          {flow === "reset" && (
+          {(flow === "reset" || flow === "reset-verification") && (
             <button
               type="button"
               onClick={() => { setFlow("signIn"); setError(null); }}
