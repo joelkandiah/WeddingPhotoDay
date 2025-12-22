@@ -167,6 +167,9 @@ export function PhotoUpload() {
               className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
               placeholder="Share the story behind these moments..."
               rows={3}
+              autoCorrect="on"
+              spellCheck={true}
+              autoComplete="on"
             />
           </div>
 

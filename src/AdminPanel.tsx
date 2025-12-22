@@ -385,7 +385,7 @@ export function AdminPanel() {
                   id="edit-category"
                   value={editCategory}
                   onChange={(e) => setEditCategory(e.target.value as PostCategory)}
-                  className="w-full px-4 py-3 rounded-lg border border-card-border bg-input-bg text-primary focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
                 >
                   {POST_CATEGORIES.map((category) => (
                     <option key={category} value={category}>
@@ -405,7 +405,10 @@ export function AdminPanel() {
                   onChange={(e) => setEditCaption(e.target.value)}
                   placeholder="Add a caption..."
                   rows={4}
-                  className="w-full px-4 py-3 rounded-lg border border-card-border bg-input-bg text-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                  className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
+                  autoCorrect="on"
+                  spellCheck={true}
+                   autoComplete="on"
                 />
               </div>
 
