@@ -68,11 +68,10 @@ export function SignInForm() {
         if (!resetToken) {
           throw new Error("Invalid reset link");
         }
-        await signIn("password", { 
+        await signIn("password-reset", { 
           email, 
           code: resetToken,
-          newPassword,
-          flow: "reset-verification" 
+          newPassword
         });
         toast.success("Password reset successfully! You can now sign in.");
         setFlow("signIn");
