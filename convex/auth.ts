@@ -39,7 +39,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
           const siteUrl = process.env.SITE_URL || "http://localhost:5173";
           
           // Construct the reset URL with code and email parameters
-          const resetUrl = `${siteUrl}/?code=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+          const resetUrl = `${siteUrl}/reset-password?code=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
 
           try {
             await resend.emails.send({
