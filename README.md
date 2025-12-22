@@ -247,53 +247,44 @@ After deployment, test the setup:
 
 ## App authentication
 
-This app uses **sitewide login** with [Convex Auth](https://auth.convex.dev/). Users enter a single password to access the site, and the backend automatically determines their role (user or admin) based on which password matches.
+This app uses **email and password authentication** with [Convex Auth](https://auth.convex.dev/). Users can:
+- Sign up with email, name, and password
+- Sign in with email and password
+- Reset their password if forgotten
 
-### Setting up passwords (Hashed)
+### Password Reset
 
-This app uses **hashed password comparison** with `bcrypt` for enhanced security. Instead of plaintext passwords, you must provide bcrypt hashes in your environment variables.
+The app includes a password reset feature that allows users to reset their password via email. See [PASSWORD_RESET_SETUP.md](./PASSWORD_RESET_SETUP.md) for complete setup instructions.
 
-#### 1. Generate password hashes
+**Quick setup:**
+1. Sign up for a free account at [resend.com](https://resend.com)
+2. Get your API key from the Resend dashboard
+3. Set the required environment variable:
+   ```bash
+   npx convex env set RESEND_API_KEY your_resend_api_key
+   ```
 
-Run the following utility script for both your guest and admin passwords:
-
+**Optional configuration:**
 ```bash
-# For regular users
-node scripts/hash-password.js your_guest_password
+# Custom from email (requires verified domain in Resend)
+npx convex env set RESEND_FROM_EMAIL "Your App <noreply@yourdomain.com>"
 
-# For admins
-node scripts/hash-password.js your_admin_password
+# Production site URL
+npx convex env set SITE_URL https://your-production-domain.com
 ```
 
-The script will output a hash like `$2b$10$...`.
+### User Roles
 
-#### 2. Configure Convex environment variables
-
-Set the following environment variables in your Convex deployment using the hashes you generated:
-
-- `USER_PASSWORD_HASH` - The bcrypt hash for regular users
-- `ADMIN_PASSWORD_HASH` - The bcrypt hash for admin users
-
-```bash
-npx convex env set USER_PASSWORD_HASH '$2b$10$your_user_hash_here'
-npx convex env set ADMIN_PASSWORD_HASH '$2b$10$your_admin_hash_here'
-```
-
-> [!IMPORTANT]
-> Always wrap the hash in single quotes when using the CLI to avoid shell interpretation issues.
-
-**Security Notes:**
-- Passwords are compared using `bcrypt` which is resistant to brute-force and timing attacks.
-- Plaintext passwords are NEVER stored in the database or environment variables.
-- Default passwords have been removed to ensure a secure-by-default setup.
+Users are automatically assigned a role based on their account:
+- **Regular users** can upload photos and view the gallery
+- **Admin users** have additional privileges to approve/reject photos
 
 ### How it works
 
-1. Users see a simple password input on the homepage
-2. When they submit the password, the backend checks if it matches either the user or admin password
-3. If it matches the admin password, they're logged in as admin with access to approve/reject photos
-4. If it matches the user password, they're logged in as a regular user who can upload and view photos
-5. Invalid passwords are rejected
+1. Users can sign up with their email and password
+2. Users can sign in with their credentials
+3. If a user forgets their password, they can click "Forgot password?" to receive a reset link via email
+4. The reset link is valid for 15 minutes and allows setting a new password
 
 ## Developing and deploying your app
 
