@@ -129,7 +129,7 @@ function Content() {
           <Route 
             path="/reset-password" 
             element={
-              <div className="text-center mb-8 py-12 gap-4 margin-auto">
+              <div className="text-center mb-8 py-12 mx-auto">
                 <h1>
                   Reset Your Password
                 </h1>
@@ -145,7 +145,7 @@ function Content() {
           <Route 
             path="*" 
             element={
-              <div className="text-center mb-8 py-12 gap-4 margin-auto">
+              <div className="text-center mb-8 py-12 mx-auto">
                 <h1>
                   Share Our Wedding Joy
                 </h1>
@@ -162,50 +162,76 @@ function Content() {
       </Unauthenticated>
 
       <Authenticated>
-        {/* Only show content if user has a role (password was verified)
-            Note: loggedInUser query returns null if user has no role */}
-        {loggedInUser ? (
-          <Routes>
-            <Route path="/" element={<Navigate to="/gallery" replace />} />
+        <Routes>
+          {/* Password reset route - accessible even without a role */}
+          <Route 
+            path="/reset-password" 
+            element={
+              <div className="text-center mb-8 py-12 mx-auto">
+                <h1>
+                  Reset Your Password
+                </h1>
+                <p className="text-xl mb-8 py-2">
+                  Enter your new password below
+                </p>
+                <div className="max-w-md mx-auto">
+                  <SignInForm />
+                </div>
+              </div>
+            } 
+          />
+          
+          {/* Only show other routes if user has a role (password was verified)
+              Note: loggedInUser query returns null if user has no role */}
+          {loggedInUser ? (
+            <>
+              <Route path="/" element={<Navigate to="/gallery" replace />} />
+              <Route 
+                path="/gallery" 
+                element={
+                  <>
+                    <WelcomeMessage />
+                    <PhotoGallery />
+                  </>
+                } 
+              />
+              <Route 
+                path="/upload" 
+                element={
+                  <>
+                    <WelcomeMessage />
+                    <PhotoUpload />
+                  </>
+                } 
+              />
+              <Route 
+                path="/slideshow" 
+                element={
+                  <>
+                    <WelcomeMessage />
+                    <Slideshow />
+                  </>
+                } 
+              />
+              <Route path="/admin" element={isAdmin ? <AdminPanel /> : <Navigate to="/gallery" replace />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </>
+          ) : (
+            // User is authenticated but loggedInUser is null (no role = password verification in progress or failed)
+            // Show loading state for any route except reset-password
             <Route 
-              path="/gallery" 
+              path="*" 
               element={
-                <>
-                  <WelcomeMessage />
-                  <PhotoGallery />
-                </>
+                <div className="flex justify-center items-center min-h-[400px]">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Verifying password...</p>
+                  </div>
+                </div>
               } 
             />
-            <Route 
-              path="/upload" 
-              element={
-                <>
-                  <WelcomeMessage />
-                  <PhotoUpload />
-                </>
-              } 
-            />
-            <Route 
-              path="/slideshow" 
-              element={
-                <>
-                  <WelcomeMessage />
-                  <Slideshow />
-                </>
-              } 
-            />
-            <Route path="/admin" element={isAdmin ? <AdminPanel /> : <Navigate to="/gallery" replace />} />
-            <Route path="/settings" element={<SettingsPage />} />
-          </Routes>
-        ) : (
-          // User is authenticated but loggedInUser is null (no role = password verification in progress or failed)
-          <div className="flex justify-center items-center min-h-[400px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Verifying password...</p>
-            </div>
-          </div>
-        )}
+          )}
+        </Routes>
       </Authenticated>
     </div>
   );
