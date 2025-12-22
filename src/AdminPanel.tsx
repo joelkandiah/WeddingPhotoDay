@@ -5,9 +5,10 @@ import { useState } from "react";
 import { ImageCarousel } from "./components/ImageCarousel";
 import { usePaginatedQuery } from "convex/react";
 import { POST_CATEGORIES, type PostCategory } from "../convex/constants";
+import type { Id } from "../convex/_generated/dataModel";
 
 type Post = {
-  _id: string;
+  _id: Id<"posts">;
   uploaderName: string;
   caption?: string;
   category: PostCategory;
@@ -103,7 +104,7 @@ export function AdminPanel() {
 
     try {
       await editPost({
-        postId: editingPost._id as any,
+        postId: editingPost._id,
         caption: editCaption || undefined,
         category: editCategory,
       });
@@ -276,7 +277,7 @@ export function AdminPanel() {
                 {activeTab === "pending" ? (
                   <div className="flex gap-3">
                     <button
-                      onClick={() => handleEdit(post as any)}
+                      onClick={() => handleEdit(post as Post)}
                       className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
                     >
                       ✏️ Edit
@@ -297,7 +298,7 @@ export function AdminPanel() {
                 ) : activeTab === "approved" ? (
                   <div className="flex gap-3">
                     <button
-                      onClick={() => handleEdit(post as any)}
+                      onClick={() => handleEdit(post as Post)}
                       className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
                     >
                       ✏️ Edit
@@ -312,7 +313,7 @@ export function AdminPanel() {
                 ) : (
                   <div className="flex gap-3">
                     <button
-                      onClick={() => handleEdit(post as any)}
+                      onClick={() => handleEdit(post as Post)}
                       className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
                     >
                       ✏️ Edit

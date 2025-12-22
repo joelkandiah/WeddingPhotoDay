@@ -11,7 +11,14 @@ import { SettingsPage } from "./SettingsPage";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
 
-
+function WelcomeMessage() {
+  return (
+    <div className="mb-8 text-center">
+      <h1>Welcome!</h1>
+      <p>Thank you for being part of our special day ✨</p>
+    </div>
+  );
+}
 
 export default function App() {
   const location = useLocation();
@@ -141,10 +148,7 @@ function Content() {
               path="/gallery" 
               element={
                 <>
-                  <div className="mb-8 text-center">
-                    <h1>Welcome!</h1>
-                    <p>Thank you for being part of our special day ✨</p>
-                  </div>
+                  <WelcomeMessage />
                   <PhotoGallery />
                 </>
               } 
@@ -153,10 +157,7 @@ function Content() {
               path="/upload" 
               element={
                 <>
-                  <div className="mb-8 text-center">
-                    <h1>Welcome!</h1>
-                    <p>Thank you for being part of our special day ✨</p>
-                  </div>
+                  <WelcomeMessage />
                   <PhotoUpload />
                 </>
               } 
@@ -165,10 +166,7 @@ function Content() {
               path="/slideshow" 
               element={
                 <>
-                  <div className="mb-8 text-center">
-                    <h1>Welcome!</h1>
-                    <p>Thank you for being part of our special day ✨</p>
-                  </div>
+                  <WelcomeMessage />
                   <Slideshow />
                 </>
               } 
