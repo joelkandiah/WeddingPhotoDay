@@ -18,6 +18,8 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       reset: {
         id: "password-reset",
         type: "email",
+        name: "Password Reset",
+        from: process.env.RESEND_FROM_EMAIL || "Wedding Photos <onboarding@resend.dev>",
         maxAge: 60 * 15, // 15 minutes
         async sendVerificationRequest({ identifier: email, url, token }) {
           const resendApiKey = process.env.RESEND_API_KEY;
