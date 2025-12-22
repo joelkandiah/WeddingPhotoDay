@@ -277,7 +277,7 @@ export function AdminPanel() {
                 {activeTab === "pending" ? (
                   <div className="flex gap-3">
                     <button
-                      onClick={() => handleEdit(post as Post)}
+                      onClick={() => handleEdit(post)}
                       className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
                     >
                       ✏️ Edit
@@ -298,7 +298,7 @@ export function AdminPanel() {
                 ) : activeTab === "approved" ? (
                   <div className="flex gap-3">
                     <button
-                      onClick={() => handleEdit(post as Post)}
+                      onClick={() => handleEdit(post)}
                       className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
                     >
                       ✏️ Edit
@@ -313,7 +313,7 @@ export function AdminPanel() {
                 ) : (
                   <div className="flex gap-3">
                     <button
-                      onClick={() => handleEdit(post as Post)}
+                      onClick={() => handleEdit(post)}
                       className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
                     >
                       ✏️ Edit
