@@ -4,9 +4,23 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { ImageCarousel } from "./components/ImageCarousel";
 import { usePaginatedQuery } from "convex/react";
+import { POST_CATEGORIES, type PostCategory } from "../convex/constants";
+import type { Id } from "../convex/_generated/dataModel";
+
+type Post = {
+  _id: Id<"posts">;
+  uploaderName: string;
+  caption?: string;
+  category: PostCategory;
+  photoUrls: Array<{ original: string; thumbnail: string; small: string; medium: string; large: string }>;
+  _creationTime: number;
+};
 
 export function AdminPanel() {
   const [activeTab, setActiveTab] = useState<"pending" | "approved" | "rejected">("pending");
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [editCaption, setEditCaption] = useState("");
+  const [editCategory, setEditCategory] = useState<PostCategory>(POST_CATEGORIES[0]);
   
   // Use paginated queries instead of loading all posts at once
   const { results: pendingPosts, status: pendingStatus, loadMore: loadMorePending } = usePaginatedQuery(
@@ -35,6 +49,7 @@ export function AdminPanel() {
   const revokeApproval = useMutation(api.posts.revokePostApproval);
   const approveAllPending = useMutation(api.posts.approveAllPendingPosts);
   const deletePost = useMutation(api.posts.deletePost);
+  const editPost = useMutation(api.posts.editPost);
 
   const handleApprove = async (postId: string) => {
     try {
@@ -76,6 +91,34 @@ export function AdminPanel() {
     } catch (error) {
       toast.error("Failed to delete post");
     }
+  };
+
+  const handleEdit = (post: Post) => {
+    setEditingPost(post);
+    setEditCaption(post.caption || "");
+    setEditCategory(post.category);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingPost) return;
+
+    try {
+      await editPost({
+        postId: editingPost._id,
+        caption: editCaption || undefined,
+        category: editCategory,
+      });
+      toast.success("Post updated successfully!");
+      setEditingPost(null);
+    } catch (error) {
+      toast.error("Failed to update post");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPost(null);
+    setEditCaption("");
+    setEditCategory(POST_CATEGORIES[0]);
   };
 
   const handleApproveAll = async () => {
@@ -220,6 +263,9 @@ export function AdminPanel() {
                       {post.uploaderName}
                     </p>
                   )}
+                  <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 mb-2">
+                    Category: {post.category}
+                  </p>
                   {post.caption && (
                     <p className="mb-3">{post.caption}</p>
                   )}
@@ -230,6 +276,12 @@ export function AdminPanel() {
                 
                 {activeTab === "pending" ? (
                   <div className="flex gap-3">
+                    <button
+                      onClick={() => handleEdit(post)}
+                      className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      ✏️ Edit
+                    </button>
                     <button
                       onClick={() => handleApprove(post._id)}
                       className="flex-1 bg-green-500 text-white font-semibold py-3 rounded-lg hover:bg-green-600 transition-colors"
@@ -244,14 +296,28 @@ export function AdminPanel() {
                     </button>
                   </div>
                 ) : activeTab === "approved" ? (
-                  <button
-                    onClick={() => handleRevokeApproval(post._id)}
-                    className="w-full bg-orange-500 text-white font-semibold py-3 rounded-lg hover:bg-orange-600 transition-colors"
-                  >
-                    ↶ Revoke Approval
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleEdit(post)}
+                      className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => handleRevokeApproval(post._id)}
+                      className="flex-1 bg-orange-500 text-white font-semibold py-3 rounded-lg hover:bg-orange-600 transition-colors"
+                    >
+                      ↶ Revoke Approval
+                    </button>
+                  </div>
                 ) : (
                   <div className="flex gap-3">
+                    <button
+                      onClick={() => handleEdit(post)}
+                      className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      ✏️ Edit
+                    </button>
                     <button
                       onClick={() => handleApprove(post._id)}
                       className="flex-1 bg-green-500 text-white font-semibold py-3 rounded-lg hover:bg-green-600 transition-colors"
@@ -287,6 +353,78 @@ export function AdminPanel() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400"></div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingPost && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-card-bg rounded-2xl shadow-2xl border border-card-border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-2xl font-bold mb-6">Edit Post</h2>
+              
+              <div className="mb-6">
+                <div className="aspect-video overflow-hidden bg-input-bg rounded-lg mb-4">
+                  <ImageCarousel 
+                    images={editingPost.photoUrls} 
+                    alt={editingPost.caption || "Wedding photo"}
+                    className="w-full h-full"
+                    aspectRatio="contain"
+                  />
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Uploaded by {editingPost.uploaderName} • {new Date(editingPost._creationTime).toLocaleString()}
+                </p>
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="edit-category" className="block text-sm font-semibold mb-2">
+                  Category
+                </label>
+                <select
+                  id="edit-category"
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value as PostCategory)}
+                  className="w-full px-4 py-3 rounded-lg border border-card-border bg-input-bg text-primary focus:outline-none focus:ring-2 focus:ring-violet-500"
+                >
+                  {POST_CATEGORIES.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="edit-caption" className="block text-sm font-semibold mb-2">
+                  Caption
+                </label>
+                <textarea
+                  id="edit-caption"
+                  value={editCaption}
+                  onChange={(e) => setEditCaption(e.target.value)}
+                  placeholder="Add a caption..."
+                  rows={4}
+                  className="w-full px-4 py-3 rounded-lg border border-card-border bg-input-bg text-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCancelEdit}
+                  className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  className="flex-1 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

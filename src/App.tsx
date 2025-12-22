@@ -9,28 +9,35 @@ import { AdminPanel } from "./AdminPanel";
 import { Slideshow } from "./Slideshow";
 import { SettingsPage } from "./SettingsPage";
 import { ThemeToggle } from "./components/ThemeToggle";
-import { useState } from "react";
+import { Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
 
-
+function WelcomeMessage() {
+  return (
+    <div className="mb-8 text-center">
+      <h1>Welcome!</h1>
+      <p>Thank you for being part of our special day ✨</p>
+    </div>
+  );
+}
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<"gallery" | "upload" | "admin" | "slideshow" | "settings">("gallery");
+  const location = useLocation();
   const isAdmin = useQuery(api.photos.isUserAdmin);
 
   const navItems = [
-    { id: "gallery" as const, label: "Gallery", icon: "🖼️" },
-    { id: "upload" as const, label: "Upload", icon: "📤" },
-    { id: "slideshow" as const, label: "Slideshow", icon: "▶️" },
-    { id: "settings" as const, label: "Settings", icon: "⚙️" },
+    { id: "gallery" as const, label: "Gallery", icon: "🖼️", path: "/gallery" },
+    { id: "upload" as const, label: "Upload", icon: "📤", path: "/upload" },
+    { id: "slideshow" as const, label: "Slideshow", icon: "▶️", path: "/slideshow" },
+    { id: "settings" as const, label: "Settings", icon: "⚙️", path: "/settings" },
   ];
 
   // Add admin to nav items if user is admin
   const allNavItems = isAdmin 
-    ? [{ id: "gallery" as const, label: "Gallery", icon: "🖼️" },
-       { id: "upload" as const, label: "Upload", icon: "📤" },
-       { id: "slideshow" as const, label: "Slideshow", icon: "▶️" },
-       { id: "admin" as const, label: "Admin", icon: "🛡️" },
-       { id: "settings" as const, label: "Settings", icon: "⚙️" }]
+    ? [{ id: "gallery" as const, label: "Gallery", icon: "🖼️", path: "/gallery" },
+       { id: "upload" as const, label: "Upload", icon: "📤", path: "/upload" },
+       { id: "slideshow" as const, label: "Slideshow", icon: "▶️", path: "/slideshow" },
+       { id: "admin" as const, label: "Admin", icon: "🛡️", path: "/admin" },
+       { id: "settings" as const, label: "Settings", icon: "⚙️", path: "/settings" }]
     : navItems;
 
   return (
@@ -47,20 +54,18 @@ export default function App() {
               {/* Desktop Navigation - Hidden on mobile */}
               <nav className="hidden md:flex gap-2">
                 {allNavItems.map((item) => (
-                  <button
+                  <Link
                     key={item.id}
-                    onClick={() => {
-                      setCurrentView(item.id);
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }}
+                    to={item.path}
+                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      currentView === item.id
+                      location.pathname === item.path
                         ? "bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-100"
                         : "text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
                     }`}
                   >
                     {item.label}
-                  </button>
+                  </Link>
                 ))}
               </nav>
             </Authenticated>
@@ -71,7 +76,7 @@ export default function App() {
       </header>
 
       <main className="flex-1 mobile-nav-spacing">
-        <Content currentView={currentView} />
+        <Content />
       </main>
 
       {/* Mobile Bottom Navigation - Hidden on desktop */}
@@ -82,18 +87,18 @@ export default function App() {
             allNavItems.length === 4 ? 'grid-cols-4' : 'grid-cols-3'
           }`}>
             {allNavItems.map((item) => (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => setCurrentView(item.id)}
+                to={item.path}
                 className={`touch-target flex flex-col items-center justify-center gap-1 rounded-lg transition-colors ${
-                  currentView === item.id
+                  location.pathname === item.path
                     ? "bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-100"
                     : "text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
                 }`}
               >
                 <span className="text-xl">{item.icon}</span>
                 <span className="text-xs font-medium">{item.label}</span>
-              </button>
+              </Link>
             ))}
           </div>
         </nav>
@@ -104,7 +109,7 @@ export default function App() {
   );
 }
 
-function Content({ currentView }: { currentView: string }) {
+function Content() {
   const loggedInUser = useQuery(api.auth.loggedInUser);
   const isAdmin = useQuery(api.photos.isUserAdmin);
 
@@ -137,24 +142,38 @@ function Content({ currentView }: { currentView: string }) {
         {/* Only show content if user has a role (password was verified)
             Note: loggedInUser query returns null if user has no role */}
         {loggedInUser ? (
-          <>
-            {currentView !== "settings" && currentView !== "admin" && (
-              <div className="mb-8 text-center">
-                <h1>
-                  Welcome!
-                </h1>
-                <p>
-                  Thank you for being part of our special day ✨
-                </p>
-              </div>
-            )}
-
-            {currentView === "gallery" && <PhotoGallery />}
-            {currentView === "upload" && <PhotoUpload />}
-            {currentView === "slideshow" && <Slideshow />}
-            {currentView === "admin" && <AdminPanel />}
-            {currentView === "settings" && <SettingsPage />}
-          </>
+          <Routes>
+            <Route path="/" element={<Navigate to="/gallery" replace />} />
+            <Route 
+              path="/gallery" 
+              element={
+                <>
+                  <WelcomeMessage />
+                  <PhotoGallery />
+                </>
+              } 
+            />
+            <Route 
+              path="/upload" 
+              element={
+                <>
+                  <WelcomeMessage />
+                  <PhotoUpload />
+                </>
+              } 
+            />
+            <Route 
+              path="/slideshow" 
+              element={
+                <>
+                  <WelcomeMessage />
+                  <Slideshow />
+                </>
+              } 
+            />
+            <Route path="/admin" element={isAdmin ? <AdminPanel /> : <Navigate to="/gallery" replace />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
         ) : (
           // User is authenticated but loggedInUser is null (no role = password verification in progress or failed)
           <div className="flex justify-center items-center min-h-[400px]">
