@@ -20,7 +20,7 @@ export function AdminPanel() {
   const [activeTab, setActiveTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editCaption, setEditCaption] = useState("");
-  const [editCategory, setEditCategory] = useState<PostCategory>("US Ceremony");
+  const [editCategory, setEditCategory] = useState<PostCategory>(POST_CATEGORIES[0]);
   
   // Use paginated queries instead of loading all posts at once
   const { results: pendingPosts, status: pendingStatus, loadMore: loadMorePending } = usePaginatedQuery(
@@ -118,7 +118,7 @@ export function AdminPanel() {
   const handleCancelEdit = () => {
     setEditingPost(null);
     setEditCaption("");
-    setEditCategory("US Ceremony");
+    setEditCategory(POST_CATEGORIES[0]);
   };
 
   const handleApproveAll = async () => {
