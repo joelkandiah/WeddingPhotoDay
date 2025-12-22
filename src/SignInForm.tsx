@@ -11,14 +11,34 @@ export function SignInForm() {
   const [flow, setFlow] = useState<"signIn" | "signUp" | "reset" | "reset-verification">("signIn");
   const [error, setError] = useState<string | null>(null);
   const [resetToken, setResetToken] = useState<string | null>(null);
+  const [validatedEmail, setValidatedEmail] = useState<string>("");
+
+  // Validate email format
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Validate token format (should be alphanumeric and reasonable length)
+  const isValidToken = (token: string): boolean => {
+    // Token should be alphanumeric, between 20-200 characters
+    const tokenRegex = /^[a-zA-Z0-9_-]{20,200}$/;
+    return tokenRegex.test(token);
+  };
 
   // Check if URL contains password reset token
   useEffect(() => {
     const code = searchParams.get("code");
     const email = searchParams.get("email");
-    if (code && email) {
+    
+    // Validate both code and email before proceeding
+    if (code && email && isValidToken(code) && isValidEmail(email)) {
       setFlow("reset-verification");
       setResetToken(code);
+      setValidatedEmail(email);
+    } else if (code || email) {
+      // If either parameter exists but validation fails, show error
+      setError("Invalid or malformed reset link. Please request a new password reset.");
     }
   }, [searchParams]);
 
@@ -120,7 +140,7 @@ export function SignInForm() {
               type="email"
               name="email"
               placeholder="you@example.com"
-              defaultValue={searchParams.get("email") || ""}
+              defaultValue={validatedEmail}
               required
             />
           </div>

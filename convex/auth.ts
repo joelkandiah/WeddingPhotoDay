@@ -5,6 +5,9 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { Resend } from "resend";
 
+// Email configuration for password reset
+const RESET_EMAIL_FROM = process.env.RESEND_FROM_EMAIL || "Wedding Photos <onboarding@resend.dev>";
+
 // Use Password provider for authentication
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [
@@ -19,7 +22,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
         id: "password-reset",
         type: "email",
         name: "Password Reset",
-        from: process.env.RESEND_FROM_EMAIL || "Wedding Photos <onboarding@resend.dev>",
+        from: RESET_EMAIL_FROM,
         maxAge: 60 * 15, // 15 minutes
         async sendVerificationRequest({ identifier: email, url, token }) {
           const resendApiKey = process.env.RESEND_API_KEY;
@@ -37,7 +40,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 
           try {
             await resend.emails.send({
-              from: process.env.RESEND_FROM_EMAIL || "Wedding Photos <onboarding@resend.dev>",
+              from: RESET_EMAIL_FROM,
               to: email,
               subject: "Reset your password",
               html: `
