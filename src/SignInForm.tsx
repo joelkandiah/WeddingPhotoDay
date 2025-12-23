@@ -27,16 +27,18 @@ export function SignInForm() {
   };
 
   // Check if URL contains password reset token
+  // Using "resetCode" instead of "code" to prevent ConvexAuthProvider from
+  // automatically consuming the token before the user enters their new password
   useEffect(() => {
-    const code = searchParams.get("code");
+    const resetCode = searchParams.get("resetCode");
     const email = searchParams.get("email");
     
-    // Validate both code and email before proceeding
-    if (code && email && isValidToken(code) && isValidEmail(email)) {
+    // Validate both resetCode and email before proceeding
+    if (resetCode && email && isValidToken(resetCode) && isValidEmail(email)) {
       setFlow("reset-verification");
-      setResetToken(code);
+      setResetToken(resetCode);
       setValidatedEmail(email);
-    } else if (code || email) {
+    } else if (resetCode || email) {
       // If either parameter exists but validation fails, show error
       setError("Invalid or malformed reset link. Please request a new password reset.");
     }
