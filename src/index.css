@@ -9,7 +9,7 @@
   --color-fg: #0F172A;          /* Deep Navy instead of Black */
 
   /* Inputs: Clean and structured */
-  --color-input-bg: #F8FAFC;
+  --color-input-bg: #F1F7F9;
   --color-input-border: #CBD5E1;
 
   /* The Cobalt Accent */
@@ -33,7 +33,7 @@
   --color-fg: #E0E7FF;          /* Soft Porcelain White (blue-tinted) */
 
   /* Input & Borders: Mimicking fine china edges */
-  --color-input-bg: #0D142B;
+  --color-input-bg: #0A0F1F;
   --color-input-border: #1E3A8A; /* Cobalt border */
 
   /* The primary Cobalt from the vase */
@@ -147,7 +147,7 @@
   h1 {
     /* Elegant cursive font for wedding titles */
     font-family: 'Great Vibes', cursive;
-    @apply text-6xl font-normal bg-gradient-to-r from-blue-700 via-blue-600 to-blue-800 bg-clip-text text-transparent mb-6;
+    @apply text-6xl md:text-8xl font-normal bg-gradient-to-r from-blue-700 via-blue-600 to-blue-800 bg-clip-text text-transparent mb-6;
     letter-spacing: 0.02em;
     padding-top: 0.5rem;
     line-height: 1.3;

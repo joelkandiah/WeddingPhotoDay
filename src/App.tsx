@@ -16,6 +16,7 @@ function WelcomeMessage() {
     <div className="mb-8 text-center">
       <h1>Welcome!</h1>
       <p>Thank you for being part of our special day ✨</p>
+      <p>Please share your memories by uploading your photos 📸</p>
     </div>
   );
 }
@@ -45,9 +46,9 @@ export default function App() {
       <header className="sticky top-0 z-10 bg-card-bg/90 backdrop-blur-xs border-b-0 shadow-sm" style={{borderBottom: '1px solid rgba(59, 130, 246, 0.1)'}}>
         <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent dark:from-blue-400 dark:via-blue-500 dark:to-blue-600">
+            <h1 className="text-2xl md:text-3xl mt-6 md:mt-4 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent dark:from-blue-400 dark:via-blue-500 dark:to-blue-600">
               💙 Our Wedding Memories
-            </h2>
+            </h1>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
             <Authenticated>
