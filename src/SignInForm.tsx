@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 
 export function SignInForm() {
-  const { signIn } = useAuthActions();
+  const { signIn, signOut } = useAuthActions();
   const [searchParams] = useSearchParams();
   const [submitting, setSubmitting] = useState(false);
   const [flow, setFlow] = useState<"signIn" | "signUp" | "reset" | "reset-verification">("signIn");
@@ -102,7 +102,7 @@ export function SignInForm() {
 
   return (
     <div className="max-w-md mx-auto">
-      <div className="bg-card-bg rounded-2xl shadow-lg border border-card-border p-8">
+      <div className="card p-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-card-text">
             {flow === "signIn" && "Welcome Back"}
@@ -119,7 +119,7 @@ export function SignInForm() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-shake">
+          <div className="mb-6 p-4 rounded-xl animate-shake" style={{backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)'}}>
             <p className="text-sm text-red-600 dark:text-red-400 text-center font-medium">
               {error}
             </p>
@@ -131,7 +131,7 @@ export function SignInForm() {
             <div>
               <label className="block text-sm font-medium text-card-text mb-2">Name</label>
               <input
-                className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all text-card-text placeholder-card-text/50"
+                className="input-field text-card-text placeholder-card-text/50"
                 type="text"
                 name="name"
                 placeholder="Your Name"
@@ -143,7 +143,7 @@ export function SignInForm() {
           <div>
             <label className="block text-sm font-medium text-card-text mb-2">Email</label>
             <input
-              className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all text-card-text placeholder-card-text/50"
+              className="input-field text-card-text placeholder-card-text/50"
               type="email"
               name="email"
               placeholder="you@example.com"
@@ -156,7 +156,7 @@ export function SignInForm() {
             <div>
               <label className="block text-sm font-medium text-card-text mb-2">New Password</label>
               <input
-                className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all text-card-text placeholder-card-text/50"
+                className="input-field text-card-text placeholder-card-text/50"
                 type="password"
                 name="newPassword"
                 placeholder="••••••••"
@@ -170,7 +170,7 @@ export function SignInForm() {
             <div>
               <label className="block text-sm font-medium text-card-text mb-2">Password</label>
               <input
-                className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all text-card-text placeholder-card-text/50"
+                className="input-field text-card-text placeholder-card-text/50"
                 type="password"
                 name="password"
                 placeholder="••••••••"
@@ -181,7 +181,7 @@ export function SignInForm() {
           )}
 
           <button
-            className="w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white font-semibold py-4 rounded-lg hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary w-full py-4"
             type="submit"
             disabled={submitting}
           >
@@ -202,7 +202,7 @@ export function SignInForm() {
                 <button
                   type="button"
                   onClick={() => { setFlow("signUp"); setError(null); }}
-                  className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
+                  className="text-blue-600 font-semibold hover:text-blue-800 transition-colors dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Sign up
                 </button>
@@ -222,7 +222,7 @@ export function SignInForm() {
               <button
                 type="button"
                 onClick={() => { setFlow("signIn"); setError(null); }}
-                className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
+                className="text-blue-600 font-semibold hover:text-blue-800 transition-colors dark:text-blue-400 dark:hover:text-blue-300"
               >
                 Sign in
               </button>
@@ -232,7 +232,7 @@ export function SignInForm() {
             <button
               type="button"
               onClick={() => { setFlow("signIn"); setError(null); }}
-              className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
+              className="text-blue-600 font-semibold hover:text-blue-800 transition-colors dark:text-blue-400 dark:hover:text-blue-300"
             >
               Back to Sign In
             </button>

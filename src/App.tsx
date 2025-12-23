@@ -16,6 +16,7 @@ function WelcomeMessage() {
     <div className="mb-8 text-center">
       <h1>Welcome!</h1>
       <p>Thank you for being part of our special day ✨</p>
+      <p>Please share your memories by uploading your photos 📸</p>
     </div>
   );
 }
@@ -42,12 +43,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[var(--color-bg-start)] to-[var(--color-bg-end)] bg-animate-morph">
-      <header className="sticky top-0 z-10 bg-card-bg/90 backdrop-blur-xs border-b border-card-border shadow-xs">
+      <header className="sticky top-0 z-10 bg-card-bg/90 backdrop-blur-xs border-b-0 shadow-sm" style={{borderBottom: '1px solid rgba(59, 130, 246, 0.1)'}}>
         <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400">
-              💜 Our Wedding Memories
-            </h2>
+            <h1 className="text-2xl md:text-3xl mt-6 md:mt-4 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 bg-clip-text text-transparent dark:from-blue-400 dark:via-blue-500 dark:to-blue-600">
+              💙 Our Wedding Memories
+            </h1>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
             <Authenticated>
@@ -60,8 +61,8 @@ export default function App() {
                     onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                       location.pathname === item.path
-                        ? "bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-100"
-                        : "text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
+                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100"
+                        : "text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
                     }`}
                   >
                     {item.label}
@@ -81,7 +82,7 @@ export default function App() {
 
       {/* Mobile Bottom Navigation - Hidden on desktop */}
       <Authenticated>
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-card-bg/90 backdrop-blur-xs border-t border-card-border shadow-lg pb-safe  dark:border-card-border">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-card-bg/90 backdrop-blur-xs border-t-0 shadow-lg pb-safe" style={{borderTop: '1px solid rgba(59, 130, 246, 0.1)'}}>
           <div className={`grid gap-1 px-2 py-2 ${
             allNavItems.length === 5 ? 'grid-cols-5' : 
             allNavItems.length === 4 ? 'grid-cols-4' : 'grid-cols-3'
@@ -92,8 +93,8 @@ export default function App() {
                 to={item.path}
                 className={`touch-target flex flex-col items-center justify-center gap-1 rounded-lg transition-colors ${
                   location.pathname === item.path
-                    ? "bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-100"
-                    : "text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
+                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100"
+                    : "text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
                 }`}
               >
                 <span className="text-xl">{item.icon}</span>

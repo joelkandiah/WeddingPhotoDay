@@ -54,7 +54,8 @@ export function CategoryTabs({ selectedCategory, onSelectCategory, showCounter =
         {!hiddenLeftArrow && (
           <button
             onClick={() => scrollTabs('left')}
-            className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-card-bg/90 backdrop-blur-sm border border-card-border rounded-full w-8 h-8 items-center justify-center hover:bg-input-bg transition-colors shadow-md text-fg"
+            className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-card-bg/90 backdrop-blur-sm rounded-full w-8 h-8 items-center justify-center hover:bg-input-bg transition-colors shadow-md text-fg"
+            style={{border: '1px solid rgba(59, 130, 246, 0.2)'}}
             aria-label="Scroll left"
           >
             ←
@@ -68,12 +69,12 @@ export function CategoryTabs({ selectedCategory, onSelectCategory, showCounter =
           className="overflow-x-auto scrollbar-hide"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          <div className="flex gap-2 border-b border-card-border min-w-max px-4 md:px-0">
+          <div className="flex gap-2 border-b-0 min-w-max px-4 md:px-0" style={{borderBottom: '1px solid rgba(59, 130, 246, 0.15)'}}>
             <button
               onClick={() => onSelectCategory("All Posts")}
               className={`px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
                 selectedCategory === "All Posts"
-                  ? "border-violet-500 text-violet-600 dark:border-violet-400 dark:text-violet-400"
+                  ? "border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400"
                   : "border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
               }`}
             >
@@ -99,7 +100,8 @@ export function CategoryTabs({ selectedCategory, onSelectCategory, showCounter =
         {!hiddenRightArrow && (
           <button
             onClick={() => scrollTabs('right')}
-            className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-card-bg/90 backdrop-blur-sm border border-card-border rounded-full w-8 h-8 items-center justify-center hover:bg-input-bg transition-colors shadow-md text-fg"
+            className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-card-bg/90 backdrop-blur-sm rounded-full w-8 h-8 items-center justify-center hover:bg-input-bg transition-colors shadow-md text-fg"
+            style={{border: '1px solid rgba(59, 130, 246, 0.2)'}}
             aria-label="Scroll right"
           >
             →
