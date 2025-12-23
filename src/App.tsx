@@ -42,7 +42,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[var(--color-bg-start)] to-[var(--color-bg-end)] bg-animate-morph">
-      <header className="sticky top-0 z-10 bg-card-bg/90 backdrop-blur-xs border-b border-card-border shadow-xs">
+      <header className="sticky top-0 z-10 bg-card-bg/90 backdrop-blur-xs border-b-0 shadow-sm" style={{borderBottom: '1px solid rgba(59, 130, 246, 0.1)'}}>
         <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <h2 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400">
@@ -81,7 +81,7 @@ export default function App() {
 
       {/* Mobile Bottom Navigation - Hidden on desktop */}
       <Authenticated>
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-card-bg/90 backdrop-blur-xs border-t border-card-border shadow-lg pb-safe  dark:border-card-border">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-card-bg/90 backdrop-blur-xs border-t-0 shadow-lg pb-safe" style={{borderTop: '1px solid rgba(59, 130, 246, 0.1)'}}>
           <div className={`grid gap-1 px-2 py-2 ${
             allNavItems.length === 5 ? 'grid-cols-5' : 
             allNavItems.length === 4 ? 'grid-cols-4' : 'grid-cols-3'

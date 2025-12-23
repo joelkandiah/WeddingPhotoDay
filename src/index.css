@@ -60,13 +60,65 @@
   .auth-button {
     @apply w-full px-4 py-3 rounded-sm bg-primary text-white font-semibold hover:bg-primary-hover transition-colors shadow-xs hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
   }
+
+  /* Generic Button Classes */
+  .btn-primary {
+    @apply bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-semibold py-3 px-6 rounded-xl hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-xl hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600;
+  }
+
+  .btn-success {
+    @apply bg-green-500 text-white font-semibold py-3 px-6 rounded-xl hover:bg-green-600 transition-colors shadow-sm hover:shadow-md;
+  }
+
+  .btn-danger {
+    @apply bg-red-500 text-white font-semibold py-3 px-6 rounded-xl hover:bg-red-600 transition-colors shadow-sm hover:shadow-md;
+  }
+
+  /* Generic Card Classes */
+  .card {
+    @apply bg-card-bg rounded-2xl shadow-md border-0 overflow-hidden hover:shadow-lg transition-all duration-300;
+    border: 1px solid rgba(59, 130, 246, 0.1);
+  }
+
+  .card-compact {
+    @apply bg-card-bg rounded-xl shadow-sm border-0 overflow-hidden hover:shadow-md transition-all duration-300;
+    border: 1px solid rgba(59, 130, 246, 0.08);
+  }
+
+  /* Generic Input Classes */
+  .input-field {
+    @apply bg-input-bg w-full px-4 py-3 rounded-xl border-0 focus:ring-2 focus:ring-blue-400/30 outline-hidden transition-all;
+    border: 1px solid rgba(59, 130, 246, 0.15);
+  }
+
+  .input-field:focus {
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+
+  /* SVG Divider Styles */
+  .divider-elegant {
+    @apply w-full my-4 text-blue-400 dark:text-blue-500;
+    opacity: 0.6;
+  }
+
+  .divider-subtle {
+    @apply w-full my-2 text-blue-300 dark:text-blue-600;
+    opacity: 0.4;
+  }
 }
 
 @layer base {
-    h1 {
-    /* From Cobalt to Slate Blue (No Purple) */
-    @apply text-5xl font-bold bg-gradient-to-r from-blue-700 via-blue-800 to-blue-500 bg-clip-text text-transparent mb-6;
+  h1 {
+    /* Elegant cursive font for wedding titles */
+    font-family: 'Great Vibes', cursive;
+    @apply text-6xl font-normal bg-gradient-to-r from-blue-700 via-blue-600 to-blue-800 bg-clip-text text-transparent mb-6;
+    letter-spacing: 0.02em;
   }
+  
   h2 {
     @apply text-2xl font-semibold text-gray-800 mb-2 dark:text-gray-100;
   }
@@ -79,6 +131,7 @@
     /* Slightly darker for better readability on white */
     @apply text-slate-700 dark:text-blue-100;
   }
+  
   /* Add a "Glaze" effect to cards */
   .photo-card {
     @apply transition-all duration-300;

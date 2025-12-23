@@ -173,7 +173,7 @@ export function AdminPanel() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-card-border">
+      <div className="flex gap-2 mb-6 border-b-0" style={{borderBottom: '1px solid rgba(59, 130, 246, 0.15)'}}>
         <button
           onClick={() => setActiveTab("pending")}
           className={`px-6 py-3 font-semibold transition-colors border-b-2 ${
@@ -211,7 +211,7 @@ export function AdminPanel() {
         <div className="mb-6 flex justify-end">
           <button
             onClick={handleApproveAll}
-            className="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors"
+            className="btn-success px-6 py-3"
           >
             ✓ Approve All ({pendingCount})
           </button>
@@ -243,7 +243,7 @@ export function AdminPanel() {
           {currentPosts.map((post) => (
             <div
               key={post._id}
-              className="bg-card-bg rounded-2xl shadow-lg border border-card-border overflow-hidden"
+              className="card"
             >
               <div className="aspect-video overflow-hidden bg-input-bg">
                 <ImageCarousel 
@@ -278,19 +278,19 @@ export function AdminPanel() {
                   <div className="flex gap-3">
                     <button
                       onClick={() => handleEdit(post)}
-                      className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
+                      className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-xl hover:bg-blue-600 transition-colors"
                     >
                       ✏️ Edit
                     </button>
                     <button
                       onClick={() => handleApprove(post._id)}
-                      className="flex-1 bg-green-500 text-white font-semibold py-3 rounded-lg hover:bg-green-600 transition-colors"
+                      className="btn-success flex-1"
                     >
                       ✓ Approve
                     </button>
                     <button
                       onClick={() => handleReject(post._id)}
-                      className="flex-1 bg-red-500 text-white font-semibold py-3 rounded-lg hover:bg-red-600 transition-colors"
+                      className="btn-danger flex-1"
                     >
                       ✗ Reject
                     </button>
@@ -299,13 +299,13 @@ export function AdminPanel() {
                   <div className="flex gap-3">
                     <button
                       onClick={() => handleEdit(post)}
-                      className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
+                      className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-xl hover:bg-blue-600 transition-colors"
                     >
                       ✏️ Edit
                     </button>
                     <button
                       onClick={() => handleRevokeApproval(post._id)}
-                      className="flex-1 bg-orange-500 text-white font-semibold py-3 rounded-lg hover:bg-orange-600 transition-colors"
+                      className="flex-1 bg-orange-500 text-white font-semibold py-3 rounded-xl hover:bg-orange-600 transition-colors"
                     >
                       ↶ Revoke Approval
                     </button>
@@ -314,19 +314,19 @@ export function AdminPanel() {
                   <div className="flex gap-3">
                     <button
                       onClick={() => handleEdit(post)}
-                      className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors"
+                      className="flex-1 bg-blue-500 text-white font-semibold py-3 rounded-xl hover:bg-blue-600 transition-colors"
                     >
                       ✏️ Edit
                     </button>
                     <button
                       onClick={() => handleApprove(post._id)}
-                      className="flex-1 bg-green-500 text-white font-semibold py-3 rounded-lg hover:bg-green-600 transition-colors"
+                      className="btn-success flex-1"
                     >
                       ✓ Re-approve
                     </button>
                     <button
                       onClick={() => handleDelete(post._id)}
-                      className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition-colors"
+                      className="flex-1 bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 transition-colors"
                     >
                       🗑️ Delete
                     </button>
@@ -341,7 +341,7 @@ export function AdminPanel() {
             <div className="flex justify-center mt-4">
               <button
                 onClick={() => loadMore(10)}
-                className="px-8 py-3 bg-violet-500 text-white font-semibold rounded-lg hover:bg-violet-600 transition-colors"
+                className="btn-primary px-8 py-3"
               >
                 Load More Posts
               </button>
@@ -359,7 +359,7 @@ export function AdminPanel() {
       {/* Edit Modal */}
       {editingPost && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-card-bg rounded-2xl shadow-2xl border border-card-border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="card max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <h2 className="text-2xl font-bold mb-6">Edit Post</h2>
               
@@ -385,7 +385,7 @@ export function AdminPanel() {
                   id="edit-category"
                   value={editCategory}
                   onChange={(e) => setEditCategory(e.target.value as PostCategory)}
-                  className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
+                  className="input-field"
                 >
                   {POST_CATEGORIES.map((category) => (
                     <option key={category} value={category}>
@@ -405,7 +405,7 @@ export function AdminPanel() {
                   onChange={(e) => setEditCaption(e.target.value)}
                   placeholder="Add a caption..."
                   rows={4}
-                  className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
+                  className="input-field"
                   autoCorrect="on"
                   spellCheck={true}
                    autoComplete="on"
@@ -415,13 +415,13 @@ export function AdminPanel() {
               <div className="flex gap-3">
                 <button
                   onClick={handleCancelEdit}
-                  className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                  className="btn-secondary flex-1"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveEdit}
-                  className="flex-1 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+                  className="flex-1 bg-blue-500 text-white font-semibold py-3 px-6 rounded-xl hover:bg-blue-600 transition-colors"
                 >
                   Save Changes
                 </button>

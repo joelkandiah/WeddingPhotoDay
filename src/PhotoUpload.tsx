@@ -133,7 +133,7 @@ export function PhotoUpload() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-card-bg rounded-2xl shadow-lg border border-card-border p-8">
+      <div className="card p-8">
         <h2 className="text-center">
           Share Wedding Memories 📸
         </h2>
@@ -146,7 +146,7 @@ export function PhotoUpload() {
             <select
               value={category.value}
               onChange={(e) => category.value = e.target.value as PostCategory}
-              className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
+              className="input-field"
               required
             >
               {POST_CATEGORIES.map((cat) => (
@@ -164,7 +164,7 @@ export function PhotoUpload() {
             <textarea
               value={caption.value}
               onChange={(e) => caption.value = e.target.value}
-              className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all"
+              className="input-field"
               placeholder="Share the story behind these moments..."
               rows={3}
               autoCorrect="on"
@@ -189,7 +189,10 @@ export function PhotoUpload() {
               <button
                 type="button"
                 onClick={() => imageInput.current?.click()}
-                className="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-card-border transition-colors text-center dark:border-gray-600 dark:hover:border-card-border"
+                className="w-full p-8 border-2 border-dashed rounded-xl transition-colors text-center"
+                style={{borderColor: 'rgba(59, 130, 246, 0.2)'}}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.2)'}
               >
                 <div className="space-y-2">
                   <div className="text-4xl">📷</div>
@@ -210,7 +213,7 @@ export function PhotoUpload() {
           <button
             type="submit"
             disabled={!canUpload.value}
-            className={`w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white font-semibold py-4 rounded-lg hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl ${
+            className={`btn-primary w-full py-4 ${
               canUpload.value ? "pulse-playful" : ""
             }`}
           >
@@ -225,7 +228,7 @@ export function PhotoUpload() {
           </button>
         </form>
 
-        <div className="mt-6 p-4 bg-card-bg rounded-lg dark:bg-card-bg/30 dark:border dark:border-card-border">
+        <div className="mt-6 p-4 rounded-xl" style={{backgroundColor: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.1)'}}>
           <p className="text-sm text-card-text dark:text-card-text">
             <strong>Note:</strong> All photos will be reviewed before appearing in the gallery. 
             Thank you for helping us create beautiful memories! 📸

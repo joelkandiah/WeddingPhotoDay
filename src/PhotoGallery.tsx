@@ -3,6 +3,7 @@ import { ImageCarousel } from "./components/ImageCarousel";
 import { PostCategory } from "../convex/constants";
 import { PhotoFeed } from "./components/PhotoFeed";
 import { CategoryTabs } from "./components/CategoryTabs";
+import { ElegantDivider } from "./components/ElegantDivider";
 
 export function PhotoGallery() {
   const [selectedCategory, setSelectedCategory] = useState<PostCategory | "All Posts">("All Posts");
@@ -56,7 +57,8 @@ export function PhotoGallery() {
               </button>
             </div>
             
-            <div className="p-4 bg-card-bg/95 backdrop-blur-sm rounded-b-lg text-fg border-x border-b border-card-border">
+            <div className="p-4 bg-card-bg/95 backdrop-blur-sm rounded-b-lg text-fg border-0">
+              <ElegantDivider className="mb-3" />
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-bold text-lg mb-1">{selectedPost.uploaderName}</h3>

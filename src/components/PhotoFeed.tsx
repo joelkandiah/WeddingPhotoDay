@@ -3,6 +3,7 @@ import { api } from "../../convex/_generated/api";
 import { useRef, useEffect } from "react";
 import { ImageCarousel } from "./ImageCarousel";
 import { PostCategory } from "../../convex/constants";
+import { ElegantDivider } from "./ElegantDivider";
 
 interface PhotoFeedProps {
   category: PostCategory | "All Posts";
@@ -60,7 +61,7 @@ export function PhotoFeed({ category, onPostClick }: PhotoFeedProps) {
       {posts.map((post) => (
         <div
           key={post._id}
-          className="bg-card-bg rounded-xl shadow-lg border border-card-border overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01]"
+          className="card transform hover:scale-[1.01]"
         >
           <div className="overflow-hidden">
             <ImageCarousel 
@@ -71,6 +72,7 @@ export function PhotoFeed({ category, onPostClick }: PhotoFeedProps) {
               aspectRatio="auto"
             />
           </div>
+          <ElegantDivider />
           <div className="p-4">
             <div className="flex justify-between items-start">
               <div>
