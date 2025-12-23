@@ -4,38 +4,50 @@
 :root {
   color-scheme: light dark;
 
-  --color-bg: #F5F3FF;
-  --color-fg: #171717;
+/* The "Porcelain" Canvas */
+  --color-bg: #FFFFFF;
+  --color-fg: #0F172A;          /* Deep Navy instead of Black */
 
-  --color-input-bg: #FFFFFF;
-  --color-input-border: #e5e7eb;
+  /* Inputs: Clean and structured */
+  --color-input-bg: #F8FAFC;
+  --color-input-border: #CBD5E1;
 
-  --color-accent-text: #475569;
+  /* The Cobalt Accent */
+  --color-accent-text: #1E40AF;  /* Rich Cobalt Blue */
 
-  --color-bg-start: #F0F9FF;
-  --color-bg-end: #FAF5FF;
+  /* Soft Gradient: Like a clear morning sky */
+  --color-bg-start: #F0F9FF;    /* Light Sky Blue */
+  --color-bg-end: #FFFFFF;
 
-  --color-card-bg: #ffffff;
-  --color-card-border: #E0E7FF;
+  /* Cards: High contrast with a subtle shadow */
+  --color-card-bg: #FFFFFF;
+  --color-card-border: #E2E8F0;
+
+  --color-primary: #1D4ED8;        
+  --color-primary-hover: #1E40AF;
 }
 
 .dark {
-  --color-bg: #0f0f0f;
-  --color-fg: #f5f5f5;
+  /* The "Inky" Backgrounds */
+  --color-bg: #040816;          /* Darker, deep midnight ink */
+  --color-fg: #E0E7FF;          /* Soft Porcelain White (blue-tinted) */
 
-  --color-input-bg: #1a1a1a;
-  --color-input-border: #312E81;
+  /* Input & Borders: Mimicking fine china edges */
+  --color-input-bg: #0D142B;
+  --color-input-border: #1E3A8A; /* Cobalt border */
 
-  --color-accent-text: #94a3b8;
+  /* The primary Cobalt from the vase */
+  --color-accent-text: #3B82F6; 
 
-  --color-bg-start: #0f0f0f;
-  --color-bg-end: #1e1b4b;
+  /* Gradient Backgrounds: From Ink to Deep Sea */
+  --color-bg-start: #040816;
+  --color-bg-end: #0F172A;
 
-  --color-card-bg: #101010;
-  --color-card-border: #312E81;
+  /* Card Surfaces: Polished Ceramic feel */
+  --color-card-bg: #0D142B;
+  --color-card-border: rgba(59, 130, 246, 0.2); /* Faint cobalt glow */
 }
 
-/* only use this to update the style of the auth input fields. use a different class for all other input fields */
 @layer components {
   .auth-input-field {
     @apply w-full px-4 py-3 rounded-container border focus:ring-1 focus:ring-primary outline-hidden transition-shadow shadow-xs hover:shadow-sm;
@@ -51,10 +63,10 @@
 }
 
 @layer base {
-  h1 {
-    @apply text-5xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 leading-[1.3];
+    h1 {
+    /* From Cobalt to Slate Blue (No Purple) */
+    @apply text-5xl font-bold bg-gradient-to-r from-blue-700 via-blue-800 to-blue-500 bg-clip-text text-transparent mb-6;
   }
-
   h2 {
     @apply text-2xl font-semibold text-gray-800 mb-2 dark:text-gray-100;
   }
@@ -64,13 +76,24 @@
   }
 
   p {
-    @apply text-gray-600 dark:text-gray-300;
+    /* Slightly darker for better readability on white */
+    @apply text-slate-700 dark:text-blue-100;
+  }
+  /* Add a "Glaze" effect to cards */
+  .photo-card {
+    @apply transition-all duration-300;
+    box-shadow: 0 4px 20px -5px rgba(0, 85, 164, 0.3);
+  }
+  
+  .photo-card:hover {
+    box-shadow: 0 10px 30px -5px rgba(0, 85, 164, 0.5);
+    border-color: rgba(255, 255, 255, 0.4);
   }
 }
 
 @theme {
-  --color-primary: #7C3AED;
-  --color-primary-hover: #6D28D9;
+  --color-primary: #2562EB;
+  --color-primary-hover: #0D4ED8;
   --color-dark-gray: #1f2937;
 
   --color-secondary: #6b7280;
