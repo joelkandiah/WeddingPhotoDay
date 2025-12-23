@@ -178,9 +178,10 @@ npx convex env set RESEND_API_KEY your_resend_api_key
 1. Reset link expired (15 minutes)
 2. Reset link already used
 3. Token malformed or corrupted
-4. ~~Token automatically consumed by auth provider~~ (Fixed: now using `resetCode` parameter)
 
 **Solution:** Request a new password reset link.
+
+**Note:** Previous versions had an issue where the token was automatically consumed by the auth provider. This has been fixed by using the `resetCode` parameter instead of `code`.
 
 ## Implementation Details
 

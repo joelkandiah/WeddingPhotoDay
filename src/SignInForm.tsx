@@ -19,11 +19,11 @@ export function SignInForm() {
     return emailRegex.test(email);
   };
 
-  // Validate token format (should be alphanumeric and reasonable length)
-  const isValidToken = (token: string): boolean => {
-    // Token should be alphanumeric, between 20-200 characters
-    const tokenRegex = /^[a-zA-Z0-9_-]{20,200}$/;
-    return tokenRegex.test(token);
+  // Validate reset code format (should be alphanumeric and reasonable length)
+  const isValidResetCode = (code: string): boolean => {
+    // Code should be alphanumeric, between 20-200 characters
+    const codeRegex = /^[a-zA-Z0-9_-]{20,200}$/;
+    return codeRegex.test(code);
   };
 
   // Check if URL contains password reset token
@@ -34,7 +34,7 @@ export function SignInForm() {
     const email = searchParams.get("email");
     
     // Validate both resetCode and email before proceeding
-    if (resetCode && email && isValidToken(resetCode) && isValidEmail(email)) {
+    if (resetCode && email && isValidResetCode(resetCode) && isValidEmail(email)) {
       setFlow("reset-verification");
       setResetToken(resetCode);
       setValidatedEmail(email);
