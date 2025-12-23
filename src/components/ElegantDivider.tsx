@@ -1,8 +1,8 @@
-interface ElegantDividerProps {
+interface DividerProps {
   className?: string;
 }
 
-export function ElegantDivider({ className = "" }: ElegantDividerProps) {
+export function ElegantDivider({ className = "" }: DividerProps) {
   return (
     <svg
       className={`divider-elegant ${className}`}
@@ -25,7 +25,7 @@ export function ElegantDivider({ className = "" }: ElegantDividerProps) {
   );
 }
 
-export function SubtleDivider({ className = "" }: ElegantDividerProps) {
+export function SubtleDivider({ className = "" }: DividerProps) {
   return (
     <svg
       className={`divider-subtle ${className}`}

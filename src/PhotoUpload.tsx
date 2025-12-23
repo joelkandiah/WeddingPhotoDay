@@ -189,10 +189,7 @@ export function PhotoUpload() {
               <button
                 type="button"
                 onClick={() => imageInput.current?.click()}
-                className="w-full p-8 border-2 border-dashed rounded-xl transition-colors text-center"
-                style={{borderColor: 'rgba(59, 130, 246, 0.2)'}}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.2)'}
+                className="upload-area"
               >
                 <div className="space-y-2">
                   <div className="text-4xl">📷</div>

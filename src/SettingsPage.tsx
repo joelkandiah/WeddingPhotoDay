@@ -181,9 +181,7 @@ export function SettingsPage() {
         <button
           onClick={handleDeleteAccount}
           disabled={isDeleting}
-          className="bg-white dark:bg-transparent font-bold px-6 py-2 rounded-xl transition-all disabled:opacity-50" style={{border: '2px solid rgb(239, 68, 68)', color: 'rgb(220, 38, 38)'}}
-          onMouseEnter={(e) => {e.currentTarget.style.backgroundColor = 'rgb(239, 68, 68)'; e.currentTarget.style.color = 'white';}}
-          onMouseLeave={(e) => {e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = 'rgb(220, 38, 38)';}}
+          className="btn-delete-account"
         >
           {isDeleting ? "Deleting Account..." : "Delete Account"}
         </button>
