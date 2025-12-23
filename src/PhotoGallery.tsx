@@ -58,7 +58,6 @@ export function PhotoGallery() {
             </div>
             
             <div className="p-4 bg-card-bg/95 backdrop-blur-sm rounded-b-lg text-fg border-0">
-              <ElegantDivider className="mb-3" />
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-bold text-lg mb-1">{selectedPost.uploaderName}</h3>

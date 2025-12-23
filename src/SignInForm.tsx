@@ -202,7 +202,7 @@ export function SignInForm() {
                 <button
                   type="button"
                   onClick={() => { setFlow("signUp"); setError(null); }}
-                  className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
+                  className="text-blue-600 font-semibold hover:text-blue-800 transition-colors dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Sign up
                 </button>
@@ -222,7 +222,7 @@ export function SignInForm() {
               <button
                 type="button"
                 onClick={() => { setFlow("signIn"); setError(null); }}
-                className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
+                className="text-blue-600 font-semibold hover:text-blue-800 transition-colors dark:text-blue-400 dark:hover:text-blue-300"
               >
                 Sign in
               </button>
@@ -232,7 +232,7 @@ export function SignInForm() {
             <button
               type="button"
               onClick={() => { setFlow("signIn"); setError(null); }}
-              className="text-purple-600 font-semibold hover:text-purple-800 transition-colors"
+              className="text-blue-600 font-semibold hover:text-blue-800 transition-colors dark:text-blue-400 dark:hover:text-blue-300"
             >
               Back to Sign In
             </button>
