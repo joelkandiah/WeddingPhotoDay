@@ -207,7 +207,7 @@ export function AdminPanel() {
       </div>
 
       {/* Approve All Button - only show on pending tab */}
-      {activeTab === "pending" && pendingCount && pendingCount > 0 && (
+      {activeTab === "pending" && pendingCount !== undefined && pendingCount > 0 && (
         <div className="mb-6 flex justify-end">
           <button
             onClick={handleApproveAll}

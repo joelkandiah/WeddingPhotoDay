@@ -81,6 +81,8 @@ export function SignInForm() {
         });
         toast.success("Password reset successfully! You can now sign in.");
         setFlow("signIn");
+        // Sign out the user if they are automatically signed in after reset
+        await signOut();
       }
     } catch (e: any) {
       console.error("Auth error:", e);
