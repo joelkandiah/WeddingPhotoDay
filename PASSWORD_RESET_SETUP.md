@@ -64,8 +64,10 @@ npx convex env set SITE_URL https://your-production-domain.com
 
 The password reset email will include a link like:
 ```
-https://your-production-domain.com/?code=RESET_TOKEN&email=user@example.com
+https://your-production-domain.com/reset-password?resetCode=RESET_TOKEN&email=user@example.com
 ```
+
+**Important**: The link uses `resetCode` instead of `code` to prevent the ConvexAuthProvider from automatically consuming the token before the user can enter their new password. This ensures the token remains valid until the user submits the password reset form.
 
 ## How It Works
 
@@ -176,6 +178,7 @@ npx convex env set RESEND_API_KEY your_resend_api_key
 1. Reset link expired (15 minutes)
 2. Reset link already used
 3. Token malformed or corrupted
+4. ~~Token automatically consumed by auth provider~~ (Fixed: now using `resetCode` parameter)
 
 **Solution:** Request a new password reset link.
 
@@ -199,6 +202,17 @@ This approach:
 - Improves user experience by reducing friction
 - Maintains security through the cryptographically secure token
 - Is the recommended pattern for password reset flows per @convex-dev/auth documentation
+
+### Preventing Automatic Token Consumption
+
+The implementation uses `resetCode` as the URL parameter name instead of `code`. This is critical because:
+
+- The `ConvexAuthProvider` automatically detects any `code` parameter in the URL and immediately attempts to sign in with it
+- This would consume the one-time token before the user has a chance to enter their new password
+- By using `resetCode`, we prevent this automatic consumption
+- The frontend reads `resetCode` from the URL and passes it as `code` when the user submits the password reset form
+
+This ensures the token remains valid until the user explicitly submits their new password.
 
 ## Email Customization
 
