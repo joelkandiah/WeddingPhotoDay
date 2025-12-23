@@ -19,24 +19,26 @@ export function SignInForm() {
     return emailRegex.test(email);
   };
 
-  // Validate token format (should be alphanumeric and reasonable length)
-  const isValidToken = (token: string): boolean => {
-    // Token should be alphanumeric, between 20-200 characters
-    const tokenRegex = /^[a-zA-Z0-9_-]{20,200}$/;
-    return tokenRegex.test(token);
+  // Validate reset code format (should be alphanumeric and reasonable length)
+  const isValidResetCode = (code: string): boolean => {
+    // Code should be alphanumeric, between 20-200 characters
+    const codeRegex = /^[a-zA-Z0-9_-]{20,200}$/;
+    return codeRegex.test(code);
   };
 
   // Check if URL contains password reset token
+  // Using "resetCode" instead of "code" to prevent ConvexAuthProvider from
+  // automatically consuming the token before the user enters their new password
   useEffect(() => {
-    const code = searchParams.get("code");
+    const resetCode = searchParams.get("resetCode");
     const email = searchParams.get("email");
     
-    // Validate both code and email before proceeding
-    if (code && email && isValidToken(code) && isValidEmail(email)) {
+    // Validate both resetCode and email before proceeding
+    if (resetCode && email && isValidResetCode(resetCode) && isValidEmail(email)) {
       setFlow("reset-verification");
-      setResetToken(code);
+      setResetToken(resetCode);
       setValidatedEmail(email);
-    } else if (code || email) {
+    } else if (resetCode || email) {
       // If either parameter exists but validation fails, show error
       setError("Invalid or malformed reset link. Please request a new password reset.");
     }

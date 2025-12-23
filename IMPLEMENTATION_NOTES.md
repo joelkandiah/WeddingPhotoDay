@@ -26,6 +26,7 @@ Successfully implemented password reset functionality for the Wedding Photo Day 
 - Protected against XSS attacks through URL parameter sanitization
 - Added proper error handling for invalid or expired links
 - Pre-fills email field from validated URL parameter
+- **Fixed**: Changed from `code` to `resetCode` URL parameter to prevent ConvexAuthProvider from automatically consuming the token before the user enters their new password
 
 ### 4. Documentation
 - **Created**: `PASSWORD_RESET_SETUP.md` - Comprehensive setup guide with:
@@ -35,6 +36,7 @@ Successfully implemented password reset functionality for the Wedding Photo Day 
   - Security features explanation
   - Email customization instructions
 - **Updated**: `README.md` - Added password reset section to main documentation
+- **Updated**: Documentation to reflect use of `resetCode` parameter instead of `code`
 
 ## Required Environment Variables
 

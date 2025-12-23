@@ -38,8 +38,10 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
           // not CONVEX_SITE_URL which points to the Convex backend
           const siteUrl = process.env.SITE_URL || "http://localhost:5173";
           
-          // Construct the reset URL with code and email parameters
-          const resetUrl = `${siteUrl}/reset-password?code=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+          // Construct the reset URL with resetCode and email parameters
+          // Using "resetCode" instead of "code" to prevent ConvexAuthProvider from
+          // automatically consuming the token before the user enters their new password
+          const resetUrl = `${siteUrl}/reset-password?resetCode=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
 
           try {
             await resend.emails.send({
