@@ -85,7 +85,7 @@ export function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-8 pb-12 animate-fade-in">
       {/* Profile Section */}
-      <section className="bg-card-bg rounded-2xl shadow-lg border border-card-border p-6 md:p-8">
+      <section className="card p-6 md:p-8">
         <div className="flex items-center gap-3 mb-6">
           <span className="text-2xl">👤</span>
           <h2 className="text-xl font-bold text-card-text">Profile Settings</h2>
@@ -98,7 +98,7 @@ export function SettingsPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all text-card-text"
+              className="input-field text-card-text"
               placeholder="Your name"
               required
               minLength={2}
@@ -107,7 +107,7 @@ export function SettingsPage() {
           <button
             type="submit"
             disabled={isUpdatingName || name === user.name}
-            className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold px-6 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all shadow-md disabled:opacity-50"
+            className="btn-primary px-6 py-2"
           >
             {isUpdatingName ? "Saving..." : "Update Name"}
           </button>
@@ -115,7 +115,7 @@ export function SettingsPage() {
       </section>
 
       {/* Password Section */}
-      <section className="bg-card-bg rounded-2xl shadow-lg border border-card-border p-6 md:p-8">
+      <section className="card p-6 md:p-8">
         <div className="flex items-center gap-3 mb-6">
           <span className="text-2xl">🔐</span>
           <h2 className="text-xl font-bold text-card-text">Change Password</h2>
@@ -128,7 +128,7 @@ export function SettingsPage() {
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all text-card-text"
+              className="input-field text-card-text"
               placeholder="••••••••"
               required
             />
@@ -140,7 +140,7 @@ export function SettingsPage() {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all text-card-text"
+                className="input-field text-card-text"
                 placeholder="Min 8 characters"
                 required
                 minLength={8}
@@ -152,7 +152,7 @@ export function SettingsPage() {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="bg-input-bg w-full px-4 py-3 rounded-lg border border-input-border focus:border-card-border focus:ring-2 focus:ring-card-border outline-hidden transition-all text-card-text"
+                className="input-field text-card-text"
                 placeholder="••••••••"
                 required
                 minLength={8}
@@ -162,7 +162,7 @@ export function SettingsPage() {
           <button
             type="submit"
             disabled={isUpdatingPassword || !currentPassword || !newPassword}
-            className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold px-6 py-2 rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all shadow-md disabled:opacity-50"
+            className="btn-primary px-6 py-2"
           >
             {isUpdatingPassword ? "Updating..." : "Change Password"}
           </button>
@@ -170,7 +170,7 @@ export function SettingsPage() {
       </section>
 
       {/* Danger Zone */}
-      <section className="bg-red-50 dark:bg-red-950/20 rounded-2xl shadow-lg border border-red-200 dark:border-red-900/50 p-6 md:p-8">
+      <section className="rounded-2xl shadow-md p-6 md:p-8" style={{backgroundColor: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)'}}>
         <div className="flex items-center gap-3 mb-4">
           <span className="text-2xl">⚠️</span>
           <h2 className="text-xl font-bold text-red-700 dark:text-red-400">Danger Zone</h2>
@@ -181,7 +181,9 @@ export function SettingsPage() {
         <button
           onClick={handleDeleteAccount}
           disabled={isDeleting}
-          className="bg-white dark:bg-transparent border-2 border-red-500 text-red-600 dark:text-red-500 font-bold px-6 py-2 rounded-lg hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"
+          className="bg-white dark:bg-transparent font-bold px-6 py-2 rounded-xl transition-all disabled:opacity-50" style={{border: '2px solid rgb(239, 68, 68)', color: 'rgb(220, 38, 38)'}}
+          onMouseEnter={(e) => {e.currentTarget.style.backgroundColor = 'rgb(239, 68, 68)'; e.currentTarget.style.color = 'white';}}
+          onMouseLeave={(e) => {e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = 'rgb(220, 38, 38)';}}
         >
           {isDeleting ? "Deleting Account..." : "Delete Account"}
         </button>
